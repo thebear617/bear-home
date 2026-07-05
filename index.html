@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="version" content="V0.0.2">
+  <meta name="version" content="V0.0.3">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>熊窝</title>
   <link rel="stylesheet" href="css/style.css">
@@ -47,16 +47,8 @@
               <div class="cookbook-tags">
                 <span v-for="tag in entry.tags" :key="tag" class="cookbook-tag">{{ tag }}</span>
               </div>
-              <div class="cookbook-steps">
-                <div v-for="(step, i) in entry.steps" :key="i" class="cookbook-step">
-                  <span class="cookbook-check">{{ step.done ? '✅' : '⬜' }}</span>
-                  <span class="cookbook-step-text">{{ step.text }}</span>
-                </div>
-              </div>
-              <div v-if="entry.note" class="cookbook-note">💡 {{ entry.note }}</div>
-              <a v-if="entry.source" :href="entry.source" target="_blank" class="cookbook-source">📎 {{ entry.sourceName || '原始链接' }}</a>
+              <div class="cookbook-body" v-html="renderMarkdown(entry.body)"></div>
             </div>
-          </div>
         </main>
         <footer class="site-footer">熊窝 · 个人主页</footer>
       </div>
@@ -66,6 +58,7 @@
   <script src="js/data.js"></script>
   <script src="js/diary-data.js"></script>
   <script src="js/vendor/vue.global.prod.js"></script>
+  <script src="js/vendor/marked.min.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

@@ -32,19 +32,17 @@ const cookbookEntries = [
     id: 'deploy-vercel',
     title: '从域名到上线：腾讯云 + GitHub + Vercel 部署全流程',
     tags: ['部署', '域名', 'Vercel'],
-    source: 'https://blog.csdn.net/qq_57376018/article/details/160097635',
-    sourceName: 'CSDN · 2026最新 Vercel 自动化部署与自定义域名配置教程',
-    steps: [
-      { done: true, text: '在腾讯云购买域名 thebear617.cn，完成实名认证' },
-      { done: true, text: '在 GitHub 创建仓库 bear-home，提交静态网站代码' },
-      { done: true, text: '尝试 GitHub Pages 绑定自定义域名，CNAME 指向 thebear617.github.io → 404，放弃' },
-      { done: true, text: '（坑）Vercel 授权：Vercel 看不到仓库 → GitHub Settings → Applications → Vercel → 勾选 bear-home' },
-      { done: true, text: '在 Vercel Import bear-home，Framework Preset 选 Other，无构建命令，部署成功' },
-      { done: true, text: '在 Vercel 项目 Settings → Domains 添加 www.thebear617.cn 和 thebear617.cn' },
-      { done: true, text: '（坑）Vercel 给的 CNAME 是项目专属地址（非固定 cname.vercel-dns.com），以页面实际显示为准' },
-      { done: true, text: '在腾讯云 DNS 添加 CNAME 记录，主机 www → Vercel 给的地址，同理配 @' },
-      { done: true, text: '等待 Vercel 验证通过，自动签发 SSL，域名上线' },
-    ],
-    note: '纯静态 Vue 3 站点，Git push 触发 Vercel 自动部署；自定义域名一条 CNAME 即可，不需要 A 记录。'
+    body: `## 步骤
+
+1. 在腾讯云购买域名 thebear617.cn，记得勾选禁止转移锁，完成实名认证
+2. 在 GitHub 创建想要部署的仓库，push代码
+3. 在 Vercel 上Import对应代码仓库，然后创建 Pproject，直接部署
+4. 在 Vercel 项目 Settings → Domains 添加 www.thebear617.cn 和 thebear617.cn
+5. 在腾讯云 DNS 添加 A 记录 和 CNAME 记录，按照Vercel 给的配即可，等待 Vercel 验证通过，自动签发 SSL，域名上线
+
+## 参考
+
+- [CSDN · 2026最新 Vercel 自动化部署与自定义域名配置教程](https://blog.csdn.net/qq_57376018/article/details/160097635)
+`,
   },
 ];

@@ -1,5 +1,15 @@
 const { createApp } = Vue;
 
+marked.use({
+  renderer: {
+    link({ href, raw, tokens }) {
+      if (!raw.startsWith('[')) return this.parser.parseInline(tokens);
+      const text = this.parser.parseInline(tokens);
+      return `<a href="${href}" target="_blank">${text}</a>`;
+    }
+  }
+});
+
 const dailyRecords = Object.assign({}, diaryRecords, manualRecords);
 
 function pad(n) { return String(n).padStart(2, '0'); }
@@ -315,11 +325,14 @@ const app = createApp({
       return this.cookbookEntries.filter(entry =>
         entry.title.toLowerCase().includes(q) ||
         entry.tags.some(tag => tag.toLowerCase().includes(q)) ||
-        entry.steps.some(step => step.text.toLowerCase().includes(q))
+        entry.body.toLowerCase().includes(q)
       );
     }
   },
   methods: {
+    renderMarkdown(md) {
+      return marked.parse(md, { breaks: true, gfm: true });
+    },
     switchTab(id) {
       this.activeTab = id;
       if (window.innerWidth < 720) this.sidebarOpen = false;
