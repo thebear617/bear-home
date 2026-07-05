@@ -1956,12 +1956,32 @@ const diaryRecords = {
     ]
   },
   "2026-07-05": {
-    "value": 1,
+    "value": 5,
     "tasks": [
       {
         "status": "x",
         "time": "00:00-01:30",
         "desc": "打电动"
+      },
+      {
+        "status": "x",
+        "time": "01:30-02:30",
+        "desc": "玩手机"
+      },
+      {
+        "status": "x",
+        "time": "02:30-11:00",
+        "desc": "睡觉"
+      },
+      {
+        "status": "x",
+        "time": "11:00-12:30",
+        "desc": "洗澡"
+      },
+      {
+        "status": "x",
+        "time": "12:30-14:00",
+        "desc": "吃张亮"
       }
     ]
   }
