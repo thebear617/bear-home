@@ -1956,7 +1956,7 @@ const diaryRecords = {
     ]
   },
   "2026-07-05": {
-    "value": 5,
+    "value": 6,
     "tasks": [
       {
         "status": "x",
@@ -1982,6 +1982,11 @@ const diaryRecords = {
         "status": "x",
         "time": "12:30-14:00",
         "desc": "吃张亮"
+      },
+      {
+        "status": "x",
+        "time": "14:00-18:00",
+        "desc": "工作：配置自己的域名和个人主页"
       }
     ]
   }
