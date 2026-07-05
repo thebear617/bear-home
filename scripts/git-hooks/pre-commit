@@ -1,0 +1,3 @@
+#!/bin/sh
+python3 scripts/build-diary.py
+git add js/diary-data.js
