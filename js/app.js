@@ -292,6 +292,53 @@ const RouteTable = {
   }
 };
 
+/* ─── Cookbook ─── */
+
+const CookbookView = {
+  template: `
+    <div class="cookbook-view">
+      <div class="route-search">
+        <input
+          v-model="query"
+          type="text"
+          placeholder="搜索食谱..."
+        />
+      </div>
+      <div v-if="filteredEntries.length === 0" class="empty-state">没有匹配的条目</div>
+      <div v-for="entry in filteredEntries" :key="entry.id" class="cookbook-card">
+        <div class="cookbook-title">{{ entry.title }}</div>
+        <div class="cookbook-tags">
+          <span v-for="tag in entry.tags" :key="tag" class="cookbook-tag">{{ tag }}</span>
+        </div>
+        <div class="cookbook-steps">
+          <div v-for="(step, i) in entry.steps" :key="i" class="cookbook-step">
+            <span class="cookbook-check">{{ step.done ? '✅' : '⬜' }}</span>
+            <span class="cookbook-step-text">{{ step.text }}</span>
+          </div>
+        </div>
+        <div v-if="entry.note" class="cookbook-note">💡 {{ entry.note }}</div>
+        <a v-if="entry.source" :href="entry.source" target="_blank" class="cookbook-source">📎 {{ entry.sourceName || '原始链接' }}</a>
+      </div>
+    </div>
+  `,
+  data() {
+    return {
+      query: ''
+    };
+  },
+  computed: {
+    filteredEntries() {
+      const q = this.query.trim().toLowerCase();
+      if (!q) return cookbookEntries;
+      return cookbookEntries.filter(entry =>
+        entry.title.toLowerCase().includes(q) ||
+        entry.tags.some(tag => tag.toLowerCase().includes(q)) ||
+        entry.steps.some(step => step.text.toLowerCase().includes(q))
+      );
+    }
+  }
+};
+
 /* ─── App ─── */
 
 const app = createApp({
@@ -299,6 +346,7 @@ const app = createApp({
     return {
       tabs: [
         { id: 'calendar', title: '每日日历追踪', icon: '📅' },
+        { id: 'cookbook', title: 'Cookbook', icon: '📖' },
         { id: 'routes', title: '路由表', icon: '🗺️' }
       ],
       activeTab: 'calendar',
@@ -325,4 +373,5 @@ const app = createApp({
 
 app.component('calendar-view', CalendarView);
 app.component('route-table', RouteTable);
+app.component('cookbook-view', CookbookView);
 app.mount('#app');
