@@ -34,9 +34,28 @@
 
       <div class="main-area">
         <main class="app-shell">
-          <calendar-view v-if="activeTab === 'calendar'" />
-          <route-table v-if="activeTab === 'routes'" />
-          <cookbook-view v-if="activeTab === 'cookbook'" />
+          <calendar-view v-show="activeTab === 'calendar'" />
+          <route-table v-show="activeTab === 'routes'" />
+          <div v-show="activeTab === 'cookbook'" class="cookbook-view">
+            <div class="route-search">
+              <input v-model="cookbookQuery" type="text" placeholder="搜索食谱..."/>
+            </div>
+            <div v-if="cookbookFiltered.length === 0" class="empty-state">没有匹配的条目</div>
+            <div v-for="entry in cookbookFiltered" :key="entry.id" class="cookbook-card">
+              <div class="cookbook-title">{{ entry.title }}</div>
+              <div class="cookbook-tags">
+                <span v-for="tag in entry.tags" :key="tag" class="cookbook-tag">{{ tag }}</span>
+              </div>
+              <div class="cookbook-steps">
+                <div v-for="(step, i) in entry.steps" :key="i" class="cookbook-step">
+                  <span class="cookbook-check">{{ step.done ? '✅' : '⬜' }}</span>
+                  <span class="cookbook-step-text">{{ step.text }}</span>
+                </div>
+              </div>
+              <div v-if="entry.note" class="cookbook-note">💡 {{ entry.note }}</div>
+              <a v-if="entry.source" :href="entry.source" target="_blank" class="cookbook-source">📎 {{ entry.sourceName || '原始链接' }}</a>
+            </div>
+          </div>
         </main>
         <footer class="site-footer">熊窝 · 个人主页</footer>
       </div>
