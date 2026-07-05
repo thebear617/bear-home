@@ -323,14 +323,15 @@ const CookbookView = {
   `,
   data() {
     return {
-      query: ''
+      query: '',
+      entries: cookbookEntries
     };
   },
   computed: {
     filteredEntries() {
       const q = this.query.trim().toLowerCase();
-      if (!q) return cookbookEntries;
-      return cookbookEntries.filter(entry =>
+      if (!q) return this.entries;
+      return this.entries.filter(entry =>
         entry.title.toLowerCase().includes(q) ||
         entry.tags.some(tag => tag.toLowerCase().includes(q)) ||
         entry.steps.some(step => step.text.toLowerCase().includes(q))
