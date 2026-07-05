@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+  <meta name="version" content="V0.0.2">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>熊窝</title>
   <link rel="stylesheet" href="css/style.css">
@@ -34,8 +35,8 @@
 
       <div class="main-area">
         <main class="app-shell">
-          <calendar-view v-show="activeTab === 'calendar'" />
-          <route-table v-show="activeTab === 'routes'" />
+          <calendar-view v-show="activeTab === 'calendar'"></calendar-view>
+          <route-table v-show="activeTab === 'routes'"></route-table>
           <div v-show="activeTab === 'cookbook'" class="cookbook-view">
             <div class="route-search">
               <input v-model="cookbookQuery" type="text" placeholder="搜索食谱..."/>
