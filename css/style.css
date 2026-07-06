@@ -898,3 +898,123 @@ button {
   border: none;
   border-top: 1px solid var(--line);
 }
+
+/* ─── Expense ─── */
+
+.expense-view {
+  animation: fadeIn .2s ease;
+}
+
+.expense-amount {
+  color: var(--red);
+}
+
+.expense-cat-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.expense-cat-amount {
+  font-size: .82rem;
+  font-weight: 800;
+  color: #f7c974;
+}
+
+.expense-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .7rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.expense-item:last-child {
+  border-bottom: none;
+}
+
+.expense-item-left {
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+  min-width: 0;
+}
+
+.expense-item-sub {
+  font-weight: 700;
+  font-size: .9rem;
+  color: var(--text);
+}
+
+.expense-item-note {
+  font-size: .78rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.expense-item-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .15rem;
+  flex-shrink: 0;
+  margin-left: .8rem;
+}
+
+.expense-item-amount {
+  font-size: .92rem;
+  font-weight: 800;
+  color: var(--red);
+}
+
+.expense-item-date {
+  font-size: .72rem;
+  color: var(--muted);
+}
+
+.cal-expense-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  position: absolute;
+  bottom: .4rem;
+  right: .4rem;
+}
+
+.detail-expenses {
+  margin-top: .6rem;
+  padding-top: .6rem;
+  border-top: 1px solid var(--line);
+}
+
+.expense-detail-item {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .3rem 0;
+  font-size: .84rem;
+}
+
+.expense-detail-sub {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.expense-detail-note {
+  color: var(--muted);
+  font-size: .78rem;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.expense-detail-amount {
+  font-weight: 800;
+  color: var(--red);
+  margin-left: auto;
+  flex-shrink: 0;
+}
