@@ -160,16 +160,6 @@ button {
   width: 100%;
 }
 
-.site-footer {
-  margin-top: auto;
-  flex-shrink: 0;
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-  font-size: .82rem;
-  padding: 1.5rem 1rem;
-  text-align: center;
-}
-
 /* ─── Animations ─── */
 
 @keyframes fadeIn {
@@ -619,49 +609,67 @@ button {
   overflow: hidden;
 }
 
-.route-item {
-  padding: .85rem 1.1rem;
-  border-bottom: 1px solid var(--line);
+.route-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: .65rem;
+  padding: .8rem 1rem;
 }
 
-.route-item:last-child {
-  border-bottom: none;
-}
-
-.route-item-name {
-  font-weight: 700;
-  font-size: .94rem;
-  color: var(--text);
-}
-
-.route-item-desc {
-  margin-top: .2rem;
-  font-size: .82rem;
-  color: var(--muted);
-}
-
-.route-item-link {
-  display: inline-block;
-  margin-top: .35rem;
-  font-size: .8rem;
-  color: var(--blue);
-  text-decoration: none;
-  word-break: break-all;
-}
-
-.route-item-link:hover {
-  text-decoration: underline;
-}
-
-.route-item-path {
-  display: inline-block;
-  margin-top: .35rem;
-  padding: .2rem .5rem;
-  font-size: .78rem;
-  font-family: "SF Mono", Menlo, Consolas, monospace;
+.route-card {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+  padding: .75rem .85rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
   background: var(--surface-soft);
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color .15s, box-shadow .15s, background .15s;
+  cursor: default;
+}
+
+a.route-card {
+  cursor: pointer;
+}
+
+a.route-card:hover {
+  border-color: #c08a2f;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+  background: var(--surface);
+}
+
+.route-card-name {
+  font-size: .92rem;
+  font-weight: 800;
+  color: var(--dark);
+}
+
+.route-card-desc {
+  font-size: .78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.route-card-path {
+  display: inline-block;
+  margin-top: .2rem;
+  padding: .15rem .45rem;
+  font-size: .72rem;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 4px;
   color: var(--muted);
+  align-self: flex-start;
+}
+
+@media (max-width: 719px) {
+  .route-grid {
+    grid-template-columns: 1fr;
+    padding: .6rem .5rem;
+  }
 }
 
 /* ─── Responsive ─── */

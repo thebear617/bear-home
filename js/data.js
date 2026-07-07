@@ -7,10 +7,11 @@ const routeCategories = [
   {
     title: '🏠 个人站点',
     items: [
-      { name: '猫猫手册', desc: '猫协档案与疫苗绝育追踪', url: 'https://thebear617.github.io/cat-knowledge/' },
-      { name: '猪窝', desc: '家居生活管理与美食记录', url: 'https://thebear617.github.io/pig-home/' },
-      { name: '租房对账表', desc: '租房看房清单', url: 'https://thebear617.github.io/rental-checklist/' },
-      { name: '表征学习图谱', desc: '表征学习知识体系', url: 'https://thebear617.github.io/representation-learning/' },
+      { name: '猪窝', desc: '家居生活管理与美食记录', url: 'https://pig.thebear617.cn/' },
+      { name: '猫猫', desc: '猫协档案与疫苗绝育追踪', url: 'https://cat.thebear617.cn/' },
+      { name: '熊窝（个人主页）', desc: '个人主页、日历追踪与支出记录', url: 'https://me.thebear617.cn/' },
+      { name: '表征学习', desc: '表征学习知识体系', url: 'http://rep.thebear617.cn/' },
+      { name: '租房对账表', desc: '租房看房清单', url: 'http://rent.thebear617.cn/' },
     ]
   },
   {
@@ -28,6 +29,56 @@ const routeCategories = [
 ];
 
 const cookbookEntries = [
+  {
+    id: 'ui-layers',
+    title: '纯静态站点的五层渲染模型',
+    tags: ['架构', 'UI'],
+    body: `## 层级
+
+\`Page → Tab → Section（X 样式）→ Item（Y 样式）→ 点击行为\`
+
+三层数据和两层样式完全解耦：
+
+| 层 | 角色 | 谁决定 |
+|------|------|------|
+| Page | 整个页面 | 唯一 |
+| Tab | 功能视图切换 | 数据文件 |
+| Section | 数据分组容器 | 数据 + 渲染样式 |
+| Item | 单条数据记录 | 数据 + 渲染样式 |
+| 点击 | Item 被点击后做什么 | 交互逻辑 |
+
+## Section 渲染形式
+
+- **Accordion** — 手风琴折叠面板，点标题展开/收起
+- **Summary Grid** — 横排大数字统计卡片
+- **Plain Container** — 无额外壳，直接装 Item
+
+## Item 渲染形式
+
+- **Card Grid** — 卡片网格，名称 + 描述，2~3 列
+- **Pill Bar** — 横向圆角胶囊标签，可换行
+- **Photo Card** — 图片 + 名称，网格排列
+- **Table Row** — 紧凑多列表格行
+
+## 点击行为
+
+- **外链跳转** — \`<a target="_blank">\`
+- **打开抽屉** — 同页侧滑面板显示详情
+- **筛选** — 点击后过滤其它区域数据
+
+## 实例
+
+### 猫猫手册首页
+
+\`Page（猫猫首页）→ Tab（首页/编年史/物资…）→ Section[Summary Grid]（统计卡片）→ 点击[筛选]\`
+
+\`→ Section[Plain] → Item[Photo Card]（每只猫）→ 点击[打开抽屉]\`
+
+### 熊窝路由表
+
+\`Page（熊窝）→ Tab（路由表/日历/支出…）→ Section[Accordion]（🏠 个人站点）→ Item[Card Grid]（猪窝/猫猫…）→ 点击[外链跳转]\`
+`,
+  },
   {
     id: 'deploy-vercel',
     title: '从域名到上线：腾讯云 + GitHub + Vercel 部署全流程',

@@ -15,6 +15,16 @@ const dailyRecords = Object.assign({}, diaryRecords, manualRecords);
 function pad(n) { return String(n).padStart(2, '0'); }
 function dateKey(year, month, day) { return `${year}-${pad(month)}-${pad(day)}`; }
 
+function parseHM(hm) {
+  const [h, m] = hm.split(':').map(Number);
+  return h * 60 + m;
+}
+function minToHM(min) {
+  const h = Math.floor(min / 60) % 24;
+  const m = Math.round(min % 60);
+  return `${pad(h)}:${pad(m)}`;
+}
+
 /* ─── Lunar calendar ─── */
 
 const LUNAR_MONTH_NAMES = ['', '正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
@@ -122,25 +132,30 @@ const CalendarView = {
         </div>
       </div>
 
-      <div v-if="monthRecords.length > 0 || monthExpenseTotal > 0" class="summary-bar">
-        <div class="summary-item">
-          <span class="summary-label">{{ calendarMonth }}月记录</span>
-          <span class="summary-value">{{ monthRecords.length }} 天</span>
-        </div>
-        <div class="summary-divider"></div>
-        <div class="summary-item">
-          <span class="summary-label">{{ label }}合计</span>
-          <span class="summary-value">{{ totalValue }}</span>
-        </div>
-        <div class="summary-divider"></div>
-        <div class="summary-item">
-          <span class="summary-label">日均</span>
-          <span class="summary-value">{{ avgValue }}</span>
-        </div>
-        <div v-if="monthExpenseTotal > 0" class="summary-divider"></div>
+      <div v-if="monthExpenseTotal > 0 || sleepStats.count > 0" class="summary-bar">
         <div v-if="monthExpenseTotal > 0" class="summary-item">
           <span class="summary-label">本月支出</span>
           <span class="summary-value expense-amount">¥{{ monthExpenseTotal.toFixed(2) }}</span>
+        </div>
+        <div v-if="monthExpenseTotal > 0" class="summary-divider"></div>
+        <div v-if="monthExpenseTotal > 0" class="summary-item">
+          <span class="summary-label">日均支出</span>
+          <span class="summary-value expense-amount">¥{{ monthAvgExpense }}</span>
+        </div>
+        <div v-if="monthExpenseTotal > 0 && sleepStats.count > 0" class="summary-divider"></div>
+        <div v-if="sleepStats.count > 0" class="summary-item">
+          <span class="summary-label">平均入睡</span>
+          <span class="summary-value">{{ sleepStats.avgBedtime }}</span>
+        </div>
+        <div v-if="sleepStats.count > 0" class="summary-divider"></div>
+        <div v-if="sleepStats.count > 0" class="summary-item">
+          <span class="summary-label">平均起床</span>
+          <span class="summary-value">{{ sleepStats.avgWakeup }}</span>
+        </div>
+        <div v-if="sleepStats.count > 0" class="summary-divider"></div>
+        <div v-if="sleepStats.count > 0" class="summary-item">
+          <span class="summary-label">平均睡眠</span>
+          <span class="summary-value">{{ sleepStats.avgDuration }}h</span>
         </div>
       </div>
     </div>
@@ -214,19 +229,56 @@ const CalendarView = {
         .map(([key, record]) => ({ key, ...record }))
         .sort((a, b) => a.key.localeCompare(b.key));
     },
-    totalValue() {
-      return this.monthRecords.reduce((sum, r) => sum + r.value, 0);
-    },
-    avgValue() {
-      return this.monthRecords.length > 0
-        ? (this.totalValue / this.monthRecords.length).toFixed(1)
-        : '—';
-    },
     monthExpenseTotal() {
       const prefix = `${this.calendarYear}-${pad(this.calendarMonth)}`;
       return expenseRecords
         .filter(r => r.date.startsWith(prefix))
         .reduce((s, r) => s + r.amount, 0);
+    },
+    monthAvgExpense() {
+      const prefix = `${this.calendarYear}-${pad(this.calendarMonth)}`;
+      const days = new Set(
+        expenseRecords
+          .filter(r => r.date.startsWith(prefix))
+          .map(r => r.date)
+      );
+      return days.size > 0 ? (this.monthExpenseTotal / days.size).toFixed(2) : '—';
+    },
+    sleepStats() {
+      const prefix = `${this.calendarYear}-${pad(this.calendarMonth)}`;
+      const bedtimes = [];
+      const wakeups = [];
+      const durations = [];
+      Object.entries(dailyRecords).forEach(([key, record]) => {
+        if (!key.startsWith(prefix)) return;
+        const tasks = record.tasks || [];
+        let best = null;
+        let bestStart = -1;
+        for (const task of tasks) {
+          if (task.desc !== '睡觉' && task.desc !== '睡懒觉') continue;
+          const parts = task.time.split('-');
+          if (parts.length !== 2) continue;
+          const s = parseHM(parts[0].trim());
+          const e = parseHM(parts[1].trim());
+          if (isNaN(s) || isNaN(e)) continue;
+          if (s > bestStart) { bestStart = s; best = { s, e }; }
+        }
+        if (best) {
+          let endMin = best.e;
+          if (endMin <= best.s) endMin += 24 * 60;
+          bedtimes.push(best.s);
+          wakeups.push(best.e);
+          durations.push(endMin - best.s);
+        }
+      });
+      if (bedtimes.length === 0) return { count: 0, avgBedtime: '', avgWakeup: '', avgDuration: '' };
+      const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+      return {
+        count: bedtimes.length,
+        avgBedtime: minToHM(avg(bedtimes)),
+        avgWakeup: minToHM(avg(wakeups)),
+        avgDuration: (avg(durations) / 60).toFixed(1)
+      };
     }
   },
   methods: {
@@ -299,11 +351,18 @@ const RouteTable = {
           </div>
         </div>
         <div class="section-body" v-show="cat.open">
-          <div v-for="item in cat.filteredItems" :key="item.name" class="route-item">
-            <div class="route-item-name">{{ item.name }}</div>
-            <div v-if="item.desc" class="route-item-desc">{{ item.desc }}</div>
-            <a v-if="item.url" :href="item.url" target="_blank" class="route-item-link">{{ item.url }}</a>
-            <code v-else-if="item.path" class="route-item-path">{{ item.path }}</code>
+          <div class="route-grid">
+            <template v-for="item in cat.filteredItems" :key="item.name">
+              <a v-if="item.url" :href="item.url" target="_blank" class="route-card">
+                <div class="route-card-name">{{ item.name }}</div>
+                <div v-if="item.desc" class="route-card-desc">{{ item.desc }}</div>
+              </a>
+              <div v-else class="route-card">
+                <div class="route-card-name">{{ item.name }}</div>
+                <div v-if="item.desc" class="route-card-desc">{{ item.desc }}</div>
+                <code v-if="item.path" class="route-card-path">{{ item.path }}</code>
+              </div>
+            </template>
           </div>
         </div>
       </div>
@@ -321,7 +380,7 @@ const RouteTable = {
       if (!q) {
         return this.categories;
       }
-      return this.categories
+      return routeCategories
         .map(cat => ({
           ...cat,
           filteredItems: cat.items.filter(item =>
@@ -462,12 +521,12 @@ const app = createApp({
   data() {
     return {
       tabs: [
+        { id: 'routes', title: '路由表', icon: '🗺️' },
         { id: 'calendar', title: '每日日历追踪', icon: '📅' },
         { id: 'expense', title: '支出记录', icon: '💰' },
-        { id: 'cookbook', title: 'Cookbook', icon: '📖' },
-        { id: 'routes', title: '路由表', icon: '🗺️' }
+        { id: 'cookbook', title: 'Cookbook', icon: '📖' }
       ],
-      activeTab: 'calendar',
+      activeTab: 'routes',
       sidebarOpen: false,
       cookbookQuery: '',
       cookbookEntries: cookbookEntries
