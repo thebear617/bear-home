@@ -907,6 +907,30 @@ a.route-card:hover {
   border-top: 1px solid var(--line);
 }
 
+.cookbook-body table {
+  margin: .6rem 0;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .84rem;
+}
+
+.cookbook-body th,
+.cookbook-body td {
+  padding: .45rem .65rem;
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.cookbook-body th {
+  background: var(--surface-soft);
+  font-weight: 800;
+  color: var(--dark);
+}
+
+.cookbook-body tr:nth-child(even) td {
+  background: var(--surface-soft);
+}
+
 /* ─── Expense ─── */
 
 .expense-view {
