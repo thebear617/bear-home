@@ -120,4 +120,8 @@ const expenseCategories = [
 const expenseRecords = [
   { date: '2026-07-06', cat: '市内出行', sub: '外出餐饮', amount: 24.88, note: '千里香馄饨、兵立王奶茶' },
   { date: '2026-07-06', cat: '市内出行', sub: '外出餐饮', amount: 13.50, note: '丁香食堂' },
+  { date: '2026-07-07', cat: '市内出行', sub: '外出餐饮', amount: 14.00, note: '竹园减脂餐（煎鸡排饭）' },
+  { date: '2026-07-07', cat: '市内出行', sub: '外出餐饮', amount: 20.00, note: '东北烧烤' },
+  { date: '2026-07-07', cat: '居家生活', sub: '居家', amount: 40.00, note: '零食' },
+  { date: '2026-07-07', cat: '市内出行', sub: '外出餐饮', amount: 2.00, note: '买水' },
 ];
