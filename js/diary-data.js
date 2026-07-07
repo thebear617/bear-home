@@ -2036,7 +2036,7 @@ const diaryRecords = {
     ]
   },
   "2026-07-07": {
-    "value": 8,
+    "value": 9,
     "tasks": [
       {
         "status": "x",
@@ -2077,6 +2077,11 @@ const diaryRecords = {
         "status": "x",
         "time": "21:20-22:20",
         "desc": "回学校放笼子，回家买零食和烧烤"
+      },
+      {
+        "status": "x",
+        "time": "22:20-24:00",
+        "desc": "回家和过马路过二人世界"
       }
     ]
   }
