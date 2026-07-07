@@ -63,4 +63,5 @@ const expenseCategories = [
 
 const expenseRecords = [
   { date: '2026-07-06', cat: '市内出行', sub: '外出餐饮', amount: 24.88, note: '千里香馄饨、兵立王奶茶' },
+  { date: '2026-07-06', cat: '市内出行', sub: '外出餐饮', amount: 13.50, note: '丁香食堂' },
 ];

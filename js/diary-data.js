@@ -291,27 +291,27 @@ const diaryRecords = {
       {
         "status": "x",
         "time": "00:00-03:00",
-        "desc": "躺床玩手机"
+        "desc": "躺床玩手机 #area/chill"
       },
       {
         "status": "x",
         "time": "03:00-10:00",
-        "desc": "睡觉"
+        "desc": "睡觉 #area/daily"
       },
       {
         "status": "x",
         "time": "10:00-10:30",
-        "desc": "赖床"
+        "desc": "赖床 #area/chill"
       },
       {
         "status": "x",
         "time": "10:30-13:00",
-        "desc": "研究 NotebookLM + Agent 结合"
+        "desc": "研究 NotebookLM + Agent 结合 #area/dev"
       },
       {
         "status": "x",
         "time": "13:00-14:30",
-        "desc": "吃张亮麻辣烫（过马路）"
+        "desc": "吃张亮麻辣烫（过马路） #area/daily"
       },
       {
         "status": "x",
@@ -451,37 +451,37 @@ const diaryRecords = {
       {
         "status": "x",
         "time": "00:00-03:00",
-        "desc": "研究 OVS"
+        "desc": "研究 OVS #area/research"
       },
       {
         "status": "x",
         "time": "03:00-04:00",
-        "desc": "在床上玩手机"
+        "desc": "在床上玩手机 #area/chill"
       },
       {
         "status": "x",
         "time": "04:00-10:00",
-        "desc": "睡觉"
+        "desc": "睡觉 #area/daily"
       },
       {
         "status": "x",
         "time": "10:00-10:30",
-        "desc": "研究 OVS"
+        "desc": "研究 OVS #area/research"
       },
       {
         "status": "x",
         "time": "10:30-12:00",
-        "desc": "打电动"
+        "desc": "打电动 #area/game"
       },
       {
         "status": "x",
         "time": "12:00-14:30",
-        "desc": "出门吃三顾冒菜·买兵立王·找小猫二柑玩·参加计科院小活动"
+        "desc": "出门吃三顾冒菜·买兵立王·找小猫二柑玩·参加计科院小活动 #area/chill"
       },
       {
         "status": "x",
         "time": "18:00-19:00",
-        "desc": "竹园吃饭（饺子）"
+        "desc": "竹园吃饭（饺子） #area/daily"
       },
       {
         "status": "x",
@@ -601,17 +601,17 @@ const diaryRecords = {
       {
         "status": "x",
         "time": "18:30-19:44",
-        "desc": "在宿舍学习 OVS + 完善猫咪系统"
+        "desc": "在宿舍学习 OVS + 完善猫咪系统 #area/research"
       },
       {
         "status": "x",
         "time": "19:50-21:30",
-        "desc": "外出：吃饭 + 取快递 + 还笼子"
+        "desc": "外出：吃饭 + 取快递 + 还笼子 #area/daily"
       },
       {
         "status": "x",
         "time": "21:30-22:00",
-        "desc": "洗澡"
+        "desc": "洗澡 #area/daily"
       }
     ]
   },
@@ -1501,7 +1501,7 @@ const diaryRecords = {
     ]
   },
   "2026-06-26": {
-    "value": 12,
+    "value": 9,
     "tasks": [
       {
         "status": "x",
@@ -1547,21 +1547,6 @@ const diaryRecords = {
         "status": "x",
         "time": "19:00-19:30",
         "desc": "听别人讲 AI 可解释性的 PPT"
-      },
-      {
-        "status": "x",
-        "time": "21:30-22:30",
-        "desc": "和过马路吃学校豆花米线 + 买零食回家"
-      },
-      {
-        "status": "x",
-        "time": "23:00-23:10",
-        "desc": "给小车充电"
-      },
-      {
-        "status": "x",
-        "time": "23:10-23:40",
-        "desc": "洗澡 + 洗内裤"
       }
     ]
   },
@@ -2001,7 +1986,7 @@ const diaryRecords = {
     ]
   },
   "2026-07-06": {
-    "value": 5,
+    "value": 9,
     "tasks": [
       {
         "status": "x",
@@ -2027,6 +2012,56 @@ const diaryRecords = {
         "status": "x",
         "time": "13:40-14:10",
         "desc": "吃千里香，买兵立王，花费 24.88"
+      },
+      {
+        "status": "x",
+        "time": "14:10-18:00",
+        "desc": "网站开发，完善猫猫网站和熊窝"
+      },
+      {
+        "status": "x",
+        "time": "18:00-19:40",
+        "desc": "在丁香食堂吃饭，花费 13.5 元，并且去游泳"
+      },
+      {
+        "status": "x",
+        "time": "19:40-23:30",
+        "desc": "去和过马路、耿哥以及轩轩他们唱 K"
+      },
+      {
+        "status": "x",
+        "time": "23:30-24:00",
+        "desc": "回家"
+      }
+    ]
+  },
+  "2026-07-07": {
+    "value": 5,
+    "tasks": [
+      {
+        "status": "x",
+        "time": "00:00-03:00",
+        "desc": "打电动和玩手机"
+      },
+      {
+        "status": "x",
+        "time": "03:00-12:00",
+        "desc": "睡觉"
+      },
+      {
+        "status": "x",
+        "time": "12:00-13:00",
+        "desc": "玩手机"
+      },
+      {
+        "status": "x",
+        "time": "13:00-14:00",
+        "desc": "自己煮泡面吃"
+      },
+      {
+        "status": "x",
+        "time": "14:00-16:00",
+        "desc": "进行个人主页和猫猫网站的进一步开发"
       }
     ]
   }

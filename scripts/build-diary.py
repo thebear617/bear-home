@@ -29,7 +29,6 @@ for fname in sorted(os.listdir(DIARY_DIR)):
             status = match.group(1)
             time = f'{match.group(2)}-{match.group(3)}'
             desc = match.group(4).strip()
-            desc = re.sub(r'\s*#area/\S+', '', desc)
             tasks.append({'status': status, 'time': time, 'desc': desc})
 
     if not tasks:
