@@ -32,6 +32,7 @@ const cookbookEntries = [
   {
     id: 'ui-layers',
     title: '纯静态站点的五层渲染模型',
+    date: '2026-07-07',
     tags: ['架构', 'UI'],
     body: `## 层级
 
@@ -87,6 +88,7 @@ const cookbookEntries = [
   {
     id: 'deploy-vercel',
     title: '从域名到上线：腾讯云 + GitHub + Vercel 部署全流程',
+    date: '2026-07-05',
     tags: ['部署', '域名', 'Vercel'],
     body: `## 步骤
 

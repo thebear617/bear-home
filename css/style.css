@@ -776,7 +776,191 @@ a.route-card:hover {
   }
 }
 
-/* ─── Cookbook ─── */
+/* ─── Cookbook Timeline ─── */
+
+.cookbook-view {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.timeline-wrap {
+  position: relative;
+}
+
+.timeline-scroll {
+  position: relative;
+}
+
+.timeline-track {
+  position: relative;
+  display: flow-root;
+}
+
+.timeline-track::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 3px;
+  height: 100%;
+  background: var(--line);
+  transform: translateX(-50%);
+}
+
+.timeline-year-group {
+  float: left;
+  clear: both;
+  width: calc(50% - 24px);
+  text-align: right;
+  margin-bottom: 2rem;
+}
+
+.timeline-year-group:nth-child(even) {
+  float: right;
+  text-align: left;
+}
+
+.timeline-year-group:first-child {
+  margin-top: 1rem;
+}
+
+.timeline-year-label {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--dark);
+  position: relative;
+  margin-bottom: 0.3rem;
+}
+
+.timeline-year-label::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 3px solid var(--bg);
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.timeline-year-group:nth-child(odd) .timeline-year-label::after {
+  left: calc(100% + 13px);
+}
+
+.timeline-year-group:nth-child(even) .timeline-year-label::after {
+  right: calc(100% + 13px);
+}
+
+.timeline-month-group {
+  margin-bottom: 0.6rem;
+}
+
+.timeline-month-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+  position: relative;
+  margin-bottom: 0.3rem;
+}
+
+.timeline-month-label::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--muted);
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.timeline-year-group:nth-child(odd) .timeline-month-label::after {
+  left: calc(100% + 19px);
+}
+
+.timeline-year-group:nth-child(even) .timeline-month-label::after {
+  right: calc(100% + 19px);
+}
+
+.timeline-item {
+  cursor: pointer;
+  padding: 0.25rem 0;
+}
+
+.timeline-item-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  transition: color 0.15s;
+}
+
+.timeline-item:hover .timeline-item-title {
+  color: var(--green);
+}
+
+.timeline-item-tags {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  margin-top: 0.15rem;
+}
+
+.timeline-year-group:nth-child(odd) .timeline-item-tags {
+  justify-content: flex-end;
+}
+
+.timeline-year-group:nth-child(even) .timeline-item-tags {
+  justify-content: flex-start;
+}
+
+/* ─── Cookbook Detail ─── */
+
+.cookbook-detail {
+  padding-bottom: 2rem;
+}
+
+.cookbook-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-bottom: 0.8rem;
+  transition: color 0.15s;
+}
+
+.cookbook-back:hover {
+  color: var(--green);
+}
+
+.cookbook-meta {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+
+.cookbook-date {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 500;
+}
 
 .cookbook-card {
   margin-bottom: 1rem;
@@ -798,7 +982,6 @@ a.route-card:hover {
   display: flex;
   gap: .4rem;
   flex-wrap: wrap;
-  margin-top: .4rem;
 }
 
 .cookbook-tag {

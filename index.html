@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="version" content="V0.0.8">
+  <meta name="version" content="V0.0.9">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>熊窝</title>
   <link rel="stylesheet" href="css/style.css">
@@ -39,17 +39,12 @@
           <expense-view v-show="activeTab === 'expense'"></expense-view>
           <route-table v-show="activeTab === 'routes'"></route-table>
           <div v-show="activeTab === 'cookbook'" class="cookbook-view">
-            <div class="route-search">
+            <div v-if="cookbookView === 'timeline'" class="route-search">
               <input v-model="cookbookQuery" type="text" placeholder="搜索食谱..."/>
             </div>
-            <div v-if="cookbookFiltered.length === 0" class="empty-state">没有匹配的条目</div>
-            <div v-for="entry in cookbookFiltered" :key="entry.id" class="cookbook-card">
-              <div class="cookbook-title">{{ entry.title }}</div>
-              <div class="cookbook-tags">
-                <span v-for="tag in entry.tags" :key="tag" class="cookbook-tag">{{ tag }}</span>
-              </div>
-              <div class="cookbook-body" v-html="renderMarkdown(entry.body)"></div>
-            </div>
+            <cookbook-timeline v-if="cookbookView === 'timeline'" :entries="cookbookEntries" :query="cookbookQuery" @select="openDetail"></cookbook-timeline>
+            <cookbook-detail v-else :entry="cookbookDetailEntry" @back="closeDetail"></cookbook-detail>
+          </div>
         </main>
       </div>
     </div>
