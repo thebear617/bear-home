@@ -126,4 +126,6 @@ const expenseRecords = [
   { date: '2026-07-07', cat: '市内出行', sub: '外出餐饮', amount: 20.00, note: '东北烧烤' },
   { date: '2026-07-07', cat: '居家生活', sub: '居家', amount: 40.00, note: '零食' },
   { date: '2026-07-07', cat: '市内出行', sub: '外出餐饮', amount: 2.00, note: '买水' },
+  { date: '2026-07-08', cat: '市内出行', sub: '外出餐饮', amount: 13.00, note: '竹园餐厅三合一+绿豆沙' },
+  { date: '2026-07-08', cat: '市内出行', sub: '市内交通', amount: 23.10, note: '送赫兹去医院打车费' },
 ];
