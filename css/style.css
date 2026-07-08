@@ -1159,6 +1159,37 @@ a.route-card:hover {
   }
 }
 
+.vmap-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin-bottom: 1rem;
+}
+
+.vmap-tab {
+  padding: .35rem .85rem;
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s, color .15s, border-color .15s;
+}
+
+.vmap-tab:hover {
+  color: var(--dark);
+  border-color: var(--dark);
+}
+
+.vmap-tab.active {
+  color: #fff;
+  background: #2D6A7E;
+  border-color: #2D6A7E;
+}
+
 .vmap-content {
   max-width: 100%;
 }
@@ -1274,6 +1305,12 @@ a.route-card:hover {
   width: 100%;
   border-collapse: collapse;
   font-size: .84rem;
+  table-layout: fixed;
+}
+
+.valorant-body th:first-child,
+.valorant-body td:first-child {
+  width: 7rem;
 }
 
 .valorant-body th,
@@ -1296,55 +1333,85 @@ a.route-card:hover {
 /* ─── Callouts ─── */
 
 .callout {
-  margin: .8rem 0;
-  padding: .7rem 1rem;
-  border-radius: 8px;
-  border-left: 4px solid;
-  background: var(--surface-soft);
+  margin: .7rem 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  overflow: hidden;
   font-size: .86rem;
   line-height: 1.6;
 }
 
 .callout .callout-title {
+  padding: .6rem 1rem;
   font-weight: 800;
-  margin-bottom: .3rem;
+  font-size: .88rem;
 }
+
+details.callout > summary {
+  display: flex;
+  align-items: center;
+  padding: .65rem 2rem .65rem 1rem;
+  font-weight: 800;
+  font-size: .88rem;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  position: relative;
+  transition: filter .15s;
+}
+
+details.callout > summary::-webkit-details-marker { display: none; }
+
+details.callout > summary::after {
+  content: '';
+  position: absolute;
+  right: .9rem;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-70%) rotate(45deg);
+  transition: transform .2s;
+  opacity: .5;
+}
+
+details.callout[open] > summary::after {
+  transform: translateY(-30%) rotate(-135deg);
+}
+
+details.callout > summary:hover {
+  filter: brightness(1.06);
+}
+
+.callout > :is(.callout-title, summary) + * {
+  padding: .6rem 1rem .8rem;
+}
+
+.callout > :is(.callout-title, summary) + :is(p, ul, ol, .callout-body) {
+  margin-top: 0;
+}
+
+.callout .callout-body > :first-child { margin-top: 0; }
+.callout .callout-body > :last-child { margin-bottom: 0; }
 
 .callout p { margin: .3rem 0; }
 .callout ul, .callout ol { margin: .3rem 0; padding-left: 1.2rem; }
 .callout li { margin: .15rem 0; }
+.callout li > p { margin: 0; }
 .callout table { margin: .4rem 0; width: 100%; border-collapse: collapse; font-size: .82rem; }
 .callout th, .callout td { padding: .3rem .5rem; border: 1px solid var(--line); text-align: left; }
 .callout th { background: rgba(0,0,0,.03); font-weight: 700; }
 
-details.callout { cursor: pointer; }
-details.callout > summary {
-  font-weight: 800;
-  list-style: none;
-  user-select: none;
-}
-details.callout > summary::-webkit-details-marker { display: none; }
-details.callout > summary::before {
-  content: '▸ ';
-  font-size: .75rem;
-  display: inline-block;
-  transition: transform .15s;
-}
-details.callout[open] > summary::before {
-  transform: rotate(90deg);
-}
+.callout-note > :is(.callout-title, summary) { background: #eff6ff; color: #1d4ed8; }
 
-.callout-note  { border-color: var(--blue); }
-.callout-note .callout-title { color: var(--blue); }
+.callout-warning > :is(.callout-title, summary) { background: #fffbeb; color: #b45309; }
 
-.callout-warning { border-color: var(--amber); }
-.callout-warning .callout-title { color: var(--amber); }
+.callout-tip > :is(.callout-title, summary) { background: #ecfdf5; color: #047857; }
 
-.callout-tip  { border-color: var(--green); }
-.callout-tip .callout-title { color: var(--green); }
-
-.callout-info { border-color: var(--muted); }
-.callout-info .callout-title { color: var(--muted); }
+.callout-info > :is(.callout-title, summary) { background: #f8fafc; color: #475569; }
 
 /* ─── Expense ─── */
 

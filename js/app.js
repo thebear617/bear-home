@@ -63,18 +63,28 @@ function getLunarInfo(year, month, day) {
 
 /* ─── Obsidian Preprocessor ─── */
 
-function buildCallout(type, expand, title, lines) {
-  const content = lines.join('\n').trim();
-  if (expand === '-') {
-    return '<details class="callout callout-' + type + '"><summary>' + title + '</summary>\n\n' + content + '\n\n</details>';
-  }
-  return '<div class="callout callout-' + type + '"><div class="callout-title">' + title + '</div>\n\n' + content + '\n\n</div>';
+function stripWikilinks(md) {
+  md = md.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '$2');
+  md = md.replace(/\[\[([^\]]+)\]\]/g, function(m, path) {
+    var parts = path.split('/');
+    return parts[parts.length - 1].replace(/\.md$/, '');
+  });
+  return md;
 }
 
-function preprocessObsidian(md) {
+function buildCallout(type, expand, title, contentHtml) {
+  if (expand === '-') {
+    return '<details class="callout callout-' + type + '"><summary>' + title + '</summary><div class="callout-body">' + contentHtml + '</div></details>';
+  }
+  return '<div class="callout callout-' + type + '"><div class="callout-title">' + title + '</div><div class="callout-body">' + contentHtml + '</div></div>';
+}
+
+function preprocessObsidian(md, markedFn) {
   md = md.replace(/^---\n[\s\S]*?\n---\n?/, '');
+  md = stripWikilinks(md);
 
   var lines = md.split('\n');
+  var placeholders = [];
   var result = [];
   var inCallout = false;
   var calloutType = '';
@@ -82,43 +92,47 @@ function preprocessObsidian(md) {
   var calloutTitle = '';
   var calloutLines = [];
 
+  function flushCallout() {
+    var raw = calloutLines.join('\n').trim();
+    var contentHtml = markedFn(raw);
+    var html = buildCallout(calloutType, calloutExpand, calloutTitle, contentHtml);
+    var ph = '<div data-callout="' + placeholders.length + '"></div>';
+    placeholders.push(html);
+    result.push(ph);
+  }
+
   for (var i = 0; i < lines.length; i++) {
     var line = lines[i];
     var cm = line.match(/^> \[!(\w+)\]([+-])?\s*(.*)/);
     if (cm) {
-      if (inCallout) {
-        result.push(buildCallout(calloutType, calloutExpand, calloutTitle, calloutLines));
-        calloutLines = [];
-      }
+      if (inCallout) flushCallout();
       inCallout = true;
       calloutType = cm[1];
       calloutExpand = cm[2] || '';
-      calloutTitle = cm[3] || '';
+      calloutTitle = cm[3].replace(/（来源：.*?）\s*$/, '').replace(/\(来源：.*?\)\s*$/, '').trim();
+      calloutLines = [];
     } else if (inCallout && line.startsWith('>')) {
       var content = line.slice(1);
       if (content.startsWith(' ')) content = content.slice(1);
       calloutLines.push(content);
     } else {
       if (inCallout) {
-        result.push(buildCallout(calloutType, calloutExpand, calloutTitle, calloutLines));
-        calloutLines = [];
+        flushCallout();
         inCallout = false;
       }
       result.push(line);
     }
   }
-  if (inCallout) {
-    result.push(buildCallout(calloutType, calloutExpand, calloutTitle, calloutLines));
+  if (inCallout) flushCallout();
+
+  var processed = result.join('\n');
+  var html = markedFn(processed);
+
+  for (var p = 0; p < placeholders.length; p++) {
+    html = html.replace('<div data-callout="' + p + '"></div>', placeholders[p]);
   }
-  md = result.join('\n');
 
-  md = md.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '$2');
-  md = md.replace(/\[\[([^\]]+)\]\]/g, function(m, path) {
-    var parts = path.split('/');
-    return parts[parts.length - 1].replace(/\.md$/, '');
-  });
-
-  return md;
+  return html;
 }
 
 /* ─── Valorant View ─── */
@@ -135,12 +149,22 @@ const ValorantView = {
             class="vmap-card"
             :class="{ active: activeSection === s.id }"
             :style="cardStyle(i)"
-            @click="activeSection = s.id"
+            @click="selectSection(s.id)"
           >{{ s.title }}</button>
         </div>
         <div v-for="section in sections" :key="section.id" v-show="activeSection === section.id" class="vmap-content">
           <h2 class="vmap-title">{{ section.title }}</h2>
-          <div class="valorant-body" v-html="section.html"></div>
+          <div v-if="section.subSections && section.subSections.length > 1" class="vmap-tabs">
+            <button
+              v-for="sub in section.subSections"
+              :key="sub.id"
+              class="vmap-tab"
+              :class="{ active: activeSub[section.id] === sub.id }"
+              @click="activeSub[section.id] = sub.id"
+            >{{ sub.title }}</button>
+          </div>
+          <div v-if="activeSubForSection(section)" class="valorant-body" v-html="activeSubForSection(section).html"></div>
+          <div v-else class="valorant-body" v-html="section.html"></div>
         </div>
       </div>
     </div>
@@ -150,16 +174,17 @@ const ValorantView = {
       loading: true,
       sections: [],
       activeSection: '',
+      activeSub: {},
       gradients: [
         'linear-gradient(135deg, #FFD3B6, #FFAAA5)',
         'linear-gradient(135deg, #A8E6CF, #DCEDC1)',
-        'linear-gradient(135deg, #E8D5FF, #B088F9)',
+        'linear-gradient(135deg, #E8D5FF, #B388FF)',
         'linear-gradient(135deg, #A2D2FF, #BDE0FE)',
         'linear-gradient(135deg, #FFC3A0, #FFAFBD)',
-        'linear-gradient(135deg, #FFF5B1, #FFD54F)',
+        'linear-gradient(135deg, #FFF176, #FFB300)',
         'linear-gradient(135deg, #FADADD, #F4A7B9)',
         'linear-gradient(135deg, #B5EAD7, #C7CEEA)',
-        'linear-gradient(135deg, #FFE0B2, #FF9800)'
+        'linear-gradient(135deg, #FFE0B2, #FF8A65)'
       ]
     };
   },
@@ -169,10 +194,10 @@ const ValorantView = {
     },
     splitByHeading(html) {
       var sections = [];
-      var h2Regex = /<h2[^>]*>(.*?)<\/h2>/gi;
+      var h1Regex = /<h1[^>]*>(.*?)<\/h1>/gi;
       var prevSection = null;
       var match;
-      while ((match = h2Regex.exec(html)) !== null) {
+      while ((match = h1Regex.exec(html)) !== null) {
         var title = match[1].replace(/<[^>]+>/g, '').trim();
         if (prevSection) {
           prevSection.html = html.slice(prevSection.startIdx, match.index);
@@ -186,14 +211,49 @@ const ValorantView = {
       }
       return sections;
     },
+    splitSubSections(html) {
+      var subs = [];
+      var h2Regex = /<h2[^>]*>(.*?)<\/h2>/gi;
+      var matches = [];
+      var match;
+      while ((match = h2Regex.exec(html)) !== null) {
+        matches.push({ title: match[1].replace(/<[^>]+>/g, '').trim(), index: match.index });
+      }
+      for (var i = 0; i < matches.length; i++) {
+        var startIdx = matches[i].index;
+        var endIdx = i + 1 < matches.length ? matches[i + 1].index : html.length;
+        subs.push({ id: 'sub-' + i, title: matches[i].title, html: html.slice(startIdx, endIdx) });
+      }
+      return subs;
+    },
+    activeSubForSection(section) {
+      var subId = this.activeSub[section.id];
+      if (!subId || !section.subSections) return null;
+      for (var i = 0; i < section.subSections.length; i++) {
+        if (section.subSections[i].id === subId) return section.subSections[i];
+      }
+      return null;
+    },
+    selectSection(id) {
+      this.activeSection = id;
+      if (!this.activeSub[id]) {
+        var section = this.sections.find(function(s) { return s.id === id; });
+        if (section && section.subSections && section.subSections.length) {
+          this.activeSub[id] = section.subSections[0].id;
+        }
+      }
+    },
     loadContent() {
       try {
         var mapMd = typeof valorantMapMd !== 'undefined' ? valorantMapMd : '';
 
         if (!mapMd) throw new Error('数据文件未加载，请重建 valorant-data.js');
 
-        var mapProcessed = preprocessObsidian(mapMd);
-        var mapHtml = marked.parse(mapProcessed);
+        var render = function(md) { return marked.parse(md); };
+        var mapHtml = preprocessObsidian(mapMd, render);
+        mapHtml = mapHtml.replace(/<h1[^>]*>.*?<\/h1>/, '');
+        mapHtml = mapHtml.replace(/<h2/g, '<h1').replace(/<\/h2>/g, '</h1>');
+        mapHtml = mapHtml.replace(/<h3/g, '<h2').replace(/<\/h3>/g, '</h2>');
 
         var rawSections = this.splitByHeading(mapHtml);
         if (rawSections.length >= 2) {
@@ -203,6 +263,14 @@ const ValorantView = {
           this.sections = [merged].concat(rest);
         } else {
           this.sections = rawSections;
+        }
+        for (var i = 0; i < this.sections.length; i++) {
+          var sec = this.sections[i];
+          var subs = this.splitSubSections(sec.html);
+          sec.subSections = subs;
+          if (subs.length > 0) {
+            this.activeSub[sec.id] = subs[0].id;
+          }
         }
         if (this.sections.length) this.activeSection = this.sections[0].id;
         this.loading = false;
