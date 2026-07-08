@@ -739,6 +739,173 @@ const ExpenseView = {
   }
 };
 
+/* ─── Membership View ─── */
+
+const MembershipView = {
+  template: `
+    <div class="membership-view">
+      <div class="membership-filter-grid">
+        <button
+          class="membership-filter-card"
+          :class="{ active: group === 'active' }"
+          @click="group = 'active'"
+        >
+          <div class="mfc-label">未过期</div>
+          <div class="mfc-amount">月均 ¥{{ activeMonthlyTotal }}</div>
+        </button>
+        <button
+          class="membership-filter-card"
+          :class="{ active: group === 'expired' }"
+          @click="group = 'expired'"
+        >
+          <div class="mfc-label">已过期</div>
+        </button>
+      </div>
+
+      <div class="route-search">
+        <input v-model="query" type="text" placeholder="搜索会员名或标签..." />
+      </div>
+
+      <div v-if="!groupedByTag.length" class="empty-state">无匹配记录</div>
+
+      <div
+        v-for="cat in groupedByTag"
+        :key="cat.tag"
+        class="check-section"
+        :class="{ open: isTagOpen(cat.tag) }"
+      >
+        <div class="section-header" @click="toggleTag(cat.tag)">
+          <div class="section-header-left">
+            <h2>{{ cat.tag }}</h2>
+          </div>
+          <div class="section-header-right">
+            <span class="section-count">{{ cat.records.length }}</span>
+            <span class="section-arrow">▸</span>
+          </div>
+        </div>
+        <div class="section-body" v-show="isTagOpen(cat.tag)">
+          <div class="table-wrap">
+            <table class="membership-table">
+              <thead>
+                <tr>
+                  <th>会员名称</th>
+                  <th>到期时间</th>
+                  <th>剩余天数</th>
+                  <th>价格</th>
+                  <th>标签</th>
+                  <th>备注</th>
+                  <th>链接</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="r in cat.records"
+                  :key="r.name"
+                  :class="{ 'row-unknown': !r.expireDate }"
+                >
+                  <td class="mt-name">{{ r.name }}</td>
+                  <td>{{ r.expireDate || '未知' }}</td>
+                  <td :class="daysClass(r)">{{ formatDays(r) }}</td>
+                  <td>{{ r.price != null ? '¥' + Math.round(r.price) : '—' }}</td>
+                  <td>
+                    <span v-for="t in r.tags" :key="t" class="membership-tag">{{ t }}</span>
+                  </td>
+                  <td class="mt-note" :title="r.note">{{ r.note }}</td>
+                  <td>
+                    <a v-if="r.url" :href="r.url" target="_blank" rel="noopener" class="mt-link">↗</a>
+                    <span v-else>—</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  data() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return {
+      group: 'active',
+      query: '',
+      openTags: {},
+      todayMs: today.getTime()
+    };
+  },
+  computed: {
+    expiredRecords() {
+      return membershipRecords
+        .filter(r => r.expireDate && this.parseDate(r.expireDate) < this.todayMs)
+        .sort((a, b) => this.parseDate(b.expireDate) - this.parseDate(a.expireDate));
+    },
+    activeRecords() {
+      return membershipRecords
+        .filter(r => {
+          if (!r.expireDate) return false;
+          return this.parseDate(r.expireDate) >= this.todayMs;
+        })
+        .sort((a, b) => {
+          if (!a.expireDate && !b.expireDate) return a.name.localeCompare(b.name, 'zh-CN');
+          if (!a.expireDate) return 1;
+          if (!b.expireDate) return -1;
+          return this.parseDate(a.expireDate) - this.parseDate(b.expireDate);
+        });
+    },
+    currentGroupRecords() {
+      const base = this.group === 'active' ? this.activeRecords : this.expiredRecords;
+      const q = this.query.trim().toLowerCase();
+      if (!q) return base;
+      return base.filter(r =>
+        r.name.toLowerCase().includes(q) ||
+        r.tags.some(t => t.toLowerCase().includes(q))
+      );
+    },
+    groupedByTag() {
+      const map = {};
+      for (const r of this.currentGroupRecords) {
+        const tag = (r.tags && r.tags[0]) || '其他';
+        if (!map[tag]) map[tag] = [];
+        map[tag].push(r);
+      }
+      return Object.entries(map)
+        .map(([tag, records]) => ({ tag, records }))
+        .sort((a, b) => b.records.length - a.records.length || a.tag.localeCompare(b.tag, 'zh-CN'));
+    },
+    activeMonthlyTotal() {
+      const total = this.activeRecords.reduce((s, r) => {
+        if (r.price == null || !r.cycleMonths) return s;
+        return s + r.price / r.cycleMonths;
+      }, 0);
+      return Math.round(total);
+    }
+  },
+  methods: {
+    parseDate(s) {
+      return new Date(s + 'T00:00:00').getTime();
+    },
+    daysClass(r) {
+      if (!r.expireDate) return 'days-unknown';
+      const diff = this.parseDate(r.expireDate) - this.todayMs;
+      if (diff < 0) return 'days-expired';
+      if (diff <= 30 * 86400000) return 'days-warning';
+      return 'days-ok';
+    },
+    formatDays(r) {
+      if (!r.expireDate) return '未知';
+      const diff = Math.round((this.parseDate(r.expireDate) - this.todayMs) / 86400000);
+      if (diff < 0) return `已过期 ${-diff} 天`;
+      return `${diff} 天`;
+    },
+    isTagOpen(tag) {
+      return this.openTags[tag] !== false;
+    },
+    toggleTag(tag) {
+      this.openTags[tag] = !this.isTagOpen(tag);
+    }
+  }
+};
+
 /* ─── Cookbook Timeline ─── */
 
 const MONTHS_ZH = ['', '一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
@@ -852,9 +1019,10 @@ const app = createApp({
         { id: 'calendar', title: '每日日历追踪', icon: '📅' },
         { id: 'expense', title: '支出记录', icon: '💰' },
         { id: 'cookbook', title: 'Cookbook', icon: '📖' },
-        { id: 'valorant', title: '无畏契约', icon: '🎯' }
+        { id: 'valorant', title: '无畏契约', icon: '🎯' },
+        { id: 'membership', title: '会员订阅', icon: '💳' }
       ],
-      activeTab: 'routes',
+      activeTab: 'membership',
       sidebarOpen: false,
       cookbookQuery: '',
       cookbookEntries: cookbookEntries,
@@ -906,4 +1074,5 @@ app.component('expense-view', ExpenseView);
 app.component('cookbook-timeline', CookbookTimeline);
 app.component('cookbook-detail', CookbookDetail);
 app.component('valorant-view', ValorantView);
+app.component('membership-view', MembershipView);
 app.mount('#app');

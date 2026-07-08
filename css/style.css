@@ -1532,3 +1532,133 @@ details.callout > summary:hover {
   margin-left: auto;
   flex-shrink: 0;
 }
+
+/* ─── Membership View ─── */
+
+.membership-view { animation: fadeIn .2s ease; }
+
+.membership-filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .8rem;
+  margin-bottom: 1rem;
+}
+
+.membership-filter-card {
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  transition: border-color .15s ease, background .15s ease;
+}
+
+.membership-filter-card:hover {
+  border-color: var(--accent);
+}
+
+.membership-filter-card.active {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, var(--surface), #fff8e8);
+  box-shadow: var(--shadow);
+}
+
+.mfc-label {
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.mfc-count {
+  font-size: .85rem;
+  color: var(--muted);
+  margin-top: .2rem;
+}
+
+.mfc-amount {
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-top: .3rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin-top: .8rem;
+}
+
+.membership-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .85rem;
+}
+
+.membership-table th,
+.membership-table td {
+  padding: .55rem .7rem;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.membership-table th {
+  background: var(--surface-soft);
+  font-weight: 700;
+  color: var(--muted);
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+.mt-name {
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.mt-note {
+  color: var(--muted);
+  font-size: .8rem;
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mt-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 1.1rem;
+}
+
+.mt-link:hover {
+  color: var(--dark);
+}
+
+.membership-tag {
+  display: inline-block;
+  padding: .15rem .5rem;
+  margin-right: .25rem;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: .72rem;
+  color: var(--text);
+}
+
+.days-expired { color: var(--red); font-weight: 700; }
+.days-warning { color: #d97706; font-weight: 700; }
+.days-ok      { color: var(--green); font-weight: 600; }
+.days-unknown { color: var(--muted); font-style: italic; }
+
+.row-unknown td { background: rgba(0, 0, 0, .02); }
+
+@media (max-width: 719px) {
+  .membership-filter-grid { grid-template-columns: 1fr; }
+  .membership-table { font-size: .78rem; }
+  .membership-table th, .membership-table td { padding: .45rem .5rem; }
+}

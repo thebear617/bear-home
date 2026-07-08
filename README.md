@@ -81,3 +81,4 @@ ln -s /Users/mokaiche/Documents/notes/日记 _diary
 - **手动记录**：在 `js/data.js` 的 `manualRecords` 中添加日期条目，手动记录会覆盖同日的日记数据。
 
 - **路由表**：在 `js/data.js` 的 `routeCategories` 中添加条目。
+- **会员订阅**：在 `js/data.js` 的 `membershipRecords` 数组中按 `{ name, expireDate, price, tags, note, source, url }` schema 添加条目；`expireDate` 留空视为"未知到期"。组件按 `expireDate < 今日` 自动划分"已过期 / 未过期"两组。

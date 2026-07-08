@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="version" content="V0.1.0">
+  <meta name="version" content="V0.2.0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>熊窝</title>
   <link rel="stylesheet" href="css/style.css">
@@ -46,6 +46,7 @@
             <cookbook-detail v-else :entry="cookbookDetailEntry" @back="closeDetail"></cookbook-detail>
           </div>
           <valorant-view v-show="activeTab === 'valorant'"></valorant-view>
+          <membership-view v-show="activeTab === 'membership'"></membership-view>
         </main>
       </div>
     </div>
