@@ -45,6 +45,7 @@
             <cookbook-timeline v-if="cookbookView === 'timeline'" :entries="cookbookEntries" :query="cookbookQuery" @select="openDetail"></cookbook-timeline>
             <cookbook-detail v-else :entry="cookbookDetailEntry" @back="closeDetail"></cookbook-detail>
           </div>
+          <valorant-view v-show="activeTab === 'valorant'"></valorant-view>
         </main>
       </div>
     </div>
@@ -52,6 +53,7 @@
 
   <script src="js/data.js"></script>
   <script src="js/diary-data.js"></script>
+  <script src="js/valorant-data.js"></script>
   <script src="js/vendor/vue.global.prod.js"></script>
   <script src="js/vendor/marked.min.js"></script>
   <script src="js/app.js"></script>

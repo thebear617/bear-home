@@ -61,6 +61,162 @@ function getLunarInfo(year, month, day) {
   return { lMonth: best.lMonth, lDay: diff + 1, lMonthName: LUNAR_MONTH_NAMES[best.lMonth], isStart: diff + 1 === 1 };
 }
 
+/* ─── Obsidian Preprocessor ─── */
+
+function buildCallout(type, expand, title, lines) {
+  const content = lines.join('\n').trim();
+  if (expand === '-') {
+    return '<details class="callout callout-' + type + '"><summary>' + title + '</summary>\n\n' + content + '\n\n</details>';
+  }
+  return '<div class="callout callout-' + type + '"><div class="callout-title">' + title + '</div>\n\n' + content + '\n\n</div>';
+}
+
+function preprocessObsidian(md) {
+  md = md.replace(/^---\n[\s\S]*?\n---\n?/, '');
+
+  var lines = md.split('\n');
+  var result = [];
+  var inCallout = false;
+  var calloutType = '';
+  var calloutExpand = '';
+  var calloutTitle = '';
+  var calloutLines = [];
+
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    var cm = line.match(/^> \[!(\w+)\]([+-])?\s*(.*)/);
+    if (cm) {
+      if (inCallout) {
+        result.push(buildCallout(calloutType, calloutExpand, calloutTitle, calloutLines));
+        calloutLines = [];
+      }
+      inCallout = true;
+      calloutType = cm[1];
+      calloutExpand = cm[2] || '';
+      calloutTitle = cm[3] || '';
+    } else if (inCallout && line.startsWith('>')) {
+      var content = line.slice(1);
+      if (content.startsWith(' ')) content = content.slice(1);
+      calloutLines.push(content);
+    } else {
+      if (inCallout) {
+        result.push(buildCallout(calloutType, calloutExpand, calloutTitle, calloutLines));
+        calloutLines = [];
+        inCallout = false;
+      }
+      result.push(line);
+    }
+  }
+  if (inCallout) {
+    result.push(buildCallout(calloutType, calloutExpand, calloutTitle, calloutLines));
+  }
+  md = result.join('\n');
+
+  md = md.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '$2');
+  md = md.replace(/\[\[([^\]]+)\]\]/g, function(m, path) {
+    var parts = path.split('/');
+    return parts[parts.length - 1].replace(/\.md$/, '');
+  });
+
+  return md;
+}
+
+/* ─── Valorant View ─── */
+
+const ValorantView = {
+  template: `
+    <div class="valorant-view">
+      <div v-if="loading" class="empty-state">加载中...</div>
+      <div v-else>
+        <div class="vmap-grid">
+          <button
+            v-for="(s, i) in sections"
+            :key="s.id"
+            class="vmap-card"
+            :class="{ active: activeSection === s.id }"
+            :style="cardStyle(i)"
+            @click="activeSection = s.id"
+          >{{ s.title }}</button>
+        </div>
+        <div v-for="section in sections" :key="section.id" v-show="activeSection === section.id" class="vmap-content">
+          <h2 class="vmap-title">{{ section.title }}</h2>
+          <div class="valorant-body" v-html="section.html"></div>
+        </div>
+      </div>
+    </div>
+  `,
+  data() {
+    return {
+      loading: true,
+      sections: [],
+      activeSection: '',
+      gradients: [
+        'linear-gradient(135deg, #FFD3B6, #FFAAA5)',
+        'linear-gradient(135deg, #A8E6CF, #DCEDC1)',
+        'linear-gradient(135deg, #E8D5FF, #B088F9)',
+        'linear-gradient(135deg, #A2D2FF, #BDE0FE)',
+        'linear-gradient(135deg, #FFC3A0, #FFAFBD)',
+        'linear-gradient(135deg, #FFF5B1, #FFD54F)',
+        'linear-gradient(135deg, #FADADD, #F4A7B9)',
+        'linear-gradient(135deg, #B5EAD7, #C7CEEA)',
+        'linear-gradient(135deg, #FFE0B2, #FF9800)'
+      ]
+    };
+  },
+  methods: {
+    cardStyle(i) {
+      return { background: this.gradients[i % this.gradients.length] };
+    },
+    splitByHeading(html) {
+      var sections = [];
+      var h2Regex = /<h2[^>]*>(.*?)<\/h2>/gi;
+      var prevSection = null;
+      var match;
+      while ((match = h2Regex.exec(html)) !== null) {
+        var title = match[1].replace(/<[^>]+>/g, '').trim();
+        if (prevSection) {
+          prevSection.html = html.slice(prevSection.startIdx, match.index);
+        }
+        var id = 'sec-' + sections.length;
+        prevSection = { id: id, title: title, html: '', searchText: title, startIdx: match.index };
+        sections.push(prevSection);
+      }
+      if (prevSection) {
+        prevSection.html = html.slice(prevSection.startIdx);
+      }
+      return sections;
+    },
+    loadContent() {
+      try {
+        var mapMd = typeof valorantMapMd !== 'undefined' ? valorantMapMd : '';
+
+        if (!mapMd) throw new Error('数据文件未加载，请重建 valorant-data.js');
+
+        var mapProcessed = preprocessObsidian(mapMd);
+        var mapHtml = marked.parse(mapProcessed);
+
+        var rawSections = this.splitByHeading(mapHtml);
+        if (rawSections.length >= 2) {
+          var mergedHtml = rawSections[0].html + rawSections[1].html;
+          var merged = { id: 'overview', title: '元认知与全地图', html: mergedHtml, searchText: '元认知 全地图' };
+          var rest = rawSections.slice(2);
+          this.sections = [merged].concat(rest);
+        } else {
+          this.sections = rawSections;
+        }
+        if (this.sections.length) this.activeSection = this.sections[0].id;
+        this.loading = false;
+      } catch (err) {
+        this.sections = [{ id: 'error', title: '加载失败', html: '<p>' + err.message + '</p><p>请确认软链和网络正常</p>', searchText: '' }];
+        this.loading = false;
+      }
+    }
+  },
+  mounted() {
+    this.loadContent();
+  }
+};
+
 /* ─── Calendar View ─── */
 
 const CalendarView = {
@@ -627,7 +783,8 @@ const app = createApp({
         { id: 'routes', title: '路由表', icon: '🗺️' },
         { id: 'calendar', title: '每日日历追踪', icon: '📅' },
         { id: 'expense', title: '支出记录', icon: '💰' },
-        { id: 'cookbook', title: 'Cookbook', icon: '📖' }
+        { id: 'cookbook', title: 'Cookbook', icon: '📖' },
+        { id: 'valorant', title: '无畏契约', icon: '🎯' }
       ],
       activeTab: 'routes',
       sidebarOpen: false,
@@ -680,4 +837,5 @@ app.component('route-table', RouteTable);
 app.component('expense-view', ExpenseView);
 app.component('cookbook-timeline', CookbookTimeline);
 app.component('cookbook-detail', CookbookDetail);
+app.component('valorant-view', ValorantView);
 app.mount('#app');

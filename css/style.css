@@ -1114,6 +1114,238 @@ a.route-card:hover {
   background: var(--surface-soft);
 }
 
+/* ─── Valorant ─── */
+
+.valorant-view {
+  animation: fadeIn .2s ease;
+}
+
+.vmap-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .5rem;
+  margin-bottom: 1.5rem;
+}
+
+.vmap-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: .65rem .75rem;
+  border-radius: var(--radius);
+  font-size: .84rem;
+  font-weight: 800;
+  color: #2f2924;
+  text-decoration: none;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: filter .15s, box-shadow .15s;
+  font-family: inherit;
+}
+
+.vmap-card:hover {
+  filter: brightness(1.06);
+  box-shadow: var(--shadow);
+}
+
+.vmap-card.active {
+  box-shadow: 0 0 0 2px var(--green);
+  filter: brightness(0.95);
+}
+
+@media (max-width: 600px) {
+  .vmap-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.vmap-content {
+  max-width: 100%;
+}
+
+.vmap-title {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--dark);
+  margin-bottom: .8rem;
+}
+
+.valorant-body {
+  font-size: .88rem;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.valorant-body h1 {
+  margin: 0 0 .5rem;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--dark);
+}
+
+.valorant-body h2 {
+  margin: 1.2rem 0 .5rem;
+  font-size: .95rem;
+  font-weight: 800;
+  color: var(--dark);
+}
+
+.valorant-body h3 {
+  margin: 1rem 0 .4rem;
+  font-size: .88rem;
+  font-weight: 800;
+  color: var(--dark);
+}
+
+.valorant-body p {
+  margin: .4rem 0;
+}
+
+.valorant-body ul,
+.valorant-body ol {
+  margin: .4rem 0;
+  padding-left: 1.3rem;
+}
+
+.valorant-body li {
+  margin: .2rem 0;
+}
+
+.valorant-body a {
+  color: var(--blue);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.valorant-body a:hover {
+  text-decoration: underline;
+}
+
+.valorant-body code {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: .8rem;
+  padding: .1rem .35rem;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.valorant-body pre {
+  margin: .6rem 0;
+  padding: .7rem .85rem;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.valorant-body pre code {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.valorant-body blockquote {
+  margin: .6rem 0;
+  padding: .4rem .8rem;
+  border-left: 3px solid var(--line);
+  background: var(--surface-soft);
+  color: var(--muted);
+  border-radius: 0 6px 6px 0;
+}
+
+.valorant-body blockquote p {
+  margin: .2rem 0;
+}
+
+.valorant-body strong {
+  font-weight: 800;
+  color: var(--dark);
+}
+
+.valorant-body hr {
+  margin: .9rem 0;
+  border: none;
+  border-top: 1px solid var(--line);
+}
+
+.valorant-body table {
+  margin: .6rem 0;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .84rem;
+}
+
+.valorant-body th,
+.valorant-body td {
+  padding: .45rem .65rem;
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.valorant-body th {
+  background: var(--surface-soft);
+  font-weight: 800;
+  color: var(--dark);
+}
+
+.valorant-body tr:nth-child(even) td {
+  background: var(--surface-soft);
+}
+
+/* ─── Callouts ─── */
+
+.callout {
+  margin: .8rem 0;
+  padding: .7rem 1rem;
+  border-radius: 8px;
+  border-left: 4px solid;
+  background: var(--surface-soft);
+  font-size: .86rem;
+  line-height: 1.6;
+}
+
+.callout .callout-title {
+  font-weight: 800;
+  margin-bottom: .3rem;
+}
+
+.callout p { margin: .3rem 0; }
+.callout ul, .callout ol { margin: .3rem 0; padding-left: 1.2rem; }
+.callout li { margin: .15rem 0; }
+.callout table { margin: .4rem 0; width: 100%; border-collapse: collapse; font-size: .82rem; }
+.callout th, .callout td { padding: .3rem .5rem; border: 1px solid var(--line); text-align: left; }
+.callout th { background: rgba(0,0,0,.03); font-weight: 700; }
+
+details.callout { cursor: pointer; }
+details.callout > summary {
+  font-weight: 800;
+  list-style: none;
+  user-select: none;
+}
+details.callout > summary::-webkit-details-marker { display: none; }
+details.callout > summary::before {
+  content: '▸ ';
+  font-size: .75rem;
+  display: inline-block;
+  transition: transform .15s;
+}
+details.callout[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.callout-note  { border-color: var(--blue); }
+.callout-note .callout-title { color: var(--blue); }
+
+.callout-warning { border-color: var(--amber); }
+.callout-warning .callout-title { color: var(--amber); }
+
+.callout-tip  { border-color: var(--green); }
+.callout-tip .callout-title { color: var(--green); }
+
+.callout-info { border-color: var(--muted); }
+.callout-info .callout-title { color: var(--muted); }
+
 /* ─── Expense ─── */
 
 .expense-view {
