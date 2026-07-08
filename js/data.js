@@ -128,4 +128,8 @@ const expenseRecords = [
   { date: '2026-07-07', cat: '市内出行', sub: '外出餐饮', amount: 2.00, note: '买水' },
   { date: '2026-07-08', cat: '市内出行', sub: '外出餐饮', amount: 13.00, note: '竹园餐厅三合一+绿豆沙' },
   { date: '2026-07-08', cat: '市内出行', sub: '市内交通', amount: 23.10, note: '送赫兹去医院打车费' },
+  { date: '2026-07-08', cat: '市内出行', sub: '外出餐饮', amount: 76.90, note: '原力场老友粉+螺蛳鸭脚煲' },
+  { date: '2026-07-08', cat: '形象装扮', sub: '服饰', amount: 69.50, note: '帽子' },
+  { date: '2026-07-08', cat: '市内出行', sub: '外出餐饮', amount: 20.00, note: '兴隆夜市烧烤' },
+  { date: '2026-07-08', cat: '人情社交', sub: '纪念', amount: 24.00, note: '纪念品相册手帐' },
 ];
