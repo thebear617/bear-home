@@ -2161,7 +2161,7 @@ const diaryRecords = {
     ]
   },
   "2026-07-09": {
-    "value": 5,
+    "value": 7,
     "tasks": [
       {
         "status": "x",
@@ -2187,6 +2187,16 @@ const diaryRecords = {
         "status": "x",
         "time": "13:00-18:00",
         "desc": "开发：增加新站点 dev，并 vercel 部署——https://dev.thebear617.cn/，增加新板块"
+      },
+      {
+        "status": "x",
+        "time": "18:00-18:40",
+        "desc": "煮饺子吃，取快递"
+      },
+      {
+        "status": "x",
+        "time": "18:40-22:10",
+        "desc": "回学校看小猫赫兹、大头，去盒马购物采购，去兴隆夜市买东北烧烤"
       }
     ]
   }
