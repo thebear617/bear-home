@@ -132,6 +132,8 @@ const expenseRecords = [
   { date: '2026-07-08', cat: '形象装扮', sub: '服饰', amount: 69.50, note: '帽子' },
   { date: '2026-07-08', cat: '市内出行', sub: '外出餐饮', amount: 20.00, note: '兴隆夜市烧烤' },
   { date: '2026-07-08', cat: '人情社交', sub: '纪念', amount: 24.00, note: '纪念品相册手帐' },
+  { date: '2026-07-09', cat: '居家生活', sub: '居家', amount: 50.00, note: '电费充值' },
+  { date: '2026-07-09', cat: '居家生活', sub: '做饭', amount: 10.11, note: '居家做饭刨丝刀' },
 ];
 
 const membershipRecords = [
