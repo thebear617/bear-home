@@ -119,23 +119,6 @@ const expenseCategories = [
   { name: '医疗保健', icon: '🏥', subs: ['医疗'] },
 ];
 
-const expenseRecords = [
-  { date: '2026-07-06', cat: '市内出行', sub: '外出餐饮', amount: 24.88, note: '千里香馄饨、兵立王奶茶' },
-  { date: '2026-07-06', cat: '市内出行', sub: '外出餐饮', amount: 13.50, note: '丁香食堂' },
-  { date: '2026-07-07', cat: '市内出行', sub: '外出餐饮', amount: 14.00, note: '竹园减脂餐（煎鸡排饭）' },
-  { date: '2026-07-07', cat: '市内出行', sub: '外出餐饮', amount: 20.00, note: '东北烧烤' },
-  { date: '2026-07-07', cat: '居家生活', sub: '居家', amount: 40.00, note: '零食' },
-  { date: '2026-07-07', cat: '市内出行', sub: '外出餐饮', amount: 2.00, note: '买水' },
-  { date: '2026-07-08', cat: '市内出行', sub: '外出餐饮', amount: 13.00, note: '竹园餐厅三合一+绿豆沙' },
-  { date: '2026-07-08', cat: '市内出行', sub: '市内交通', amount: 23.10, note: '送赫兹去医院打车费' },
-  { date: '2026-07-08', cat: '市内出行', sub: '外出餐饮', amount: 76.90, note: '原力场老友粉+螺蛳鸭脚煲' },
-  { date: '2026-07-08', cat: '形象装扮', sub: '服饰', amount: 69.50, note: '帽子' },
-  { date: '2026-07-08', cat: '市内出行', sub: '外出餐饮', amount: 20.00, note: '兴隆夜市烧烤' },
-  { date: '2026-07-08', cat: '人情社交', sub: '纪念', amount: 24.00, note: '纪念品相册手帐' },
-  { date: '2026-07-09', cat: '居家生活', sub: '居家', amount: 50.00, note: '电费充值' },
-  { date: '2026-07-09', cat: '居家生活', sub: '做饭', amount: 10.11, note: '居家做饭刨丝刀' },
-];
-
 const membershipRecords = [
   // ===== 已过期（10 条，到期 < 2026-07-08）=====
   { name: 'monica',                    expireDate: '2026-03-10', price: 865.42, cycleMonths: 12, tags: ['工具'], note: '', source: 'Notion 会员表', url: '' },
