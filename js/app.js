@@ -1022,7 +1022,7 @@ const app = createApp({
         { id: 'valorant', title: '无畏契约', icon: '🎯' },
         { id: 'membership', title: '会员订阅', icon: '💳' }
       ],
-      activeTab: 'calendar',
+      activeTab: 'routes',
       sidebarOpen: false,
       cookbookQuery: '',
       cookbookEntries: cookbookEntries,
