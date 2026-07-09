@@ -10,7 +10,7 @@ const routeCategories = [
       { name: '猪窝', desc: '家居生活管理与美食记录', url: 'https://pig.thebear617.cn/' },
       { name: '猫猫', desc: '猫协档案与疫苗绝育追踪', url: 'https://cat.thebear617.cn/' },
       { name: '熊窝（个人主页）', desc: '个人主页、日历追踪与支出记录', url: 'https://me.thebear617.cn/' },
-      { name: '表征学习', desc: '表征学习知识体系', url: 'http://rep.thebear617.cn/' },
+      { name: '科研笔记', desc: '个人科研笔记总站', url: 'http://rea.thebear617.cn/' },
       { name: '开发笔记', desc: '个人开发知识库', url: 'https://dev.thebear617.cn/' },
       { name: '租房对账表', desc: '租房看房清单', url: 'http://rent.thebear617.cn/' },
     ]
