@@ -938,11 +938,9 @@ const CookbookTimeline = {
   computed: {
     filtered() {
       const q = (this.query || '').trim().toLowerCase();
-      const sf = this.siteFilter || [];
+      const sf = this.siteFilter || '';
       let list = [...this.entries];
-      if (sf.length) {
-        list = list.filter(e => e.tags.some(t => sf.includes(t)));
-      }
+      if (sf) list = list.filter(e => e.tags.includes(sf));
       if (!q) return list.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       return list
         .filter(e =>
@@ -1003,7 +1001,7 @@ const app = createApp({
       cookbookEntries: cookbookEntries,
       cookbookView: 'timeline',
       cookbookDetailId: null,
-      cookbookSiteFilter: []
+      cookbookSiteFilter: ''
     };
   },
   computed: {
@@ -1033,11 +1031,6 @@ const app = createApp({
     closeDetail() {
       this.cookbookView = 'timeline';
       this.cookbookDetailId = null;
-    },
-    toggleCookbookSite(site) {
-      const i = this.cookbookSiteFilter.indexOf(site);
-      if (i >= 0) this.cookbookSiteFilter.splice(i, 1);
-      else this.cookbookSiteFilter.push(site);
     }
   },
   watch: {

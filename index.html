@@ -44,10 +44,10 @@
                 <span class="filter-label">站点</span>
                 <div class="filter-tags">
                   <button v-for="s in cookbookSites" :key="s"
-                    class="filter-tag" :class="{ on: cookbookSiteFilter.includes(s) }"
-                    @click="toggleCookbookSite(s)">{{ s }}</button>
+                    class="filter-tag" :class="{ on: cookbookSiteFilter === s }"
+                    @click="cookbookSiteFilter = cookbookSiteFilter === s ? '' : s">{{ s }}</button>
                 </div>
-                <button class="filter-clear" @click="cookbookSiteFilter = []">清空</button>
+                <button class="filter-clear" @click="cookbookSiteFilter = ''">清空</button>
               </div>
             </div>
             <div v-if="cookbookView === 'timeline'" class="route-search">
