@@ -2214,5 +2214,25 @@ const diaryRecords = {
         "desc": "继续开发，新增个人常识站点"
       }
     ]
+  },
+  "2026-07-10": {
+    "value": 3,
+    "tasks": [
+      {
+        "status": "x",
+        "time": "00:00-02:30",
+        "desc": "打电动"
+      },
+      {
+        "status": "x",
+        "time": "02:30-11:30",
+        "desc": "睡觉"
+      },
+      {
+        "status": "x",
+        "time": "11:30-12:30",
+        "desc": "开发：完善 lifenotes"
+      }
+    ]
   }
 };
