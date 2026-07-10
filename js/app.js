@@ -908,28 +908,22 @@ const MembershipView = {
 
 /* ─── Cookbook Timeline ─── */
 
-const MONTHS_ZH = ['', '一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
-
 const CookbookTimeline = {
   props: ['entries', 'query'],
   emits: ['select'],
   template: `
     <div class="timeline-view">
-      <div v-if="grouped.length === 0" class="empty-state">没有匹配的条目</div>
-      <div class="timeline-wrap" v-else>
-        <div class="timeline-scroll">
-          <div class="timeline-track">
-            <div v-for="item in grouped" :key="item.year" class="timeline-year-group">
-              <div class="timeline-year-label">{{ item.year }}</div>
-              <div v-for="m in item.months" :key="item.year + '-' + m.month" class="timeline-month-group">
-                  <div class="timeline-month-label">{{ m.name }}</div>
-                  <div v-for="post in m.posts" :key="post.id" class="timeline-item" @click="selectPost(post.id)">
-                    <div class="timeline-item-title">{{ post.title }}</div>
-                    <div class="timeline-item-tags" v-if="post.tags.length">
-                      <span v-for="tag in post.tags" :key="tag" class="cookbook-tag">{{ tag }}</span>
-                    </div>
-                  </div>
-                </div>
+      <div v-if="filtered.length === 0" class="empty-state">没有匹配的条目</div>
+      <div class="tl" v-else>
+        <div v-for="post in filtered" :key="post.id" class="tl-item" @click="selectPost(post.id)">
+          <div class="tl-dot"></div>
+          <div class="tl-card">
+            <div class="tl-head">
+              <span class="tl-date">{{ post.date }}</span>
+              <span class="tl-title">{{ post.title }}</span>
+            </div>
+            <div class="tl-tags" v-if="post.tags.length">
+              <span v-for="tag in post.tags" :key="tag" class="cookbook-tag">{{ tag }}</span>
             </div>
           </div>
         </div>
@@ -951,28 +945,6 @@ const CookbookTimeline = {
           e.tags.some(t => t.toLowerCase().includes(q))
         )
         .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-    },
-    grouped() {
-      const map = {};
-      for (const e of this.filtered) {
-        if (!e.date) continue;
-        const [y, m] = e.date.split('-');
-        if (!map[y]) map[y] = {};
-        if (!map[y][m]) map[y][m] = [];
-        map[y][m].push(e);
-      }
-      return Object.entries(map)
-        .sort(([a], [b]) => Number(b) - Number(a))
-        .map(([year, months]) => ({
-          year,
-          months: Object.entries(months)
-            .sort(([a], [b]) => Number(b) - Number(a))
-            .map(([month, posts]) => ({
-              month: Number(month),
-              name: MONTHS_ZH[Number(month)],
-              posts
-            }))
-        }));
     }
   }
 };

@@ -789,106 +789,84 @@ a.route-card:hover {
   flex: 1;
 }
 
-.timeline-wrap {
+.tl {
   position: relative;
+  padding-left: 1.6rem;
+  margin: 0.5rem 0.5rem 1rem;
 }
 
-.timeline-scroll {
-  position: relative;
-}
-
-.timeline-track {
-  position: relative;
-  display: flow-root;
-}
-
-.timeline-track::before {
+.tl::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 100%;
-  background: var(--line);
+  left: 0.4rem;
+  top: 0.4rem;
+  bottom: 0.4rem;
+  width: 2px;
+  background: var(--green-bg);
 }
 
-.timeline-year-group {
-  margin-bottom: 2rem;
-  padding-left: 28px;
-}
-
-.timeline-year-group:first-child {
-  margin-top: 1rem;
-}
-
-.timeline-year-label {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: var(--dark);
+.tl-item {
   position: relative;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.6rem;
+  cursor: pointer;
 }
 
-.timeline-year-label::after {
-  content: '';
+.tl-dot {
   position: absolute;
-  top: 50%;
-  left: -35px;
-  width: 18px;
-  height: 18px;
+  left: -1.32rem;
+  top: 1.05rem;
+  width: 0.65rem;
+  height: 0.65rem;
   border-radius: 50%;
   background: var(--green);
-  border: 3px solid var(--bg);
-  transform: translateY(-50%);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 2px var(--green-bg);
   z-index: 2;
 }
 
-.timeline-month-group {
-  margin-bottom: 0.5rem;
+.tl-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: border-color 0.15s;
 }
 
-.timeline-month-label {
-  font-size: 0.82rem;
+.tl-item:hover .tl-card {
+  border-color: var(--green);
+}
+
+.tl-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+}
+
+.tl-date {
+  font-size: 0.76rem;
   font-weight: 700;
-  color: var(--muted);
-  position: relative;
-  margin-bottom: 0.2rem;
-}
-
-.timeline-month-label::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: -22px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--muted);
-  transform: translateY(-50%);
-  z-index: 2;
-}
-
-.timeline-item {
-  cursor: pointer;
-  padding: 0.2rem 0;
-}
-
-.timeline-item-title {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--text);
-  transition: color 0.15s;
-}
-
-.timeline-item:hover .timeline-item-title {
   color: var(--green);
+  background: var(--green-bg);
+  border-radius: 6px;
+  padding: 0.05rem 0.45rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.timeline-item-tags {
+.tl-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+}
+
+.tl-tags {
   display: flex;
   gap: 0.3rem;
   flex-wrap: wrap;
-  margin-top: 0.15rem;
+  padding: 0 0.9rem 0.7rem;
 }
 
 /* ─── Cookbook Detail ─── */
