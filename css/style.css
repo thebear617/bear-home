@@ -806,16 +806,15 @@ a.route-card:hover {
   content: '';
   position: absolute;
   top: 0;
-  left: 50%;
+  left: 0;
   width: 3px;
   height: 100%;
   background: var(--line);
-  transform: translateX(-50%);
 }
 
 .timeline-year-group {
-  display: flow-root;
   margin-bottom: 2rem;
+  padding-left: 28px;
 }
 
 .timeline-year-group:first-child {
@@ -827,35 +826,25 @@ a.route-card:hover {
   font-weight: 800;
   color: var(--dark);
   position: relative;
-  margin-bottom: 0.6rem;
-  text-align: center;
+  margin-bottom: 0.4rem;
 }
 
 .timeline-year-label::after {
   content: '';
   position: absolute;
   top: 50%;
-  left: 50%;
-  width: 22px;
-  height: 22px;
+  left: -35px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: var(--green);
   border: 3px solid var(--bg);
-  transform: translate(-50%, -50%);
+  transform: translateY(-50%);
   z-index: 2;
 }
 
 .timeline-month-group {
-  float: left;
-  clear: both;
-  width: calc(50% - 24px);
-  text-align: right;
-  margin-bottom: 0.6rem;
-}
-
-.timeline-month-group:nth-child(even) {
-  float: right;
-  text-align: left;
+  margin-bottom: 0.5rem;
 }
 
 .timeline-month-label {
@@ -863,32 +852,25 @@ a.route-card:hover {
   font-weight: 700;
   color: var(--muted);
   position: relative;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.2rem;
 }
 
 .timeline-month-label::after {
   content: '';
   position: absolute;
   top: 50%;
-  width: 10px;
-  height: 10px;
+  left: -22px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--muted);
   transform: translateY(-50%);
   z-index: 2;
 }
 
-.timeline-month-group:nth-child(odd) .timeline-month-label::after {
-  left: calc(100% + 19px);
-}
-
-.timeline-month-group:nth-child(even) .timeline-month-label::after {
-  right: calc(100% + 19px);
-}
-
 .timeline-item {
   cursor: pointer;
-  padding: 0.25rem 0;
+  padding: 0.2rem 0;
 }
 
 .timeline-item-title {
@@ -907,14 +889,6 @@ a.route-card:hover {
   gap: 0.3rem;
   flex-wrap: wrap;
   margin-top: 0.15rem;
-}
-
-.timeline-month-group:nth-child(odd) .timeline-item-tags {
-  justify-content: flex-end;
-}
-
-.timeline-month-group:nth-child(even) .timeline-item-tags {
-  justify-content: flex-start;
 }
 
 /* ─── Cookbook Detail ─── */
