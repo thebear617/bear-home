@@ -3431,8 +3431,16 @@ const diaryRecords = {
       },
       {
         "status": "x",
-        "time": "14:00-18:00",
+        "time": "14:00-18:30",
         "desc": "开发：完善 devnotes、lifenotes 逻辑和熊窝的个人开发时间线",
+        "isCooking": false,
+        "mealType": null,
+        "dishGuess": null
+      },
+      {
+        "status": " ",
+        "time": "18:30-19:30",
+        "desc": "回学校吃饭",
         "isCooking": false,
         "mealType": null,
         "dishGuess": null
