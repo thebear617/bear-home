@@ -39,10 +39,21 @@
           <expense-view v-show="activeTab === 'expense'"></expense-view>
           <route-table v-show="activeTab === 'routes'"></route-table>
           <div v-show="activeTab === 'cookbook'" class="cookbook-view">
+            <div class="filter-bar">
+              <div class="filter-row">
+                <span class="filter-label">站点</span>
+                <div class="filter-tags">
+                  <button v-for="s in cookbookSites" :key="s"
+                    class="filter-tag" :class="{ on: cookbookSiteFilter.includes(s) }"
+                    @click="toggleCookbookSite(s)">{{ s }}</button>
+                </div>
+                <button class="filter-clear" @click="cookbookSiteFilter = []">清空</button>
+              </div>
+            </div>
             <div v-if="cookbookView === 'timeline'" class="route-search">
               <input v-model="cookbookQuery" type="text" placeholder="搜索..."/>
             </div>
-            <cookbook-timeline v-if="cookbookView === 'timeline'" :entries="cookbookEntries" :query="cookbookQuery" @select="openDetail"></cookbook-timeline>
+            <cookbook-timeline v-if="cookbookView === 'timeline'" :entries="cookbookEntries" :query="cookbookQuery" :site-filter="cookbookSiteFilter" @select="openDetail"></cookbook-timeline>
             <cookbook-detail v-else :entry="cookbookDetailEntry" @back="closeDetail"></cookbook-detail>
           </div>
           <valorant-view v-show="activeTab === 'valorant'"></valorant-view>

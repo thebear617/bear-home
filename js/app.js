@@ -909,7 +909,7 @@ const MembershipView = {
 /* ─── Cookbook Timeline ─── */
 
 const CookbookTimeline = {
-  props: ['entries', 'query'],
+  props: ['entries', 'query', 'siteFilter'],
   emits: ['select'],
   template: `
     <div class="timeline-view">
@@ -938,8 +938,13 @@ const CookbookTimeline = {
   computed: {
     filtered() {
       const q = (this.query || '').trim().toLowerCase();
-      if (!q) return [...this.entries].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      return this.entries
+      const sf = this.siteFilter || [];
+      let list = [...this.entries];
+      if (sf.length) {
+        list = list.filter(e => e.tags.some(t => sf.includes(t)));
+      }
+      if (!q) return list.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      return list
         .filter(e =>
           e.title.toLowerCase().includes(q) ||
           e.tags.some(t => t.toLowerCase().includes(q))
@@ -997,12 +1002,16 @@ const app = createApp({
       cookbookQuery: '',
       cookbookEntries: cookbookEntries,
       cookbookView: 'timeline',
-      cookbookDetailId: null
+      cookbookDetailId: null,
+      cookbookSiteFilter: []
     };
   },
   computed: {
     cookbookDetailEntry() {
       return this.cookbookEntries.find(e => e.id === this.cookbookDetailId) || null;
+    },
+    cookbookSites() {
+      return ['home', 'cats', 'reanotes', 'personal', 'lifenotes', 'devnotes'];
     }
   },
   methods: {
@@ -1024,6 +1033,11 @@ const app = createApp({
     closeDetail() {
       this.cookbookView = 'timeline';
       this.cookbookDetailId = null;
+    },
+    toggleCookbookSite(site) {
+      const i = this.cookbookSiteFilter.indexOf(site);
+      if (i >= 0) this.cookbookSiteFilter.splice(i, 1);
+      else this.cookbookSiteFilter.push(site);
     }
   },
   watch: {

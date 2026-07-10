@@ -776,6 +776,76 @@ a.route-card:hover {
   }
 }
 
+/* ─── Filter Bar ─── */
+
+.filter-bar {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 0.7rem 1rem;
+  margin: 0 0.5rem 0.8rem;
+}
+
+.filter-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.filter-label {
+  flex-shrink: 0;
+  width: 2.8rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--muted);
+  padding-top: 0.3rem;
+}
+
+.filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.filter-tag {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-tag:hover {
+  border-color: var(--green);
+}
+
+.filter-tag.on {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+
+.filter-clear {
+  margin-left: auto;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.filter-clear:hover {
+  color: var(--red);
+}
+
 /* ─── Cookbook Timeline ─── */
 
 .cookbook-view {
