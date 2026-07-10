@@ -186,6 +186,30 @@ const cookbookEntries = [
 至此已有 6 个 Tab：电费 / 物资 / 美食记录 / 美食地图 / 出发（旅游+西安 walk）/ 关系时间线，覆盖家庭生活的核心维度。`,
   },
   {
+    id: 'home-v150',
+    title: 'home v1.5.0：做饭心得视图视觉定稿',
+    date: '2026-07-10',
+    tags: ['猪窝', '架构'],
+    body: `做饭心得视图视觉定稿（合并此前 6 次视觉打磨提交）：
+- 折叠条按记录位置循环取多彩渐变，相邻互不相同；图标改为白芯片，在彩色条上更醒目
+- 配色对齐 cats tab：去除 callout 粗色条与彩虹渐变，改用柔底深字 + 金色激活环
+- 每条记录增加分类配色 icon 徽标
+- 炒菜分类置顶到导航第一位
+- 炒菜分类新增「番茄酸菜肉丝米线」卡片（用量两人一顿 + 五步做法），Markdown 手风琴渲染`,
+  },
+  {
+    id: 'home-v160',
+    title: 'home v1.6.0：生活备忘录与物资采购 Tab 改造',
+    date: '2026-07-10',
+    tags: ['猪窝', '架构'],
+    body: `生活备忘录与物资采购 Tab 由清单式重构为仿美食日历的胶囊双视图：📋 生活备忘 / 🛒 物资采购，各视图内按区域手风琴卡片展开。
+- 区域卡片正文统一经 renderMarkdown 渲染（与做饭心得卡片同款 cookbook-md 样式）
+- 移除「后续待办事项」板块；卫生间采购项删除「按压式洗衣液（网上买）」
+- 顶栏 Tab 改名「生活备忘录及物资采购」→「生活备忘录与物资采购」，并调整顺序
+- data.js 结构：follow-up 重构为 memo-supplies，数据拆 lifeMemo / procurement
+- setupFoodViews 通用化（胶囊切换 + 手风琴展开对美食日历与本 Tab 共用）`,
+  },
+  {
     id: 'lifenotes-v020',
     title: '常识笔记 v0.2.0：领域地图两视图 + 笔记中心式首页',
     date: '2026-07-10',
@@ -211,8 +235,8 @@ const cookbookEntries = [
     body: `从熊窝 cookbook 移植两篇文章到开发笔记：纯静态站点五层渲染模型、腾讯云+GitHub+Vercel 部署全流程。Markdown → HTML 转换，补全 product/stacks/langs/type 字段体系。`,
   },
   {
-    id: 'personal-v051',
-    title: '熊窝 v0.5.1：Cookbook 改为个人开发时间线',
+    id: 'personal-v060',
+    title: '熊窝 v0.6.0：Cookbook 改为个人开发时间线',
     date: '2026-07-10',
     tags: ['熊窝', '重构'],
     body: `所有 6 个站点 git 历史统一版本号规则（小写 v、诞生=v0.1.0、新 Tab 大功能=minor bump）。Cookbook Tab 从「技术心得」改为「个人开发时间线」，记录自有项目的里程碑演进。`,
