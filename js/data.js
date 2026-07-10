@@ -30,81 +30,9 @@ const routeCategories = [
   },
 ];
 
+// 个人开发时间线 — 记录自己做过的开发项目 / 站点 / 工具
+// 字段：id, title, date, tags, body（Markdown）
 const cookbookEntries = [
-  {
-    id: 'ui-layers',
-    title: '纯静态站点的五层渲染模型',
-    date: '2026-07-07',
-    tags: ['架构', 'UI'],
-    body: `## 层级
-
-\`Page → Tab → Section（X 样式）→ Item（Y 样式）→ 点击行为\`
-
-三层数据和两层样式完全解耦：
-
-| 层 | 角色 | 谁决定 |
-|------|------|------|
-| Page | 整个页面 | 唯一 |
-| Tab | 功能视图切换 | 数据文件 |
-| Section | 数据分组容器 | 数据 + 渲染样式 |
-| Item | 单条数据记录 | 数据 + 渲染样式 |
-| 点击 | Item 被点击后做什么 | 交互逻辑 |
-
-## Section 渲染形式
-
-- **Accordion** — 手风琴折叠面板，点标题展开/收起
-- **Summary Grid** — 横排大数字统计卡片
-- **Plain Container** — 无额外壳，直接装 Item
-
-## Item 渲染形式
-
-- **Card Grid** — 卡片网格，名称 + 描述，2~3 列
-- **Pill Bar** — 横向圆角胶囊标签，可换行
-- **Photo Card** — 图片 + 名称，网格排列
-- **Table Row** — 紧凑多列表格行
-
-## 点击行为
-
-- **外链跳转** — \`<a target="_blank">\`
-- **打开抽屉** — 同页侧滑面板显示详情
-- **筛选** — 点击后过滤其它区域数据
-
-## 实例
-
-### 猫猫手册首页
-
-\`Page（猫猫首页）→ Tab（首页/编年史/物资…）→ Section[Summary Grid]（统计卡片）→ 点击[筛选]\`
-
-\`→ Section[Plain] → Item[Photo Card]（每只猫）→ 点击[打开抽屉]\`
-
-### 熊窝路由表
-
-\`Page（熊窝）→ Tab（路由表/日历/支出…）→ Section[Accordion]（🏠 个人站点）→ Item[Card Grid]（猪窝/猫猫…）→ 点击[外链跳转]\`
-
-## 使用心得
-
-1. 原本是表格的数据，倾向于直接用表格渲染。参考猫猫网站的物资管理页面。
-2. 站点跳转的统筹，如果不想暴露裸链接、也不想排版全堆在左侧，可以试网格卡片。参考个人网站路由表。
-`,
-  },
-  {
-    id: 'deploy-vercel',
-    title: '从域名到上线：腾讯云 + GitHub + Vercel 部署全流程',
-    date: '2026-07-05',
-    tags: ['部署', '域名', 'Vercel'],
-    body: `## 步骤
-
-1. 在腾讯云购买域名 thebear617.cn，记得勾选禁止转移锁，完成实名认证
-2. 在 GitHub 创建想要部署的仓库，push代码
-3. 在 Vercel 上Import对应代码仓库，然后创建 Pproject，直接部署
-4. 在 Vercel 项目 Settings → Domains 添加 www.thebear617.cn 和 thebear617.cn
-5. 在腾讯云 DNS 添加 A 记录 和 CNAME 记录，按照Vercel 给的配即可，等待 Vercel 验证通过，自动签发 SSL，域名上线
-
-## 参考
-
-- [CSDN · 2026最新 Vercel 自动化部署与自定义域名配置教程](https://blog.csdn.net/qq_57376018/article/details/160097635)
-`,
-  },
 ];
 
 const expenseCategories = [

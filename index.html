@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="version" content="V0.2.0">
+  <meta name="version" content="V0.2.1">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>熊窝</title>
   <link rel="stylesheet" href="css/style.css">
@@ -40,7 +40,7 @@
           <route-table v-show="activeTab === 'routes'"></route-table>
           <div v-show="activeTab === 'cookbook'" class="cookbook-view">
             <div v-if="cookbookView === 'timeline'" class="route-search">
-              <input v-model="cookbookQuery" type="text" placeholder="搜索食谱..."/>
+              <input v-model="cookbookQuery" type="text" placeholder="搜索..."/>
             </div>
             <cookbook-timeline v-if="cookbookView === 'timeline'" :entries="cookbookEntries" :query="cookbookQuery" @select="openDetail"></cookbook-timeline>
             <cookbook-detail v-else :entry="cookbookDetailEntry" @back="closeDetail"></cookbook-detail>

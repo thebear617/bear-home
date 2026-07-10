@@ -1018,7 +1018,7 @@ const app = createApp({
         { id: 'routes', title: '路由表', icon: '🗺️' },
         { id: 'calendar', title: '每日日历追踪', icon: '📅' },
         { id: 'expense', title: '支出记录', icon: '💰' },
-        { id: 'cookbook', title: 'Cookbook', icon: '📖' },
+        { id: 'cookbook', title: '个人开发时间线', icon: '🧑‍💻' },
         { id: 'valorant', title: '无畏契约', icon: '🎯' },
         { id: 'membership', title: '会员订阅', icon: '💳' }
       ],
