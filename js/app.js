@@ -941,13 +941,25 @@ const CookbookTimeline = {
       const sf = this.siteFilter || '';
       let list = [...this.entries];
       if (sf) list = list.filter(e => e.tags.includes(sf));
-      if (!q) return list.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      return list
-        .filter(e =>
+      if (q) {
+        list = list.filter(e =>
           e.title.toLowerCase().includes(q) ||
           e.tags.some(t => t.toLowerCase().includes(q))
-        )
-        .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+        );
+      }
+      const version = (title) => {
+        const m = (title || '').match(/v(\d+)\.(\d+)\.(\d+)/);
+        return m ? [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])] : [0, 0, 0];
+      };
+      return list.sort((a, b) => {
+        const d = (b.date || '').localeCompare(a.date || '');
+        if (d !== 0) return d;
+        const va = version(a.title), vb = version(b.title);
+        for (let i = 0; i < 3; i++) {
+          if (va[i] !== vb[i]) return vb[i] - va[i];
+        }
+        return 0;
+      });
     }
   }
 };
