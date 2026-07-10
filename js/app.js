@@ -921,8 +921,7 @@ const CookbookTimeline = {
           <div class="timeline-track">
             <div v-for="item in grouped" :key="item.year" class="timeline-year-group">
               <div class="timeline-year-label">{{ item.year }}</div>
-              <div>
-                <div v-for="m in item.months" :key="item.year + '-' + m.month" class="timeline-month-group">
+              <div v-for="m in item.months" :key="item.year + '-' + m.month" class="timeline-month-group">
                   <div class="timeline-month-label">{{ m.name }}</div>
                   <div v-for="post in m.posts" :key="post.id" class="timeline-item" @click="selectPost(post.id)">
                     <div class="timeline-item-title">{{ post.title }}</div>
@@ -931,7 +930,6 @@ const CookbookTimeline = {
                     </div>
                   </div>
                 </div>
-              </div>
             </div>
           </div>
         </div>
