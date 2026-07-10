@@ -35,9 +35,9 @@ const routeCategories = [
 const cookbookEntries = [
   {
     id: 'home-v010',
-    title: 'home v0.1.0：猪窝项目上线',
+    title: '猪窝 v0.1.0：项目上线',
     date: '2026-06-26',
-    tags: ['home', '站点'],
+    tags: ['猪窝', '站点'],
     body: `第一个个人站点。用纯 HTML + CSS + 原生 JS 搭建的家庭管理工具，记录厨房物资采购清单、电费余额追踪。
 
 ## 技术选型
@@ -46,9 +46,9 @@ const cookbookEntries = [
   },
   {
     id: 'reanotes-v010',
-    title: 'reanotes v0.1.0：表征学习理解图谱上线',
+    title: '科研笔记 v0.1.0：表征学习理解图谱上线',
     date: '2026-06-30',
-    tags: ['reanotes', '站点'],
+    tags: ['科研笔记', '站点'],
     body: `第一个科研笔记站点。用 JS 对象描述知识图谱节点与边，渲染引擎生成交互页面。
 
 ## 关键决策
@@ -57,16 +57,16 @@ const cookbookEntries = [
   },
   {
     id: 'home-v020',
-    title: 'home v0.2.0：新增美食记录 Tab',
+    title: '猪窝 v0.2.0：新增美食记录 Tab',
     date: '2026-06-30',
-    tags: ['home', '功能'],
-    body: `猪窝从单纯的物资管理扩展到美食记录。新增 Tab 记录每日做饭菜品与花费，home 开始向「家庭生活全记录」演变。`,
+    tags: ['猪窝', '功能'],
+    body: `猪窝从单纯的物资管理扩展到美食记录。新增 Tab 记录每日做饭菜品与花费，开始向「家庭生活全记录」演变。`,
   },
   {
     id: 'cats-v010',
-    title: 'cats v0.1.0：猫猫手册上线',
+    title: '猫猫 v0.1.0：猫猫手册上线',
     date: '2026-07-01',
-    tags: ['cats', '站点'],
+    tags: ['猫猫', '站点'],
     body: `猫协档案管理站点。包含猫咪档案、疫苗/绝育追踪、搜索筛选，服务西电猫协日常运营。
 
 ## 技术特点
@@ -75,9 +75,9 @@ const cookbookEntries = [
   },
   {
     id: 'personal-v010',
-    title: 'personal v0.1.0：熊窝上线，第一个 Vue 3 站点',
+    title: '熊窝 v0.1.0：上线，第一个 Vue 3 站点',
     date: '2026-07-05',
-    tags: ['personal', '站点'],
+    tags: ['熊窝', '站点'],
     body: `个人主页上线。首次引入 Vue 3（自托管，不依赖 CDN），采用 SPA 单页架构：左侧 sidebar 切换功能 Tab。
 
 ## 架构突破
@@ -87,18 +87,18 @@ const cookbookEntries = [
   },
   {
     id: 'cats-v020',
-    title: 'cats v0.2.0：重新设计猫卡，新增计划/科普 Tab',
+    title: '猫猫 v0.2.0：重新设计猫卡，新增计划/科普 Tab',
     date: '2026-07-06',
-    tags: ['cats', '功能'],
+    tags: ['猫猫', '功能'],
     body: `猫猫手册首次大改版。猫卡片从纯文字升级为照片+姓名布局，新增近期计划和科普两个 Tab，站点从单一的「档案查询」扩展为「猫协知识站」。
 
 同时修复了微信内置浏览器 X5 内核的兼容性问题（侧边栏 GPU 加速、-webkit- 前缀等）。`,
   },
   {
     id: 'personal-v030',
-    title: 'personal v0.3.0：Cookbook 时间轴+详情两页模式',
+    title: '熊窝 v0.3.0：Cookbook 时间轴+详情两页模式',
     date: '2026-07-07',
-    tags: ['personal', '架构'],
+    tags: ['熊窝', '架构'],
     body: `Cookbook 从简单列表升级为 zigzag 时间轴布局（年/月分组 + 左右交替 + 竖线节点），点击条目进入 Markdown 渲染的详情页。
 
 ## 同时沉淀
@@ -107,33 +107,33 @@ const cookbookEntries = [
   },
   {
     id: 'home-v030',
-    title: 'home v0.3.0：新增美食地图、出发双 Tab',
+    title: '猪窝 v0.3.0：新增美食地图、出发双 Tab',
     date: '2026-07-08',
-    tags: ['home', '功能'],
-    body: `猪窝继续扩展生活记录维度。新增「美食地图」Tab（校内外美食点评）和「出发」Tab（旅游记录），home 从 2 个 Tab 扩展到 4 个。`,
+    tags: ['猪窝', '功能'],
+    body: `猪窝继续扩展生活记录维度。新增「美食地图」Tab（校内外美食点评）和「出发」Tab（旅游记录），从 2 个 Tab 扩展到 4 个。`,
   },
   {
     id: 'home-v050',
-    title: 'home v0.5.0：美食地图架构重构',
+    title: '猪窝 v0.5.0：美食地图架构重构',
     date: '2026-07-08',
-    tags: ['home', '架构'],
+    tags: ['猪窝', '架构'],
     body: `美食地图从单一列表重构为校内/校外双区域 + 新配色方案。同时「出发」Tab 拆分为「旅游」和「西安 walk」两个独立 Tab。
 
 ## 架构演进
-- home 的 Tab 数量从 4 个扩展到 6 个，逐步形成「家居管理 + 美食记录 + 出行记录」三大板块`,
+- Tab 数量从 4 个扩展到 6 个，逐步形成「家居管理 + 美食记录 + 出行记录」三大板块`,
   },
   {
     id: 'personal-v040',
-    title: 'personal v0.4.0：无畏契约板块 + Markdown 渲染体系',
+    title: '熊窝 v0.4.0：无畏契约板块 + Markdown 渲染体系',
     date: '2026-07-08',
-    tags: ['personal', '渲染'],
-    body: `引入 marked.js，用 Markdown 管理 Valorant 战术笔记并前端实时渲染。建立了完整的 Markdown → HTML 渲染标准（表格、代码块、引用、callout），后续 lifenotes 的 build-notes.py 直接复用这套经验。`,
+    tags: ['熊窝', '渲染'],
+    body: `引入 marked.js，用 Markdown 管理 Valorant 战术笔记并前端实时渲染。建立了完整的 Markdown → HTML 渲染标准（表格、代码块、引用、callout），后续常识笔记的 build-notes.py 直接复用这套经验。`,
   },
   {
     id: 'reanotes-v020',
-    title: 'reanotes v0.2.0：升级为多板块科研笔记总站',
+    title: '科研笔记 v0.2.0：升级为多板块科研笔记总站',
     date: '2026-07-09',
-    tags: ['reanotes', '架构'],
+    tags: ['科研笔记', '架构'],
     body: `从单一表征学习主题升级为多板块架构。新增 BOARDS 索引 + 顶栏切换器 + 两级 hash 路由（#boardId/pageId），支持任意扩展新板块。
 
 ## 双托管
@@ -142,10 +142,10 @@ const cookbookEntries = [
   },
   {
     id: 'lifenotes-v010',
-    title: 'lifenotes v0.1.0：常识笔记站点上线',
+    title: '常识笔记 v0.1.0：站点上线',
     date: '2026-07-09',
-    tags: ['lifenotes', '站点'],
-    body: `把 Obsidian「知识观察型笔记」编译为多领域常识站。复用 reanotes 引擎，品牌色暖橙 #c2410c。
+    tags: ['常识笔记', '站点'],
+    body: `把 Obsidian「知识观察型笔记」编译为多领域常识站。复用科研笔记引擎，品牌色暖橙 #c2410c。
 
 ## 编译管线
 - build-notes.py 处理 Obsidian 语法（callout、wiki 内链、表格）→ JS 数据文件
@@ -154,10 +154,10 @@ const cookbookEntries = [
   },
   {
     id: 'devnotes-v010',
-    title: 'devnotes v0.1.0：开发笔记站点骨架 + 价格矩阵',
+    title: '开发笔记 v0.1.0：站点骨架 + 价格矩阵',
     date: '2026-07-09',
-    tags: ['devnotes', '站点'],
-    body: `开发知识库上线。Vue 3 自托管（与 personal 共享 Vue），包含「笔记中心」（多维度筛选 + 卡片网格）和「价格矩阵」（20 产品 / 7 赛道 coding plan 价格对比）。
+    tags: ['开发笔记', '站点'],
+    body: `开发知识库上线。Vue 3 自托管（与熊窝共享 Vue），包含「笔记中心」（多维度筛选 + 卡片网格）和「价格矩阵」（20 产品 / 7 赛道 coding plan 价格对比）。
 
 ## 价格数据
 - 国产产品只取中文站人民币价
@@ -166,9 +166,9 @@ const cookbookEntries = [
   },
   {
     id: 'personal-v050',
-    title: 'personal v0.5.0：新增会员订阅 Tab',
+    title: '熊窝 v0.5.0：新增会员订阅 Tab',
     date: '2026-07-09',
-    tags: ['personal', '功能'],
+    tags: ['熊窝', '功能'],
     body: `30 条会员订阅记录按标签手风琴分组，含月均消费预览。同日完成支出单源编译改造：Obsidian 日记 #支出 表 → build-diary.py → expense-data.js，不再手改数据。
 
 ## 架构意义
@@ -177,44 +177,44 @@ const cookbookEntries = [
   },
   {
     id: 'home-v060',
-    title: 'home v0.6.0：新增关系时间线 Tab',
+    title: '猪窝 v0.6.0：新增关系时间线 Tab',
     date: '2026-07-09',
-    tags: ['home', '功能'],
+    tags: ['猪窝', '功能'],
     body: `猪窝新增第 6 个 Tab。将散落在各处的旅游、西安 walk、吵架复盘等生活记录收编到一个集中的时间线视图。
 
 ## 站点全貌
-至此 home 已有 6 个 Tab：电费 / 物资 / 美食记录 / 美食地图 / 出发（旅游+西安 walk）/ 关系时间线，覆盖家庭生活的核心维度。`,
+至此已有 6 个 Tab：电费 / 物资 / 美食记录 / 美食地图 / 出发（旅游+西安 walk）/ 关系时间线，覆盖家庭生活的核心维度。`,
   },
   {
     id: 'lifenotes-v020',
-    title: 'lifenotes v0.2.0：领域地图两视图 + 笔记中心式首页',
+    title: '常识笔记 v0.2.0：领域地图两视图 + 笔记中心式首页',
     date: '2026-07-10',
-    tags: ['lifenotes', '架构'],
+    tags: ['常识笔记', '架构'],
     body: `常识笔记首次内容形态升级。每个领域的「领域地图」页内支持分类视图 / 时间轴视图切换，首页直接展示 records 而非薄卡片。删掉整个侧边栏（每领域只一个页面，侧栏冗余）。
 
 ## 核心设计
 - parse_map_records 把 callout + H2/H3 文本块解析为 records（带日期/分类）
-- 与 devnotes「笔记中心」设计语言对齐：分类/时间轴双视角 + 记录点击展开`,
+- 与开发笔记「笔记中心」设计语言对齐：分类/时间轴双视角 + 记录点击展开`,
   },
   {
     id: 'cats-v030',
-    title: 'cats v0.3.0：物资管理重写 + SOP 导航重构',
+    title: '猫猫 v0.3.0：物资管理重写 + SOP 导航重构',
     date: '2026-07-10',
-    tags: ['cats', '架构'],
+    tags: ['猫猫', '架构'],
     body: `猫猫手册第三次大版本。物资管理从清单列表重写为表格风格（导入 Excel 数据），SOP 导航重构统一美化排版。编年史改为垂直时间轴，手风琴默认展开，新增绝育记录。首页统合（移除猫咪档案独立 Tab），筛选栏值重命名，统计卡片标签趣味化。`,
   },
   {
     id: 'devnotes-v011',
-    title: 'devnotes v0.1.1：笔记中心新增两篇技术文章',
+    title: '开发笔记 v0.1.1：笔记中心新增两篇技术文章',
     date: '2026-07-10',
-    tags: ['devnotes', '内容'],
-    body: `从 personal cookbook 移植两篇文章到 devnotes 笔记中心：纯静态站点五层渲染模型（个人站点/前端/心得）、腾讯云+GitHub+Vercel 部署全流程（Vercel/部署/经验）。Markdown → HTML 转换，补全 product/stacks/langs/type 字段体系。`,
+    tags: ['开发笔记', '内容'],
+    body: `从熊窝 cookbook 移植两篇文章到开发笔记：纯静态站点五层渲染模型、腾讯云+GitHub+Vercel 部署全流程。Markdown → HTML 转换，补全 product/stacks/langs/type 字段体系。`,
   },
   {
     id: 'personal-v051',
-    title: 'personal v0.5.1：Cookbook 改为个人开发时间线',
+    title: '熊窝 v0.5.1：Cookbook 改为个人开发时间线',
     date: '2026-07-10',
-    tags: ['personal', '重构'],
+    tags: ['熊窝', '重构'],
     body: `所有 6 个站点 git 历史统一版本号规则（小写 v、诞生=v0.1.0、新 Tab 大功能=minor bump）。Cookbook Tab 从「技术心得」改为「个人开发时间线」，记录自有项目的里程碑演进。`,
   },
 ];

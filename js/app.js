@@ -1009,7 +1009,7 @@ const app = createApp({
       return this.cookbookEntries.find(e => e.id === this.cookbookDetailId) || null;
     },
     cookbookSites() {
-      return ['home', 'cats', 'reanotes', 'personal', 'lifenotes', 'devnotes'];
+      return ['猪窝', '猫猫', '科研笔记', '熊窝', '常识笔记', '开发笔记'];
     }
   },
   methods: {
