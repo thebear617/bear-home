@@ -3395,7 +3395,7 @@ const diaryRecords = {
     ]
   },
   "2026-07-10": {
-    "value": 6,
+    "value": 11,
     "tasks": [
       {
         "status": "x",
@@ -3446,9 +3446,41 @@ const diaryRecords = {
         "dishGuess": null
       },
       {
-        "status": " ",
+        "status": "x",
         "time": "19:30-22:00",
         "desc": "在学校和王一坤王广轩他们聊天，喂小猫赫兹，拿过马路的 Mac mini 回家",
+        "isCooking": false,
+        "mealType": null,
+        "dishGuess": null
+      },
+      {
+        "status": "x",
+        "time": "22:00-22:10",
+        "desc": "去洗澡",
+        "isCooking": false,
+        "mealType": null,
+        "dishGuess": null
+      },
+      {
+        "status": "x",
+        "time": "22:10-23:00",
+        "desc": "打电动",
+        "isCooking": false,
+        "mealType": null,
+        "dishGuess": null
+      },
+      {
+        "status": "x",
+        "time": "23:00-23:20",
+        "desc": "去接过马路",
+        "isCooking": false,
+        "mealType": null,
+        "dishGuess": null
+      },
+      {
+        "status": "x",
+        "time": "23:20-24:00",
+        "desc": "继续打电动",
         "isCooking": false,
         "mealType": null,
         "dishGuess": null
