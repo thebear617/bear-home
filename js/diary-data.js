@@ -3488,7 +3488,7 @@ const diaryRecords = {
     ]
   },
   "2026-07-11": {
-    "value": 2,
+    "value": 3,
     "tasks": [
       {
         "status": "x",
@@ -3505,6 +3505,14 @@ const diaryRecords = {
         "isCooking": false,
         "mealType": null,
         "dishGuess": null
+      },
+      {
+        "status": "x",
+        "time": "13:30-15:30",
+        "desc": "做饭：芦笋番茄黑椒牛排和鸡翅，收拾后厨",
+        "isCooking": true,
+        "mealType": "中饭",
+        "dishGuess": "芦笋番茄黑椒牛排和鸡翅"
       }
     ]
   }

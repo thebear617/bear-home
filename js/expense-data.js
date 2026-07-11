@@ -139,5 +139,12 @@ const expenseRecords = [
     "sub": "校内餐饮",
     "amount": 2.0,
     "note": "矿泉水"
+  },
+  {
+    "date": "2026-07-11",
+    "cat": "医疗保健",
+    "sub": "医疗",
+    "amount": 7.84,
+    "note": "碘伏棉签"
   }
 ];
