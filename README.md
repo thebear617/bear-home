@@ -15,34 +15,16 @@
 ```
 personal/
 ├── index.html              # 入口，Vue 挂载点
-├── _diary/                 # → Obsidian 日记目录（软链，gitignored）
 ├── css/style.css           # 单一样式表
 ├── js/
 │   ├── vendor/vue.global.prod.js   # Vue 3 自托管（164KB）
-│   ├── data.js             # 静态数据：路由表、手动记录
-│   ├── diary-data.js       # 日记自动生成数据（提交到 git）
-│   └── app.js              # Vue 应用：CalendarView + RouteTable 组件
+│   ├── data.js             # 静态数据：路由表、会员记录等
+│   └── app.js              # Vue 应用：RouteTable + Cookbook + Valorant + Membership 组件
 └── scripts/
-    ├── build-diary.py      # 解析 _diary/*.md 的 Day planner → diary-data.js
-    ├── install-hooks.sh    # 安装 Git 钩子
-    └── git-hooks/
-        └── pre-commit      # 每次 commit 前自动跑 build-diary.py
+    └── install-hooks.sh    # 安装 Git 钩子
 ```
 
-## 数据链路
-
-```
-Obsidian 日记 (_notes/日记/*.md)
-  ↓ 软链接 _diary/
-  ↓ pre-commit hook 触发
-scripts/build-diary.py
-  ↓ 解析 Day planner 段落，提取时间段 + 任务描述
-js/diary-data.js  (自动生成，const diaryRecords)
-  ↓ 合并 manualRecords (data.js)
-app.js → dailyRecords
-  ↓ Vue 响应式渲染
-日历视图
-```
+> 注：原「每日日历追踪 / 支出记录」Tab（Obsidian 日记 → `diary-data.js` / `expense-data.js` 的自动编译链路）已于 2026-07-11 迁移至 home 站点（`js/expense-data.js` + `js/diary-data.js` + 「每日追踪」Tab），personal 侧相关文件与组件已移除。
 
 ## 本地运行
 
@@ -57,7 +39,7 @@ python3 -m http.server 8000
 git add . && git commit -m "chore: 更新" && git push origin main
 ```
 
-每次 `git commit` 时，pre-commit hook 会自动运行 `build-diary.py` 并暂存 `diary-data.js`。无需额外步骤。
+`install-hooks.sh` 会安装项目的 Git 钩子（如有）。
 
 ## 新机器初始化
 

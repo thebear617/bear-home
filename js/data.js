@@ -1,8 +1,3 @@
-const recordLabel = '任务数';
-
-const manualRecords = {
-};
-
 const routeCategories = [
   {
     title: '🏠 个人站点',
@@ -254,20 +249,6 @@ const cookbookEntries = [
     tags: ['熊窝', '重构'],
     body: `所有 6 个站点 git 历史统一版本号规则（小写 v、诞生=v0.1.0、新 Tab 大功能=minor bump）。Cookbook Tab 从「技术心得」改为「个人开发时间线」，记录自有项目的里程碑演进。`,
   },
-];
-
-const expenseCategories = [
-  { name: '居家生活', icon: '🏠', subs: ['居家', '做饭', '洗漱', '洗衣服', '维修', '快递'] },
-  { name: '通讯订阅', icon: '📱', subs: ['通讯', '话费套餐', 'vip'] },
-  { name: '形象装扮', icon: '👔', subs: ['服饰', '美容'] },
-  { name: '市内出行', icon: '🍜', subs: ['外出餐饮', '借充电宝', '市内交通'] },
-  { name: '娱乐消费', icon: '🎮', subs: ['娱乐', '游戏充值', '抓娃娃', '彩票'] },
-  { name: '自我提升', icon: '📚', subs: ['学习', '办公', '运动健身'] },
-  { name: '电子产品', icon: '💻', subs: ['数码产品', '数码配件', '大家电', '小家电'] },
-  { name: '人情社交', icon: '🤝', subs: ['社交', '亲友', '节日', '纪念', '长辈', '爸爸妈妈', '孩子', '宝贝'] },
-  { name: '市外出行', icon: '✈️', subs: ['跨省交通', '住房', '旅行中途餐饮'] },
-  { name: '猫协救助', icon: '🐱', subs: ['宠物'] },
-  { name: '医疗保健', icon: '🏥', subs: ['医疗'] },
 ];
 
 const membershipRecords = [
