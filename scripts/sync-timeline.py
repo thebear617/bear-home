@@ -242,12 +242,14 @@ def main():
         return
     text = DATA_JS.read_text()
     i, j = find_array(text)
-    inner = text[i + 1:j]
+    inner = text[i + 1:j].rstrip()
+    if inner.endswith(","):           # 源数组末元素可能带尾逗号，去掉避免 },, 双逗号
+        inner = inner[:-1].rstrip()
     block = ",\n".join(entry_to_js(e) for e in additions)
     if inner.strip() == "":
         new_array = "[\n" + block + "\n]"
     else:
-        new_array = "[" + inner.rstrip() + ",\n" + block + "\n]"
+        new_array = "[" + inner + ",\n" + block + "\n]"
     DATA_JS.write_text(text[:i] + new_array + text[j + 1:])
     print(f"\n已新增 {len(additions)} 条记录到 {DATA_JS.relative_to(ROOT)}（未 commit / 未 push）。")
 

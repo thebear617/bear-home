@@ -142,7 +142,16 @@ const cookbookEntries = [
     title: '科研笔记 v0.2.0：升级为多板块科研笔记总站',
     date: '2026-07-09',
     tags: ['科研笔记', '架构'],
-    body: `从单一表征学习主题升级为多板块架构。新增 BOARDS 索引 + 顶栏切换器 + 两级 hash 路由（#boardId/pageId），支持任意扩展新板块。
+    body: `从单一表征学习主题升级为多板块科研笔记总站。新增 BOARDS 索引 + 顶栏切换器 + 两级 hash 路由（#boardId/pageId），支持任意扩展新板块。
+
+## 三大板块
+- 表征学习 🧠：知识图谱 + 笔记双视图，新增「理论基底」页（Bengio 表征定义 + 十大先验）
+- 深度学习工程 🛠️：八阶段研发流程（问题→数据→架构→训练→调优→部署→复盘→迭代）
+- 深度学习科研 🔬：总览 + 五个主战场（问题/架构/表征/训练/调优）+ 科研 vs 工程对照
+
+## 体验修复
+- 修复侧边栏叶子/子节点链接点击跳回主页
+- 卡片内联排版（ol/ul/li/strong/a/table）与 flow-list 圆圈序号
 
 ## 双托管
 - Vercel 自定义域名 rea.thebear617.cn（主力）
@@ -249,6 +258,39 @@ const cookbookEntries = [
     tags: ['熊窝', '重构'],
     body: `所有 6 个站点 git 历史统一版本号规则（小写 v、诞生=v0.1.0、新 Tab 大功能=minor bump）。Cookbook Tab 从「技术心得」改为「个人开发时间线」，记录自有项目的里程碑演进。`,
   },
+  {
+    id: 'home-v090',
+    title: '猪窝 v0.9.0：每日追踪与支出记录从 personal 迁移至 home',
+    date: '2026-07-11',
+    tags: ['猪窝', '架构'],
+    body: `猪窝承接 personal 的「每日追踪」能力。新增「每日追踪」Tab（记账 + 日程/睡眠），原 personal 的日历/记账数据迁移至此，形成家庭生活全记录主站。
+
+## 内容
+- 从 personal 迁移并补全「支出记录」Tab
+- 每日记账、日程、睡眠统一在 home 管理`,
+  },
+  {
+    id: 'personal-v070',
+    title: '熊窝 v0.7.0：新增个人开发时间线同步脚本 sync-timeline.py',
+    date: '2026-07-10',
+    tags: ['熊窝', '功能'],
+    body: `- scripts/sync-timeline.py：对比各仓库 main 带版本号 commit 与时间轴
+  data.js 已记录的最高大版本，自动把「高于时间轴」的大版本补进时间轴
+- 基准 = 时间轴 data.js 自身（不依赖外部 state 账本），patch/历史缺口不回填
+- 提供 --status / --dry-run（不写文件）与安全默认（只改 data.js，不 commit/push）
+- index.html 版本 meta 同步 v0.6.0 → v0.7.0`,
+  },
+  {
+    id: 'personal-v080',
+    title: '熊窝 v0.8.0：移除日历/记账 Tab（迁移至 home）',
+    date: '2026-07-11',
+    tags: ['熊窝', '架构'],
+    body: `熊窝回归纯个人主页定位。移除日历/记账两个 Tab 及其构建管线（build-diary.py 等），相关能力已整体迁移至 home「每日追踪」。
+
+## 架构
+- 删除 calendar/expense 两 Tab 与对应 JS 数据文件
+- 日记数据改由 home 编译，personal 不再持有`,
+  }
 ];
 
 const membershipRecords = [
