@@ -1,5 +1,12 @@
 # 熊窝 personal 更新日志
 
+## v0.8.1 — 2026-07-13
+feat: 路由表新增「常用链接」分类，会员订阅补充 ChatGPT Plus，修复备注列截断
+
+- feat: 路由表 `routeCategories` 新增「🔗 常用链接」分类（LDXP 神秘小铺 / OpenTheRank / OpenRouter Rankings），置于「个人站点」之后
+- feat: 会员订阅 `membershipRecords` 新增 ChatGPT Plus（到期 2026-08-12，¥25/月，备注登录账号）
+- fix: 会员表 `.mt-note` 改为换行显示，备注不再被单行省略号截断
+
 ## v0.8.0 — 2026-07-11
 refactor: 移除「日历」「记账」两个 Tab 及构建管线（大版本）
 

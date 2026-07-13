@@ -1640,10 +1640,9 @@ details.callout > summary:hover {
 .mt-note {
   color: var(--muted);
   font-size: .8rem;
-  max-width: 22ch;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  max-width: 26ch;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .mt-link {
