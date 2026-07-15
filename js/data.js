@@ -18,17 +18,14 @@ const routeCategories = [
       { name: 'Hero SMS 接码平台', desc: '接码平台，ChatGPT 电话验证登录时收验证码用', url: 'https://hero-sms.com/cn' },
       { name: 'OpenTheRank', desc: '查全球各家大模型官方订阅在各地区的价格', url: 'https://opentherank.com/zh/' },
       { name: 'OpenRouter Rankings', desc: '看全球所有大模型的实时用量 + 实时性能排行', url: 'https://openrouter.ai/rankings' },
+      { name: '鲜枣课堂', desc: '大量优质领域科普 PPT，可直接在线浏览', url: 'http://www.xzclass.com/?page_id=2390' },
+      { name: 'JavaGuide', desc: 'GitHub 156K+ Star 的 Java 面试与后端知识体系：计算机基础、数据库、分布式、高并发、系统设计与 AI 应用开发', url: 'https://javaguide.cn/' },
     ]
   },
   {
-    title: '💻 代码仓库',
+    title: '📂 本地文件',
     items: [
       { name: 'htmls', desc: '所有个人站点源码合集', path: '~/Documents/htmls' },
-    ]
-  },
-  {
-    title: '📝 笔记与文档',
-    items: [
       { name: 'Obsidian Vault', desc: '知识库与笔记', path: '~/Documents/notes' },
     ]
   }
