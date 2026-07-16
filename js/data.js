@@ -328,6 +328,16 @@ const cookbookEntries = [
 ## 架构
 - 删除 calendar/expense 两 Tab 与对应 JS 数据文件
 - 日记数据改由 home 编译，personal 不再持有`,
+  },
+  {
+    id: 'lifenotes-v040',
+    title: '常识笔记 v0.4.0：架构升级为独立内容库与视频入库工作流',
+    date: '2026-07-16',
+    tags: ['常识笔记', '架构'],
+    body: `- 将 59 篇 Markdown 迁入仓库内 content/，取消 Obsidian 运行时依赖
+- 新增视频转写 inbox，并让构建跳过内部目录
+- 补充独立构建依赖、项目规则、版本元数据和完整工作流文档
+- 保持 11 个领域的生成内容与迁移前一致`,
   }
 ];
 
