@@ -636,7 +636,7 @@ const app = createApp({
       return this.cookbookEntries.find(e => e.id === this.cookbookDetailId) || null;
     },
     cookbookSites() {
-      return ['猪窝', '猫猫', '科研笔记', '熊窝', '常识笔记', '开发笔记'];
+      return ['猪窝', '猫猫', '科研笔记', '熊窝', '常识笔记', '开发笔记', '工具'];
     }
   },
   methods: {

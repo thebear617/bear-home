@@ -35,6 +35,26 @@ const routeCategories = [
 // 字段：id, title, date, tags, body（Markdown）
 const cookbookEntries = [
   {
+    id: 'tool-tabby',
+    title: '安装 Tabby 终端：新一代跨平台终端模拟器',
+    date: '2026-07-17',
+    tags: ['工具', '功能'],
+    body: `安装了 Tabby 终端模拟器，替代系统默认终端。支持多标签、分屏、SSH 客户端、主题自定义。
+
+## 项目
+- GitHub：https://github.com/Eugeny/tabby`,
+  },
+  {
+    id: 'tool-zsh-autosuggestions',
+    title: '安装 zsh-autosuggestions 插件：终端命令智能补全',
+    date: '2026-07-17',
+    tags: ['工具', '功能'],
+    body: `安装了 zsh-autosuggestions 插件，基于历史记录和自动补全，终端输入命令时自动给出灰色建议，按 → 键即可采纳。
+
+## 项目
+- GitHub：https://github.com/zsh-users/zsh-autosuggestions`,
+  },
+  {
     id: 'home-v010',
     title: '猪窝 v0.1.0：项目上线',
     date: '2026-06-26',
