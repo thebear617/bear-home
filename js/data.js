@@ -445,9 +445,9 @@ const cookbookEntries = [
   },
   {
     id: 'cross-git-email-rewrite-2026-07-17',
-    title: '跨站点修复：6 个仓库 author email 从 icloud 改写为 qq + force-push',
+    title: 'github 贡献图根因检查及修复',
     date: '2026-07-17',
-    tags: ['跨站点', '运维', 'Git'],
+    tags: ['跨站点', '运维', 'Git', '工具'],
     body: `GitHub 贡献图一直只显示 66 contributions。诊断发现：6 个仓库的 author email 一直是 <code>1357953389@icloud.com</code>，但 GitHub 账号 <code>thebear617</code> 绑定的 verified email 是 <code>@qq.com</code>——所有 commit 都因为 email 不匹配被「无主」处理，从未算进贡献图。
 
 ## 决策
