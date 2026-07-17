@@ -35,6 +35,16 @@ const routeCategories = [
 // 字段：id, title, date, tags, body（Markdown）
 const cookbookEntries = [
   {
+    id: 'tool-ohmyzsh',
+    title: '安装 Oh My Zsh：经典 ZSH 配置管理框架',
+    date: '2026-07-17',
+    tags: ['工具', '功能'],
+    body: `安装了 Oh My Zsh，一个管理 ZSH 配置的经典框架，提供主题、插件与大量社区维护的开箱即用功能，极大简化了 shell 环境的定制。
+
+## 项目
+- GitHub：https://github.com/ohmyzsh/ohmyzsh`,
+  },
+  {
     id: 'tool-tabby',
     title: '安装 Tabby 终端：新一代跨平台终端模拟器',
     date: '2026-07-17',
