@@ -49,6 +49,16 @@
             </div>
             <div class="todo-board-column-body">
               <p v-if="todoItems.length === 0" class="todo-board-empty">还没有 todo</p>
+              <article
+                v-for="item in todoItems"
+                :key="item.id"
+                class="todo-card"
+              >
+                <h3 class="todo-card-title">{{ item.title }}</h3>
+                <a v-if="item.url" :href="item.url" target="_blank" rel="noopener" class="todo-card-url">🔗 {{ shortUrl(item.url) }}</a>
+                <p v-if="item.note" class="todo-card-note">{{ item.note }}</p>
+                <div v-if="item.createdAt" class="todo-card-meta">创建：{{ item.createdAt }}</div>
+              </article>
             </div>
           </div>
           <div class="todo-board-column">
@@ -58,6 +68,16 @@
             </div>
             <div class="todo-board-column-body">
               <p v-if="doingItems.length === 0" class="todo-board-empty">还没有进行中</p>
+              <article
+                v-for="item in doingItems"
+                :key="item.id"
+                class="todo-card todo-card-doing"
+              >
+                <h3 class="todo-card-title">{{ item.title }}</h3>
+                <a v-if="item.url" :href="item.url" target="_blank" rel="noopener" class="todo-card-url">🔗 {{ shortUrl(item.url) }}</a>
+                <p v-if="item.note" class="todo-card-note">{{ item.note }}</p>
+                <div v-if="item.createdAt" class="todo-card-meta">创建：{{ item.createdAt }} <span v-if="item.date && item.date !== todayStr" class="todo-card-crossday">（跨天）</span></div>
+              </article>
             </div>
           </div>
           <div class="todo-board-column">
@@ -67,6 +87,16 @@
             </div>
             <div class="todo-board-column-body">
               <p v-if="doneItems.length === 0" class="todo-board-empty">还没有完成</p>
+              <article
+                v-for="item in doneItems"
+                :key="item.id"
+                class="todo-card todo-card-done"
+              >
+                <h3 class="todo-card-title">{{ item.title }}</h3>
+                <a v-if="item.url" :href="item.url" target="_blank" rel="noopener" class="todo-card-url">🔗 {{ shortUrl(item.url) }}</a>
+                <p v-if="item.note" class="todo-card-note">{{ item.note }}</p>
+                <div v-if="item.createdAt" class="todo-card-meta">创建：{{ item.createdAt }}</div>
+              </article>
             </div>
           </div>
         </div>
@@ -122,6 +152,17 @@
       },
       doneItems() {
         return this.byStatusToday('done');
+      }
+    },
+    methods: {
+      shortUrl(url) {
+        if (!url) return '';
+        try {
+          const u = new URL(url);
+          return u.hostname + (u.pathname !== '/' ? u.pathname : '');
+        } catch (e) {
+          return url;
+        }
       }
     }
   };
