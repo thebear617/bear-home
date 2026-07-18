@@ -41,8 +41,34 @@
         <div v-if="!boardsLoaded" class="todo-board-empty">
           看板数据未加载。请检查 js/todo-data.js 是否在 TodoBoard.js 之前加载。
         </div>
-        <div v-else class="todo-board-placeholder">
-          当前 tab：{{ activeTabId }}（骨架版未渲染列/卡片，下一步实现）
+        <div v-else-if="activeBoard" class="todo-board-columns">
+          <div class="todo-board-column">
+            <div class="todo-board-column-header todo-status-todo">
+              <span class="todo-board-column-dot"></span>
+              待办 <span class="todo-board-column-count">{{ todoItems.length }}</span>
+            </div>
+            <div class="todo-board-column-body">
+              <p v-if="todoItems.length === 0" class="todo-board-empty">还没有 todo</p>
+            </div>
+          </div>
+          <div class="todo-board-column">
+            <div class="todo-board-column-header todo-status-doing">
+              <span class="todo-board-column-dot"></span>
+              进行中 <span class="todo-board-column-count">{{ doingItems.length }}</span>
+            </div>
+            <div class="todo-board-column-body">
+              <p v-if="doingItems.length === 0" class="todo-board-empty">还没有进行中</p>
+            </div>
+          </div>
+          <div class="todo-board-column">
+            <div class="todo-board-column-header todo-status-done">
+              <span class="todo-board-column-dot"></span>
+              已完成 <span class="todo-board-column-count">{{ doneItems.length }}</span>
+            </div>
+            <div class="todo-board-column-body">
+              <p v-if="doneItems.length === 0" class="todo-board-empty">还没有完成</p>
+            </div>
+          </div>
         </div>
       </div>
     `,
@@ -65,6 +91,35 @@
         const mm = String(d.getMonth() + 1).padStart(2, '0');
         const dd = String(d.getDate()).padStart(2, '0');
         return `${yyyy}-${mm}-${dd}（今天）`;
+      },
+      todayStr() {
+        return this.todayText.split('（')[0];
+      },
+      activeBoard() {
+        return this.boards.find(b => b.id === this.activeTabId) || null;
+      },
+      allItems() {
+        return this.activeBoard ? (this.activeBoard.items || []) : [];
+      },
+      todoItems() {
+        // 待办：date == 今天 AND status == 'todo'
+        return this.allItems.filter(it => {
+          const status = it.status || 'todo';
+          const date = it.date || this.todayStr;
+          return status === 'todo' && date === this.todayStr;
+        });
+      },
+      doingItems() {
+        // 进行中：status == 'doing'（含跨天）
+        return this.allItems.filter(it => (it.status || 'todo') === 'doing');
+      },
+      doneItems() {
+        // 已完成：date == 今天 AND status == 'done'
+        return this.allItems.filter(it => {
+          const status = it.status || 'todo';
+          const date = it.date || this.todayStr;
+          return status === 'done' && date === this.todayStr;
+        });
       }
     }
   };
