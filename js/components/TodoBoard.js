@@ -85,15 +85,19 @@
       boards() {
         return this.boardsLoaded ? TODO_BOARDS : [];
       },
-      todayText() {
+      dateKey() {
+        // 单一日期源：YYYY-MM-DD
         const d = new Date();
         const yyyy = d.getFullYear();
         const mm = String(d.getMonth() + 1).padStart(2, '0');
         const dd = String(d.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}（今天）`;
+        return `${yyyy}-${mm}-${dd}`;
+      },
+      todayText() {
+        return `${this.dateKey}（今天）`;
       },
       todayStr() {
-        return this.todayText.split('（')[0];
+        return this.dateKey;
       },
       activeBoard() {
         return this.boards.find(b => b.id === this.activeTabId) || null;
@@ -101,25 +105,23 @@
       allItems() {
         return this.activeBoard ? (this.activeBoard.items || []) : [];
       },
-      todoItems() {
-        // 待办：date == 今天 AND status == 'todo'
+      byStatusToday(status) {
+        // 工厂：按 status + 当天日期过滤
         return this.allItems.filter(it => {
-          const status = it.status || 'todo';
-          const date = it.date || this.todayStr;
-          return status === 'todo' && date === this.todayStr;
+          const s = it.status || 'todo';
+          const d = it.date || this.dateKey;
+          return s === status && d === this.dateKey;
         });
       },
+      todoItems() {
+        return this.byStatusToday('todo');
+      },
       doingItems() {
-        // 进行中：status == 'doing'（含跨天）
+        // 进行中：仅按 status，不过滤日期（跨天允许）
         return this.allItems.filter(it => (it.status || 'todo') === 'doing');
       },
       doneItems() {
-        // 已完成：date == 今天 AND status == 'done'
-        return this.allItems.filter(it => {
-          const status = it.status || 'todo';
-          const date = it.date || this.todayStr;
-          return status === 'done' && date === this.todayStr;
-        });
+        return this.byStatusToday('done');
       }
     }
   };
