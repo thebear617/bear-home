@@ -158,14 +158,6 @@
       allItems() {
         return this.activeBoard ? (this.activeBoard.items || []) : [];
       },
-      byStatusToday(status) {
-        // 工厂：按 status + 当天日期过滤
-        return this.allItems.filter(it => {
-          const s = it.status || 'todo';
-          const d = it.date || this.dateKey;
-          return s === status && d === this.dateKey;
-        });
-      },
       todoItems() {
         return this.byStatusToday('todo');
       },
@@ -208,6 +200,14 @@
       }
     },
     methods: {
+      byStatusToday(status) {
+        // 带参数的筛选器必须放在 methods，供多个 computed 调用。
+        return this.allItems.filter(it => {
+          const s = it.status || 'todo';
+          const d = it.date || this.dateKey;
+          return s === status && d === this.dateKey;
+        });
+      },
       shortUrl(url) {
         if (!url) return '';
         try {

@@ -283,6 +283,295 @@ const ValorantView = {
   }
 };
 
+/* ─── League of Legends View ─── */
+
+const LolMageGuide = {
+  props: ['guide'],
+  template: `
+    <div class="lol-guide-panel lol-mage-guide">
+      <header class="lol-hero">
+        <h1>{{ guide.title }}</h1>
+        <p>{{ guide.subtitle }}</p>
+      </header>
+
+      <section
+        v-for="build in guide.builds"
+        :key="build.id"
+        class="lol-build"
+        :class="'lol-tone-' + build.tone"
+      >
+        <div class="lol-build-heading">
+          <h2>{{ build.title }}</h2>
+          <span>{{ build.tagline }}</span>
+        </div>
+        <div v-for="row in build.rows" :key="row.label" class="lol-row">
+          <div class="lol-row-label" :class="'lol-label-' + row.type">{{ row.label }}</div>
+          <div class="lol-picks">
+            <template v-for="(item, index) in row.items" :key="item.name">
+              <span v-if="row.join && index > 0" class="lol-join">{{ row.join }}</span>
+              <figure class="lol-pick" :class="{ 'lol-pick-champion': row.type === 'champion', 'lol-pick-starter': row.type === 'starter' }">
+                <img :src="item.icon" :alt="item.name" loading="lazy">
+                <figcaption>{{ item.name }}</figcaption>
+              </figure>
+            </template>
+          </div>
+        </div>
+      </section>
+
+      <section class="lol-rules">
+        <h2>快速规则</h2>
+        <ul>
+          <li v-for="rule in guide.quickRules" :key="rule">{{ rule }}</li>
+        </ul>
+        <div v-if="guide.special" class="lol-special">
+          <h3>{{ guide.special.label }}</h3>
+          <div class="lol-picks lol-special-picks">
+            <figure class="lol-pick lol-pick-champion">
+              <img :src="guide.special.champion.icon" :alt="guide.special.champion.name" loading="lazy">
+              <figcaption>{{ guide.special.champion.name }}</figcaption>
+            </figure>
+            <figure v-for="item in guide.special.items" :key="item.name" class="lol-pick">
+              <img :src="item.icon" :alt="item.name" loading="lazy">
+              <figcaption>{{ item.name }}</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+    </div>
+  `
+};
+
+const LolAdcGuide = {
+  props: ['guide'],
+  template: `
+    <div class="lol-guide-panel lol-adc-guide">
+      <header class="lol-hero lol-adc-hero">
+        <h1>
+          <span class="lol-adc-title-part">{{ guide.titlePrefix }}</span>
+          <span class="lol-adc-title-divider">｜</span>
+          <span class="lol-adc-title-part">{{ guide.titleMain }}</span>
+        </h1>
+        <p>{{ guide.subtitle }}</p>
+        <a class="lol-source" :href="guide.source.url" target="_blank" rel="noopener">
+          来源：{{ guide.source.author }} · 查看原视频 ↗
+        </a>
+      </header>
+
+      <section class="lol-adc-card lol-formula-card">
+        <div class="lol-adc-heading">
+          <span>CORE FORMULA</span>
+          <h2>两件套公式</h2>
+        </div>
+        <div class="lol-formula-steps">
+          <article v-for="(step, index) in guide.formula" :key="step.label" class="lol-formula-step">
+            <div class="lol-step-topline">
+              <span class="lol-step-number">{{ index + 1 }}</span>
+              <div>
+                <h3>{{ step.label }}</h3>
+                <strong>{{ step.kicker }}</strong>
+              </div>
+            </div>
+            <p>{{ step.note }}</p>
+            <div class="lol-picks lol-adc-picks">
+              <figure v-for="item in step.items" :key="item.name" class="lol-pick">
+                <img :src="item.icon" :alt="item.fullName || item.name" loading="lazy">
+                <figcaption>{{ item.name }}</figcaption>
+                <small v-if="item.fullName">{{ item.fullName }}</small>
+              </figure>
+            </div>
+            <div v-if="step.champions" class="lol-adc-exception">
+              <span>仅这类英雄优先收集者</span>
+              <div class="lol-picks lol-adc-picks">
+                <figure v-for="champion in step.champions" :key="champion.name" class="lol-pick lol-pick-champion">
+                  <img :src="champion.icon" :alt="champion.name" loading="lazy">
+                  <figcaption>{{ champion.name }}</figcaption>
+                </figure>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="lol-adc-card">
+        <div class="lol-adc-heading">
+          <span>CRIT CHECK</span>
+          <h2>11 级海克斯分支</h2>
+        </div>
+        <div class="lol-branch-grid">
+          <article v-for="branch in guide.branches" :key="branch.id" class="lol-branch-card" :class="'lol-adc-tone-' + branch.tone">
+            <span class="lol-branch-badge">{{ branch.badge }}</span>
+            <h3>{{ branch.title }}</h3>
+            <p>{{ branch.note }}</p>
+            <div v-if="branch.items" class="lol-picks lol-adc-picks">
+              <figure v-for="item in branch.items" :key="item.name" class="lol-pick">
+                <img :src="item.icon" :alt="item.name" loading="lazy">
+                <figcaption>{{ item.name }}</figcaption>
+              </figure>
+            </div>
+            <div v-if="branch.champions" class="lol-adc-branch-champions">
+              <span>适用英雄</span>
+              <div class="lol-picks lol-adc-picks">
+                <figure v-for="champion in branch.champions" :key="champion.name" class="lol-pick lol-pick-champion">
+                  <img :src="champion.icon" :alt="champion.name" loading="lazy">
+                  <figcaption>{{ champion.name }}</figcaption>
+                </figure>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="lol-adc-card">
+        <div class="lol-adc-heading">
+          <span>AFTER CORE</span>
+          <h2>后续按需装备</h2>
+          <p>不是固定顺序，根据输出、续航和生存需求选择。</p>
+        </div>
+        <div class="lol-later-grid">
+          <article v-for="group in guide.laterGroups" :key="group.title" class="lol-later-group" :class="'lol-adc-tone-' + group.tone">
+            <h3>{{ group.title }}</h3>
+            <p v-if="group.note">{{ group.note }}</p>
+            <div class="lol-picks lol-adc-picks">
+              <figure v-for="item in group.items" :key="item.name" class="lol-pick">
+                <img :src="item.icon" :alt="item.name" loading="lazy">
+                <figcaption>{{ item.name }}</figcaption>
+              </figure>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="lol-rules lol-adc-rules">
+        <h2>快速规则</h2>
+        <ul>
+          <li v-for="rule in guide.quickRules" :key="rule">{{ rule }}</li>
+        </ul>
+        <div class="lol-adc-boot">
+          <span>三件套后</span>
+          <figure class="lol-pick">
+            <img :src="guide.boot.icon" :alt="guide.boot.name" loading="lazy">
+            <figcaption>{{ guide.boot.name }}</figcaption>
+          </figure>
+        </div>
+      </section>
+    </div>
+  `
+};
+
+const LolAssassinGuide = {
+  props: ['guide'],
+  template: `
+    <div class="lol-guide-panel lol-assassin-guide">
+      <header class="lol-hero">
+        <h1>{{ guide.title }}</h1>
+        <p>{{ guide.subtitle }}</p>
+        <a class="lol-source" :href="guide.source.url" target="_blank" rel="noopener">
+          来源：{{ guide.source.author }} · 查看原视频 ↗
+        </a>
+      </header>
+
+      <section class="lol-build" :class="'lol-tone-' + guide.spellblade.tone">
+        <div class="lol-build-heading">
+          <h2>{{ guide.spellblade.title }}</h2>
+          <span>{{ guide.spellblade.tagline }}</span>
+        </div>
+        <div v-for="row in guide.spellblade.rows" :key="row.label" class="lol-row">
+          <div class="lol-row-label" :class="'lol-label-' + row.type">{{ row.label }}</div>
+          <div class="lol-picks">
+            <figure
+              v-for="item in row.items"
+              :key="item.name"
+              class="lol-pick"
+              :class="{ 'lol-pick-champion': row.type === 'champion', 'lol-pick-starter': row.type === 'starter' }"
+            >
+              <img :src="item.icon" :alt="item.name" loading="lazy">
+              <figcaption>{{ item.name }}</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="lol-build lol-tone-purple lol-assassin-custom">
+        <div class="lol-build-heading">
+          <h2>不带咒刃</h2>
+          <span>一人一套 · 按英雄直接查表</span>
+        </div>
+        <div class="lol-assassin-grid">
+          <article v-for="build in guide.customBuilds" :key="build.id" class="lol-assassin-card">
+            <header>
+              <img :src="build.champion.icon" :alt="build.champion.name" loading="lazy">
+              <div>
+                <h3>{{ build.champion.name }}</h3>
+                <p>{{ build.note }}</p>
+              </div>
+            </header>
+            <div class="lol-assassin-line">
+              <span>出门</span>
+              <div class="lol-picks lol-assassin-picks">
+                <figure v-for="item in build.starter" :key="item.name" class="lol-pick lol-pick-starter">
+                  <img :src="item.icon" :alt="item.name" loading="lazy">
+                  <figcaption>{{ item.name }}</figcaption>
+                </figure>
+              </div>
+            </div>
+            <div class="lol-assassin-line">
+              <span>神装</span>
+              <div class="lol-picks lol-assassin-picks">
+                <figure v-for="item in build.items" :key="item.name" class="lol-pick">
+                  <img :src="item.icon" :alt="item.name" loading="lazy">
+                  <figcaption>{{ item.name }}</figcaption>
+                </figure>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="lol-rules lol-assassin-rules">
+        <h2>快速规则</h2>
+        <ul>
+          <li v-for="rule in guide.quickRules" :key="rule">{{ rule }}</li>
+        </ul>
+      </section>
+    </div>
+  `
+};
+
+const LolView = {
+  components: { LolMageGuide, LolAdcGuide, LolAssassinGuide },
+  template: `
+    <div class="lol-view">
+      <nav class="lol-guide-switcher" aria-label="英雄联盟攻略切换">
+        <button
+          v-for="item in guides"
+          :key="item.id"
+          :class="{ active: activeGuide === item.id }"
+          @click="activeGuide = item.id"
+        >
+          <span>{{ item.eyebrow }}</span>
+          <strong>{{ item.label }}</strong>
+        </button>
+      </nav>
+      <lol-mage-guide v-if="activeGuide === 'mage'" :guide="mageGuide"></lol-mage-guide>
+      <lol-adc-guide v-else-if="activeGuide === 'adc'" :guide="adcGuide"></lol-adc-guide>
+      <lol-assassin-guide v-else :guide="assassinGuide"></lol-assassin-guide>
+    </div>
+  `,
+  data() {
+    return {
+      activeGuide: 'mage',
+      mageGuide: lolMageGuideData,
+      adcGuide: lolAdcGuideData,
+      assassinGuide: lolAssassinGuideData,
+      guides: [
+        { id: 'mage', eyebrow: 'AP', label: '法师公式 3.0' },
+        { id: 'adc', eyebrow: 'ADC', label: 'ADC 公式 4.0' },
+        { id: 'assassin', eyebrow: 'AP', label: 'AP 刺客 3.0' }
+      ]
+    };
+  }
+};
+
 
 /* ─── Route Table ─── */
 
@@ -620,6 +909,7 @@ const app = createApp({
         { id: 'routes', title: '路由表', icon: '🗺️' },
         { id: 'cookbook', title: '个人开发时间线', icon: '🧑‍💻' },
         { id: 'valorant', title: '无畏契约', icon: '🎯' },
+        { id: 'lol', title: '英雄联盟', icon: '⚔️' },
         { id: 'membership', title: '会员订阅', icon: '💳' },
         { id: 'todo', title: '每日看板', icon: '📋' }
       ],
@@ -677,6 +967,7 @@ app.component('route-table', RouteTable);
 app.component('cookbook-timeline', CookbookTimeline);
 app.component('cookbook-detail', CookbookDetail);
 app.component('valorant-view', ValorantView);
+app.component('lol-view', LolView);
 app.component('membership-view', MembershipView);
 app.component('todo-board', window.TodoBoard);
 app.mount('#app');

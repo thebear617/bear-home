@@ -151,6 +151,7 @@ button {
   flex-direction: column;
   min-width: 0;
   overflow-y: auto;
+  transition: background-color .2s ease;
 }
 
 .app-shell {
@@ -158,6 +159,27 @@ button {
   margin: 0 auto;
   padding: 1.2rem 1rem 3rem;
   width: 100%;
+}
+
+.main-area.lol-active {
+  position: relative;
+  background: #07111f;
+}
+
+.main-area.lol-active::before {
+  content: '';
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: block;
+  width: 100%;
+  height: 5px;
+  background: #f5c64a;
+}
+
+.app-shell.lol-shell {
+  max-width: 1040px;
+  padding-top: 1.7rem;
 }
 
 /* ─── Animations ─── */
@@ -1345,6 +1367,762 @@ a.route-card:hover {
 
 .valorant-body tr:nth-child(even) td {
   background: var(--surface-soft);
+}
+
+/* ─── League of Legends ─── */
+
+.lol-view {
+  --lol-bg: #07111f;
+  --lol-panel: #121f32;
+  --lol-text: #eef5ff;
+  --lol-muted: #91a2b9;
+  --lol-gold: #f5c542;
+  color: var(--lol-text);
+  animation: fadeIn .2s ease;
+}
+
+.lol-guide-panel {
+  animation: fadeIn .2s ease;
+}
+
+.lol-guide-switcher {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .45rem;
+  width: min(100%, 760px);
+  margin: 0 auto 1.45rem;
+  padding: .4rem;
+  border: 1px solid #293852;
+  border-radius: 15px;
+  background: #0d192a;
+}
+
+.lol-guide-switcher button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  min-height: 48px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--lol-muted);
+  transition: background .18s, border-color .18s, color .18s, box-shadow .18s;
+}
+
+.lol-guide-switcher button:hover {
+  color: var(--lol-text);
+  background: rgba(255, 255, 255, .045);
+}
+
+.lol-guide-switcher button.active {
+  border-color: rgba(245, 197, 66, .72);
+  background: linear-gradient(135deg, rgba(245, 197, 66, .2), rgba(225, 133, 42, .09));
+  color: #fff4cf;
+  box-shadow: inset 0 0 0 1px rgba(245, 197, 66, .08), 0 4px 14px rgba(0, 0, 0, .18);
+}
+
+.lol-guide-switcher span {
+  color: var(--lol-gold);
+  font-size: .65rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+}
+
+.lol-guide-switcher strong {
+  font-size: .9rem;
+  font-weight: 850;
+}
+
+.lol-hero {
+  padding: .15rem 1rem 1.65rem;
+  text-align: center;
+}
+
+.lol-hero h1 {
+  color: var(--lol-text);
+  font-size: clamp(1.85rem, 4.5vw, 3rem);
+  font-weight: 950;
+  line-height: 1.12;
+  letter-spacing: .01em;
+}
+
+.lol-hero p {
+  margin-top: .25rem;
+  color: var(--lol-gold);
+  font-size: clamp(.92rem, 2vw, 1.12rem);
+  font-weight: 850;
+}
+
+.lol-source {
+  display: inline-block;
+  margin-top: .6rem;
+  color: #8092ab;
+  font-size: .76rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.lol-source:hover {
+  color: #f5c542;
+}
+
+.lol-build,
+.lol-rules {
+  margin-bottom: 1.45rem;
+  padding: 1.3rem 1.25rem 1.1rem;
+  border: 2px solid var(--lol-tone, #50617a);
+  border-radius: 22px;
+  background: var(--lol-panel);
+}
+
+.lol-tone-gold { --lol-tone: #f5c542; }
+.lol-tone-red { --lol-tone: #ef6872; }
+.lol-tone-blue { --lol-tone: #43bdf2; }
+.lol-tone-purple { --lol-tone: #a679e8; }
+
+.lol-build-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 2.2rem;
+  margin-bottom: .6rem;
+}
+
+.lol-build-heading h2,
+.lol-rules h2 {
+  color: var(--lol-text);
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  font-weight: 950;
+  line-height: 1.2;
+}
+
+.lol-build-heading span {
+  color: var(--lol-tone);
+  font-size: .98rem;
+  font-weight: 850;
+}
+
+.lol-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: .85rem;
+  align-items: start;
+  min-height: 82px;
+  padding: .42rem 0;
+}
+
+.lol-row-label {
+  padding-top: .5rem;
+  color: var(--lol-muted);
+  font-size: 1.05rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.lol-label-core { color: var(--lol-gold); }
+.lol-label-champion { color: #33c2ff; }
+
+.lol-picks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: .7rem 1.28rem;
+  min-width: 0;
+}
+
+.lol-pick {
+  width: 64px;
+  color: #cbd6e5;
+  text-align: center;
+}
+
+.lol-pick img {
+  display: block;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto;
+  border: 3px solid var(--lol-gold);
+  border-radius: 11px;
+  background: #0b1525;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .32);
+}
+
+.lol-pick-starter img {
+  border-color: #33d39a;
+}
+
+.lol-pick-champion img {
+  border-color: #24bff5;
+}
+
+.lol-pick figcaption {
+  margin-top: .25rem;
+  font-size: .78rem;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.lol-join {
+  align-self: center;
+  margin: 0 -.8rem 1.3rem;
+  color: var(--lol-muted);
+  font-size: 1.65rem;
+  font-weight: 900;
+}
+
+.lol-rules {
+  --lol-tone: #50617a;
+  margin-bottom: 0;
+}
+
+.lol-rules ul {
+  margin: .8rem 0 1.15rem;
+  padding: 0;
+  color: var(--lol-muted);
+  font-size: .96rem;
+  font-weight: 700;
+  list-style: none;
+}
+
+.lol-rules li {
+  position: relative;
+  margin: .28rem 0;
+  padding-left: 1rem;
+}
+
+.lol-rules li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+}
+
+.lol-special {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: .8rem;
+  align-items: start;
+}
+
+.lol-special h3 {
+  padding-top: .5rem;
+  color: var(--lol-gold);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.lol-special-picks {
+  gap: .7rem 1.28rem;
+}
+
+/* AP assassin formula view */
+
+.lol-assassin-guide {
+  --assassin-purple: #a679e8;
+}
+
+.lol-assassin-custom {
+  background: linear-gradient(145deg, #151f35, #111b2d);
+}
+
+.lol-assassin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .9rem;
+}
+
+.lol-assassin-card {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid #35445f;
+  border-radius: 16px;
+  background: rgba(7, 17, 31, .52);
+}
+
+.lol-assassin-card > header {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  min-height: 62px;
+  margin-bottom: .8rem;
+}
+
+.lol-assassin-card > header > img {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+  border: 3px solid #32bdf2;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .28);
+}
+
+.lol-assassin-card h3 {
+  color: var(--lol-text);
+  font-size: 1.08rem;
+  font-weight: 950;
+}
+
+.lol-assassin-card header p {
+  margin-top: .15rem;
+  color: #8fa1b9;
+  font-size: .73rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.lol-assassin-line {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: .55rem;
+  align-items: start;
+  padding-top: .55rem;
+  border-top: 1px dashed #31415b;
+}
+
+.lol-assassin-line + .lol-assassin-line {
+  margin-top: .55rem;
+}
+
+.lol-assassin-line > span {
+  padding-top: .38rem;
+  color: #8ea0b8;
+  font-size: .72rem;
+  font-weight: 900;
+}
+
+.lol-assassin-line:last-child > span {
+  color: var(--lol-gold);
+}
+
+.lol-assassin-picks {
+  gap: .55rem .7rem;
+}
+
+.lol-assassin-picks .lol-pick {
+  width: 54px;
+}
+
+.lol-assassin-picks .lol-pick img {
+  width: 50px;
+  height: 50px;
+  border-width: 2px;
+  border-radius: 9px;
+}
+
+.lol-assassin-picks .lol-pick figcaption {
+  font-size: .68rem;
+}
+
+.lol-assassin-rules {
+  border-color: #5c4b78;
+}
+
+/* ADC formula view */
+
+.lol-adc-guide {
+  --adc-orange: #f08b38;
+  --adc-panel: #111e30;
+}
+
+.lol-adc-hero p {
+  color: #ff9d4d;
+}
+
+.lol-adc-title-part,
+.lol-adc-title-divider {
+  display: inline;
+}
+
+.lol-adc-card {
+  margin-bottom: 1.35rem;
+  padding: 1.25rem;
+  border: 1px solid #33445f;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #132035, #101b2c);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .14);
+}
+
+.lol-adc-heading {
+  margin-bottom: 1rem;
+}
+
+.lol-adc-heading > span {
+  display: block;
+  margin-bottom: .1rem;
+  color: var(--adc-orange);
+  font-size: .64rem;
+  font-weight: 950;
+  letter-spacing: .13em;
+}
+
+.lol-adc-heading h2 {
+  color: var(--lol-text);
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
+  font-weight: 950;
+}
+
+.lol-adc-heading > p {
+  margin-top: .25rem;
+  color: var(--lol-muted);
+  font-size: .84rem;
+  font-weight: 650;
+}
+
+.lol-formula-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.lol-formula-step {
+  --adc-tone: var(--adc-orange);
+  position: relative;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid #2e405c;
+  border-top: 3px solid var(--adc-tone);
+  border-radius: 14px;
+  background: rgba(7, 17, 31, .52);
+}
+
+.lol-formula-step:not(:last-child)::after {
+  content: '›';
+  position: absolute;
+  top: 48%;
+  right: -.76rem;
+  z-index: 2;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid #3b4c66;
+  border-radius: 50%;
+  background: #132035;
+  color: #f0a357;
+  font-size: 1.2rem;
+  font-weight: 900;
+  line-height: 1.25rem;
+  text-align: center;
+}
+
+.lol-step-topline {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+}
+
+.lol-step-number {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  border-radius: 9px;
+  background: rgba(240, 139, 56, .16);
+  color: #ffab62;
+  font-size: .85rem;
+  font-weight: 950;
+}
+
+.lol-step-topline h3 {
+  color: var(--lol-text);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.lol-step-topline strong {
+  display: block;
+  color: #ff9d4d;
+  font-size: .76rem;
+  font-weight: 800;
+}
+
+.lol-formula-step > p,
+.lol-branch-card > p,
+.lol-later-group > p {
+  margin: .75rem 0;
+  color: var(--lol-muted);
+  font-size: .79rem;
+  line-height: 1.6;
+}
+
+.lol-adc-picks {
+  gap: .65rem .8rem;
+}
+
+.lol-adc-picks .lol-pick {
+  width: 66px;
+}
+
+.lol-adc-picks .lol-pick img {
+  border-color: var(--adc-tone, var(--adc-orange));
+}
+
+.lol-adc-picks .lol-pick-champion img {
+  border-color: #38c2f4;
+}
+
+.lol-adc-picks .lol-pick small {
+  display: block;
+  width: 86px;
+  margin: .12rem 0 0 -10px;
+  color: #6f829c;
+  font-size: .58rem;
+  line-height: 1.25;
+}
+
+.lol-adc-exception {
+  margin-top: .8rem;
+  padding-top: .7rem;
+  border-top: 1px dashed #344660;
+}
+
+.lol-adc-exception > span,
+.lol-adc-branch-champions > span {
+  display: block;
+  margin-bottom: .55rem;
+  color: #7f91a9;
+  font-size: .67rem;
+  font-weight: 800;
+}
+
+.lol-branch-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .85rem;
+}
+
+.lol-branch-card {
+  --adc-tone: #f08b38;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--adc-tone) 50%, #263750);
+  border-radius: 14px;
+  background: rgba(7, 17, 31, .46);
+}
+
+.lol-adc-tone-orange { --adc-tone: #f08b38; }
+.lol-adc-tone-gold { --adc-tone: #f5c542; }
+.lol-adc-tone-cyan { --adc-tone: #39bfe8; }
+.lol-adc-tone-green { --adc-tone: #42c48b; }
+.lol-adc-tone-purple { --adc-tone: #af7bea; }
+
+.lol-branch-badge {
+  display: inline-block;
+  margin-bottom: .6rem;
+  padding: .14rem .48rem;
+  border: 1px solid color-mix(in srgb, var(--adc-tone) 70%, transparent);
+  border-radius: 999px;
+  color: var(--adc-tone);
+  font-size: .62rem;
+  font-weight: 850;
+}
+
+.lol-branch-card h3,
+.lol-later-group h3 {
+  color: var(--lol-text);
+  font-size: .96rem;
+  font-weight: 900;
+}
+
+.lol-adc-branch-champions {
+  margin-top: .75rem;
+  padding-top: .65rem;
+  border-top: 1px dashed #344660;
+}
+
+.lol-later-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr .75fr;
+  gap: .85rem;
+}
+
+.lol-later-group {
+  --adc-tone: #f08b38;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--adc-tone) 45%, #263750);
+  border-radius: 14px;
+  background: rgba(7, 17, 31, .46);
+}
+
+.lol-adc-rules {
+  position: relative;
+  padding-right: 7rem;
+  border-color: #4a5c76;
+}
+
+.lol-adc-boot {
+  position: absolute;
+  right: 1.4rem;
+  bottom: 1rem;
+  text-align: center;
+}
+
+.lol-adc-boot > span {
+  display: block;
+  margin-bottom: .35rem;
+  color: #778ba5;
+  font-size: .64rem;
+  font-weight: 800;
+}
+
+@media (max-width: 719px) {
+  .app-shell.lol-shell {
+    padding: 1.2rem .65rem 2rem;
+  }
+
+  .lol-guide-switcher {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .lol-guide-switcher button {
+    min-height: 44px;
+    gap: .35rem;
+  }
+
+  .lol-guide-switcher strong {
+    font-size: .78rem;
+  }
+
+  .lol-hero {
+    padding-top: .5rem;
+    padding-bottom: 1.2rem;
+  }
+
+  .lol-build,
+  .lol-rules {
+    padding: 1rem .85rem .8rem;
+    border-radius: 16px;
+  }
+
+  .lol-build-heading {
+    display: block;
+    margin-bottom: .6rem;
+  }
+
+  .lol-build-heading span {
+    display: block;
+    margin-top: .15rem;
+    font-size: .86rem;
+  }
+
+  .lol-row {
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: .6rem;
+    min-height: 74px;
+  }
+
+  .lol-row-label {
+    font-size: .9rem;
+  }
+
+  .lol-picks,
+  .lol-special-picks {
+    gap: .65rem .75rem;
+  }
+
+  .lol-pick {
+    width: 54px;
+  }
+
+  .lol-pick img {
+    width: 50px;
+    height: 50px;
+    border-width: 2px;
+    border-radius: 9px;
+  }
+
+  .lol-pick figcaption {
+    font-size: .7rem;
+  }
+
+  .lol-join {
+    margin-right: -.45rem;
+    margin-left: -.45rem;
+    font-size: 1.3rem;
+  }
+
+  .lol-special {
+    display: block;
+  }
+
+  .lol-special h3 {
+    margin-bottom: .65rem;
+    padding-top: 0;
+  }
+
+  .lol-assassin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lol-assassin-card {
+    padding: .85rem;
+  }
+
+  .lol-adc-card {
+    padding: .9rem;
+    border-radius: 16px;
+  }
+
+  .lol-adc-title-part {
+    display: block;
+  }
+
+  .lol-adc-title-divider {
+    display: none;
+  }
+
+  .lol-formula-steps,
+  .lol-branch-grid,
+  .lol-later-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lol-formula-step:not(:last-child)::after {
+    content: '⌄';
+    top: auto;
+    right: 50%;
+    bottom: -.8rem;
+    transform: translateX(50%);
+    line-height: 1.15rem;
+  }
+
+  .lol-adc-rules {
+    padding-right: .85rem;
+    padding-bottom: .9rem;
+  }
+
+  .lol-adc-boot {
+    position: static;
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    margin-top: .8rem;
+    padding-top: .75rem;
+    border-top: 1px dashed #3b4d67;
+    text-align: left;
+  }
+
+  .lol-adc-boot > span {
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 430px) {
+  .lol-guide-switcher {
+    gap: .25rem;
+    padding: .3rem;
+  }
+
+  .lol-guide-switcher button {
+    flex-direction: column;
+    gap: .05rem;
+    padding: .3rem .15rem;
+  }
+
+  .lol-guide-switcher strong {
+    font-size: .68rem;
+  }
 }
 
 /* ─── Callouts ─── */

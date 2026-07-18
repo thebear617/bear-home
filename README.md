@@ -19,7 +19,13 @@ personal/
 ├── js/
 │   ├── vendor/vue.global.prod.js   # Vue 3 自托管（164KB）
 │   ├── data.js             # 静态数据：路由表、会员记录等
-│   └── app.js              # Vue 应用：RouteTable + Cookbook + Valorant + Membership 组件
+│   ├── todo-data.js        # 每日看板分类与任务数据
+│   ├── valorant-data.js    # 无畏契约攻略数据
+│   ├── lol-data.js         # 英雄联盟法师 / ADC / AP 刺客出装公式数据
+│   ├── components/
+│   │   └── TodoBoard.js    # 每日看板 Vue 组件
+│   └── app.js              # Vue 应用：各 Tab 的组件与交互
+├── assets/lol/             # 英雄联盟装备图标与英雄头像（站内本地资源）
 └── scripts/
     └── install-hooks.sh    # 安装 Git 钩子
 ```
@@ -63,4 +69,6 @@ ln -s /Users/mokaiche/Documents/notes/日记 _diary
 - **手动记录**：在 `js/data.js` 的 `manualRecords` 中添加日期条目，手动记录会覆盖同日的日记数据。
 
 - **路由表**：在 `js/data.js` 的 `routeCategories` 中添加条目。
+- **英雄联盟**：在 `js/lol-data.js` 中维护法师 / ADC / AP 刺客三个攻略视图的公式、条件分支、装备、英雄和快速规则；图片放在 `assets/lol/`。
+- **每日看板**：在 `js/todo-data.js` 的 `TODO_BOARDS` 中维护视频、科研、编程、生活四类任务；状态使用 `todo`、`doing`、`done`。
 - **会员订阅**：在 `js/data.js` 的 `membershipRecords` 数组中按 `{ name, expireDate, price, tags, note, source, url }` schema 添加条目；`expireDate` 留空视为"未知到期"。组件按 `expireDate < 今日` 自动划分"已过期 / 未过期"两组。
