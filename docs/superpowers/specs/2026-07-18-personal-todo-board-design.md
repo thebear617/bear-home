@@ -145,7 +145,7 @@ const TODO_BOARDS = [
 ### 6.1 `routeCategories` 增量（`js/data.js`）
 
 ```js
-{ id: 'todo', name: '📋 看板', icon: '📋' }
+{ id: 'todo', title: '每日看板', icon: '📋' }
 ```
 
 ### 6.2 触发逻辑
