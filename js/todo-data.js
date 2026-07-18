@@ -1,12 +1,19 @@
 // js/todo-data.js
 // 任务看板数据层。TodoBoard 组件从这里读取 TODO_BOARDS。
 // 字段约定见 docs/superpowers/specs/2026-07-18-personal-todo-board-design.md 第 4 节。
+//
+// 初始数据迁移（2026-07-18）：从 ~/.hermes/reminder-today.md「待转录视频」一节迁入。
+// 详见 spec 第 12 节。
 const TODO_BOARDS = [
   {
     id: 'video',
     name: '视频',
     icon: '🎬',
-    items: []
+    items: [
+      { id: 'v1', title: '世界模型：在 AI 里抛硬币，概率是 50% 吗？', url: 'https://b23.tv/1RotOy9', status: 'todo', note: '预计归 lifenotes/AI产业', createdAt: '2026-07-18', date: '2026-07-18' },
+      { id: 'v2', title: '中科院研究生如何用 AI 把 idea 一步步变成论文', url: 'https://www.bilibili.com/video/BV1LKjS6gEh4/', status: 'todo', note: '预计归 reanotes/literature', createdAt: '2026-07-18', date: '2026-07-18' },
+      { id: 'v3', title: 'GPT-5.6 + image2 三步法输出高质量学术 PPT', url: 'https://www.bilibili.com/video/BV1mgNj6MEuX/', status: 'todo', note: '预计归 reanotes/dlproject', createdAt: '2026-07-18', date: '2026-07-18' }
+    ]
   },
   {
     id: 'research',
