@@ -1678,3 +1678,306 @@ details.callout > summary:hover {
   .membership-table { font-size: .78rem; }
   .membership-table th, .membership-table td { padding: .45rem .5rem; }
 }
+
+/* ─── TodoBoard 看板 ─── */
+
+.todo-board {
+  padding: 24px 28px 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  color: #2f2924;
+}
+
+.todo-board-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.todo-board-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2f2924;
+}
+
+.todo-board-date-icon {
+  font-size: 18px;
+}
+
+.todo-board-history-toggle {
+  background: #ffffff;
+  border: 1px solid #e7dfd3;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 14px;
+  color: #2f2924;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.todo-board-history-toggle:hover {
+  background: #fbf6ee;
+  border-color: #c2410c;
+}
+
+.todo-board-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #e7dfd3;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.todo-board-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 10px 18px;
+  font-size: 15px;
+  color: #5a4f44;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.todo-board-tab:hover {
+  color: #c2410c;
+}
+
+.todo-board-tab.active {
+  color: #c2410c;
+  border-bottom-color: #c2410c;
+  font-weight: 600;
+}
+
+.todo-board-empty {
+  color: #9a8e80;
+  font-size: 14px;
+  text-align: center;
+  padding: 24px 0;
+  font-style: italic;
+}
+
+.todo-board-placeholder {
+  color: #9a8e80;
+  font-size: 14px;
+  text-align: center;
+  padding: 24px 0;
+}
+
+.todo-board-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.todo-board-column {
+  background: #fbf6ee;
+  border: 1px solid #e7dfd3;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 240px;
+}
+
+.todo-board-column-header {
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #e7dfd3;
+  background: #ffffff;
+  border-radius: 12px 12px 0 0;
+}
+
+.todo-board-column-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+
+.todo-status-todo .todo-board-column-dot { background: #94a3b8; }
+.todo-status-doing .todo-board-column-dot { background: #c2410c; }
+.todo-status-done .todo-board-column-dot { background: #6b7280; }
+
+.todo-board-column-count {
+  margin-left: auto;
+  background: #f7f3ee;
+  color: #5a4f44;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.todo-board-column-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.todo-card {
+  background: #ffffff;
+  border: 1px solid #e7dfd3;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.todo-card:hover {
+  box-shadow: 0 2px 8px rgba(47, 41, 36, 0.08);
+  transform: translateY(-1px);
+}
+
+.todo-card-doing {
+  border-left: 3px solid #c2410c;
+}
+
+.todo-card-done {
+  opacity: 0.65;
+}
+
+.todo-card-done .todo-card-title {
+  text-decoration: line-through;
+  color: #6b7280;
+}
+
+.todo-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  color: #2f2924;
+  line-height: 1.4;
+}
+
+.todo-card-url {
+  font-size: 12px;
+  color: #c2410c;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.todo-card-url:hover {
+  text-decoration: underline;
+}
+
+.todo-card-note {
+  font-size: 12px;
+  color: #5a4f44;
+  font-style: italic;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.todo-card-meta {
+  font-size: 11px;
+  color: #9a8e80;
+  margin-top: 2px;
+}
+
+.todo-card-crossday {
+  color: #c2410c;
+  margin-left: 4px;
+  font-weight: 500;
+}
+
+/* 历史面板 */
+.todo-board-history {
+  background: #ffffff;
+  border: 1px solid #e7dfd3;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.todo-board-history-title {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #2f2924;
+}
+
+.todo-board-history-group {
+  margin-bottom: 8px;
+}
+
+.todo-board-history-group details {
+  border-radius: 8px;
+  background: #fbf6ee;
+}
+
+.todo-board-history-group summary {
+  cursor: pointer;
+  padding: 8px 12px;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+
+.todo-board-history-group summary::-webkit-details-marker { display: none; }
+.todo-board-history-group summary::before {
+  content: '▸';
+  color: #9a8e80;
+  font-size: 10px;
+  transition: transform 0.15s ease;
+}
+.todo-board-history-group details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.todo-board-history-date {
+  font-weight: 600;
+  color: #2f2924;
+}
+
+.todo-board-history-meta {
+  color: #9a8e80;
+  font-size: 12px;
+}
+
+.todo-board-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 12px 12px 32px;
+}
+
+.todo-board-history-item {
+  padding: 4px 0;
+  font-size: 13px;
+  color: #5a4f44;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .todo-board {
+    padding: 16px 12px 40px;
+  }
+  .todo-board-columns {
+    grid-template-columns: 1fr;
+  }
+  .todo-board-history-group summary {
+    flex-wrap: wrap;
+  }
+}
