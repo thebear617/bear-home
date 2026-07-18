@@ -11,19 +11,46 @@
     template: `
       <div class="todo-board">
         <header class="todo-board-header">
-          <h2 class="todo-board-title">📋 每日 Todo 看板</h2>
-          <p class="todo-board-subtitle">骨架版（待实现）</p>
+          <div class="todo-board-date">
+            <span class="todo-board-date-icon">📅</span>
+            <span class="todo-board-date-text">{{ todayText }}</span>
+          </div>
+          <button
+            class="todo-board-history-toggle"
+            type="button"
+            @click="historyOpen = !historyOpen"
+          >
+            📜 查看历史 {{ historyOpen ? '▴' : '▾' }}
+          </button>
         </header>
+
+        <nav class="todo-board-tabs" aria-label="看板分类">
+          <button
+            v-for="board in boards"
+            :key="board.id"
+            type="button"
+            class="todo-board-tab"
+            :class="{ active: activeTabId === board.id }"
+            @click="activeTabId = board.id"
+          >
+            <span class="todo-board-tab-icon">{{ board.icon }}</span>
+            <span class="todo-board-tab-name">{{ board.name }}</span>
+          </button>
+        </nav>
+
         <div v-if="!boardsLoaded" class="todo-board-empty">
           看板数据未加载。请检查 js/todo-data.js 是否在 TodoBoard.js 之前加载。
         </div>
         <div v-else class="todo-board-placeholder">
-          数据已加载：{{ boards.length }} 个 tab（骨架版未渲染 tab/列/卡片）
+          当前 tab：{{ activeTabId }}（骨架版未渲染列/卡片，下一步实现）
         </div>
       </div>
     `,
     data() {
-      return {};
+      return {
+        activeTabId: 'video',
+        historyOpen: false
+      };
     },
     computed: {
       boardsLoaded() {
@@ -31,6 +58,13 @@
       },
       boards() {
         return this.boardsLoaded ? TODO_BOARDS : [];
+      },
+      todayText() {
+        const d = new Date();
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}（今天）`;
       }
     }
   };
