@@ -38,6 +38,29 @@
           </button>
         </nav>
 
+        <section v-if="historyOpen" class="todo-board-history" aria-label="已完成历史">
+          <h3 class="todo-board-history-title">📜 已完成历史</h3>
+          <p v-if="historyGroups.length === 0" class="todo-board-empty">还没有历史归档</p>
+          <div
+            v-for="group in historyGroups"
+            :key="group.boardId + '-' + group.date"
+            class="todo-board-history-group"
+          >
+            <details>
+              <summary>
+                <span class="todo-board-history-date">{{ group.date }}</span>
+                <span class="todo-board-history-meta">{{ group.boardIcon }} {{ group.boardName }} · {{ group.items.length }} 条</span>
+              </summary>
+              <ul class="todo-board-history-list">
+                <li v-for="item in group.items" :key="item.id" class="todo-board-history-item">
+                  {{ item.title }}
+                  <a v-if="item.url" :href="item.url" target="_blank" rel="noopener" class="todo-card-url">🔗 {{ shortUrl(item.url) }}</a>
+                </li>
+              </ul>
+            </details>
+          </div>
+        </section>
+
         <div v-if="!boardsLoaded" class="todo-board-empty">
           看板数据未加载。请检查 js/todo-data.js 是否在 TodoBoard.js 之前加载。
         </div>
@@ -152,6 +175,36 @@
       },
       doneItems() {
         return this.byStatusToday('done');
+      },
+      historyGroups() {
+        // 历史 = date < 今天 AND status == 'done'，按 board 分组再按 date 倒序
+        if (!this.boardsLoaded) return [];
+        const groups = [];
+        this.boards.forEach(board => {
+          const past = (board.items || []).filter(it => {
+            const status = it.status || 'todo';
+            const date = it.date || this.dateKey;
+            return status === 'done' && date < this.dateKey;
+          });
+          if (past.length > 0) {
+            const byDate = {};
+            past.forEach(it => {
+              const d = it.date || this.dateKey;
+              if (!byDate[d]) byDate[d] = [];
+              byDate[d].push(it);
+            });
+            Object.keys(byDate).sort((a, b) => b.localeCompare(a)).forEach(date => {
+              groups.push({
+                boardId: board.id,
+                boardIcon: board.icon,
+                boardName: board.name,
+                date,
+                items: byDate[date]
+              });
+            });
+          }
+        });
+        return groups;
       }
     },
     methods: {
