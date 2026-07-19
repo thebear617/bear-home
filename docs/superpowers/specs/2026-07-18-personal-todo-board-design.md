@@ -124,7 +124,7 @@ const TODO_BOARDS = [
 
 ### 5.2 三列填充规则（渲染时计算）
 
-- **待办**：`date == 今天 AND status == 'todo'`
+- **待办**：`date <= 今天 AND status == 'todo'`（未完成任务跨日保留；未来任务到当天才出现）
 - **进行中**：`status == 'doing'`（包括跨天的——昨天开始做还没完成的会停留在此列，直到手动标 done 或改回 todo）
 - **已完成**：`date == 今天 AND status == 'done'`
 

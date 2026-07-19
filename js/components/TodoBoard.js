@@ -80,7 +80,10 @@
                 <h3 class="todo-card-title">{{ item.title }}</h3>
                 <a v-if="item.url" :href="item.url" target="_blank" rel="noopener" class="todo-card-url">🔗 {{ shortUrl(item.url) }}</a>
                 <p v-if="item.note" class="todo-card-note">{{ item.note }}</p>
-                <div v-if="item.createdAt" class="todo-card-meta">创建：{{ item.createdAt }}</div>
+                <div v-if="item.createdAt" class="todo-card-meta">
+                  创建：{{ item.createdAt }}
+                  <span v-if="item.date && item.date < todayStr" class="todo-card-crossday">（跨天待办）</span>
+                </div>
               </article>
             </div>
           </div>
@@ -159,7 +162,12 @@
         return this.activeBoard ? (this.activeBoard.items || []) : [];
       },
       todoItems() {
-        return this.byStatusToday('todo');
+        // 未完成待办持续保留；未来日期的计划到当天才出现。
+        return this.allItems.filter(it => {
+          const status = it.status || 'todo';
+          const date = it.date || this.dateKey;
+          return status === 'todo' && date <= this.dateKey;
+        });
       },
       doingItems() {
         // 进行中：仅按 status，不过滤日期（跨天允许）
