@@ -35,6 +35,28 @@ const routeCategories = [
 // 字段：id, title, date, tags, body（Markdown）
 const cookbookEntries = [
   {
+    id: 'tool-sync-timeline',
+    title: '建立个人开发时间线自动同步系统',
+    date: '2026-07-20',
+    tags: ['熊窝', '工具'],
+    body: `建立了个人开发时间线自动同步系统：脚本检测版本缺口 + Git hook 提醒 + Agent skill 按流程生成条目。
+
+## 组件
+- scripts/sync-timeline.py：遍历 6 个站点 git log，按完整版本号（major.minor.patch）检测时间线缺口，支持 --json 输出供 Agent 消费
+- scripts/git-hooks/post-commit：每次 personal 仓库提交后自动检测版本缺口并打印提示
+- ~/.agents/skills/sync-timeline/SKILL.md：Agent 工作流规则，按文件变更量自动选择精简或详细 body 风格
+
+## 设计决策
+- 比较逻辑从按 (major,minor) 分组改为按完整版本号比对所有已存在版本，不再遗漏中间版本（如 v0.3.1 → v0.4.2 之间的 v0.4.1）
+- Git hook 只在 personal 仓库触发，不扩散到所有站点
+- 条目正文由 Agent 根据 git diff 分析生成：≤10 文件精简摘要，>10 文件结构化 Markdown
+- 新站点先列出所有版本让用户确认，再批量导入
+- 脚本只改 data.js，不自动 commit / push
+
+## 首次同步
+运行 sync-timeline.py 后一次性补全 20 条缺失版本，覆盖全部 6 个站点，时间线从 33 条扩至 53 条。`,
+  },
+  {
     id: 'tool-ohmyzsh',
     title: '安装 Oh My Zsh：经典 ZSH 配置管理框架',
     date: '2026-07-17',
@@ -498,6 +520,237 @@ const cookbookEntries = [
 - 修复 TodoBoard 组件未加载导致的空白页
 - 修正带参数筛选器误放 computed 导致的渲染中断
 - 以 v0.12.0 大版本发布并同步 README、CHANGELOG 与本地资源`,
+  },
+  {
+    id: 'home-v061',
+    title: '猪窝 v0.6.1：v0.6.1: 美食记录餐型前缀，做饭次数按餐型统计',
+    date: '2026-07-09',
+    tags: ['猪窝', '功能'],
+    body: `- 数据结构改造：foodRecords 从「日期→单条记录」改为「日期→多餐数组」，每餐带 meal 字段（中饭/晚饭/早饭等）
+- 显示优化：详情面板按餐分块，每块顶部显示餐型标签（如「中饭」红色胶囊），多餐后用分隔线区隔，方便一眼区分中饭/晚饭
+- 统计修正：做饭次数改为仅统计 meal 为「中饭」或「晚饭」的餐数（早饭不计入），与用户口径一致；同日中饭+晚饭算 2 次
+- 7.9 三道菜归入同一「中饭」餐（青椒土豆丝1.5+红油凉皮2+火腿肠泡面4.5）；历史 4 条默认标记为「中饭」
+- 新增 CSS：.food-meal-block / .food-meal-head / .food-meal-tag 餐型标签样式`,
+  },
+  {
+    id: 'home-v091',
+    title: '猪窝 v0.9.1：特殊纪念日程日历高亮+图标 + 日记更新至7/20',
+    date: '2026-07-20',
+    tags: ['猪窝', '功能'],
+    body: `- build-diary.py: 从 special-keywords.json 读取关键词→图标映射（非硬编码），每天最多一个图标
+- diary-data.js: 新增 specialEvents 输出（3天：6/10毕业🎓、6/17生日🎂、7/20天台日出🌅）
+- app.js/css: cal-special 金色渐变底色+左边框+图标行
+- data.js: 7/20 电费余额 39.27
+- 日记更新: 7/19 追加 devnotes Vue→Astro 迁移详情 + 跨天打电动，新建 7/20 日程
+- 支出更新: 7/20 黄家泡馍 26元`,
+  },
+  {
+    id: 'personal-v020',
+    title: '熊窝 v0.2.0：v0.2.0: 新增支出记录 Tab',
+    date: '2026-07-06',
+    tags: ['熊窝', '功能'],
+    body: `熊窝升级到 v0.2.0：v0.2.0: 新增支出记录 Tab。`,
+  },
+  {
+    id: 'personal-v031',
+    title: '熊窝 v0.3.1：个人开发时间线补 reanotes v0.3.1（学术会议与期刊宫格）',
+    date: '2026-07-14',
+    tags: ['熊窝', '功能'],
+    body: `- 手动补 reanotes-v031 条目（2026-07-14）：表征学习板块新增 venues 外链宫格
+- sync-timeline.py 仅认 minor 版本，patch 版 v0.3.1 不自动加，故手动补以保持两站版本一致`,
+  },
+  {
+    id: 'personal-v051',
+    title: '熊窝 v0.5.1：更新 meta 版本号为 v0.5.1',
+    date: '2026-07-10',
+    tags: ['熊窝', '功能'],
+    body: `熊窝升级到 v0.5.1：更新 meta 版本号为 v0.5.1。`,
+  },
+  {
+    id: 'personal-v081',
+    title: '熊窝 v0.8.1：路由表新增常用链接，会员补充 ChatGPT Plus，修复备注列截断',
+    date: '2026-07-13',
+    tags: ['熊窝', '功能'],
+    body: `- 路由表 routeCategories 新增「🔗 常用链接」分类（LDXP 神秘小铺 / OpenTheRank / OpenRouter Rankings），置于「个人站点」之后
+- 会员订阅 membershipRecords 新增 ChatGPT Plus（到期 2026-08-12，¥25/月，备注登录账号）
+- 修复会员表 .mt-note 单行省略号截断，改为换行完整显示
+- 版本 meta v0.8.0 → v0.8.1（patch bump，数据补充+样式微调）`,
+  },
+  {
+    id: 'personal-v0121',
+    title: '熊窝 v0.12.1：保留跨日未完成待办',
+    date: '2026-07-19',
+    tags: ['熊窝', '功能'],
+    body: `熊窝升级到 v0.12.1：保留跨日未完成待办。`,
+  },
+  {
+    id: 'devnotes-v020',
+    title: '开发笔记 v0.2.0：Vue 3 → Astro 5 重构',
+    date: '2026-07-19',
+    tags: ['开发笔记', '架构'],
+    body: `迁移内容：
+- 框架：Vue 3（164KB 运行时）→ Astro 5（零运行时）
+- 交互：Vue 组件 → 原生 JS + CSS（~3KB）
+- 样式：单一样式表整体迁移，设计 token 不变
+- 数据：data-*.js 变更为 ES module，内容无损
+
+架构变化：
+- SPA 单页 tab 切换 → 多页路由（/notes /blog /pricing /os）
+- 博客模块新增：Astro Content Collections，Markdown 编写
+- 侧栏导航从 Vue v-show → <a> 标签独立页面
+
+页面路由：
+- /          → 重定向到 /notes/
+- /notes/    → 笔记中心（筛选 + 卡片 + 详情展开）
+- /blog/     → 博客列表（Markdown 驱动）
+- /blog/[slug] → 博客详情
+- /pricing/  → 价格矩阵
+- /os/       → 操作系统学习指南（章节切换 + 手风琴）
+
+部署：
+- 本地：npm run dev
+- 构建：npm run build，输出 dist/
+- GitHub Pages：SITE_BASE=/devnotes/ npm run build`,
+  },
+  {
+    id: 'devnotes-v021',
+    title: '开发笔记 v0.2.1：完善博客表格与项目文档',
+    date: '2026-07-20',
+    tags: ['开发笔记', '功能'],
+    body: `- 新增《开发产品形态与技术栈》博客文章
+- 为 Markdown 表格补充边框、表头和横向滚动样式
+- README 更新为当前 Astro 5 架构及内容维护流程
+- 统一 package 与 lockfile 版本为 0.2.1
+- 清理既有博客尾部多余空行`,
+  },
+  {
+    id: 'devnotes-v022',
+    title: '开发笔记 v0.2.2：新增全栈文章并完善博客阅读体验',
+    date: '2026-07-20',
+    tags: ['开发笔记', '功能'],
+    body: `- 新增《全栈开发》，补充定义、典型案例、技术类型与常见误区
+- 重构并更名《产品形态与技术栈》，调整章节结构与正文内容
+- 为博客增加自定义 slug，个人博客使用 personal-blog-setup 稳定地址
+- 自动生成二三级目录，支持吸附、锚点跳转与滚动高亮
+- 放宽博客正文并完善响应式目录布局
+- 支持 ==文本== Markdown 高亮语法并跳过代码块
+- 版本升级至 0.2.2`,
+  },
+  {
+    id: 'reanotes-v011',
+    title: '科研笔记 v0.1.1：v0.1.1: 首页改为结构化内容',
+    date: '2026-06-30',
+    tags: ['科研笔记', '功能'],
+    body: `科研笔记升级到 v0.1.1：v0.1.1: 首页改为结构化内容。`,
+  },
+  {
+    id: 'reanotes-v032',
+    title: '科研笔记 v0.3.2：v0.3.2',
+    date: '2026-07-16',
+    tags: ['科研笔记', '功能'],
+    body: `科研笔记升级到 v0.3.2：v0.3.2。`,
+  },
+  {
+    id: 'reanotes-v040',
+    title: '科研笔记 v0.4.0：v0.4.0 引入卡片 Markdown 正文渲染',
+    date: '2026-07-16',
+    tags: ['科研笔记', '功能'],
+    body: `- 新增 content/replearning/supervised/ 目录，存放 ImageNet 预训练范式与监督表示特性两篇正文
+- 引入 marked.umd.js 作为客户端 Markdown 解析器（自托管）
+- app.js 新增 loadMarkdownCards() 引擎，卡片支持 markdown 字段自动 fetch 渲染
+- replearning.js 中两张卡片从内联 HTML 迁移为 markdown 引用
+- 微调 CSS 卡片样式适配 markdown-card 状态`,
+  },
+  {
+    id: 'reanotes-v041',
+    title: '科研笔记 v0.4.1：发布 v0.4.1',
+    date: '2026-07-18',
+    tags: ['科研笔记', '功能'],
+    body: `科研笔记升级到 v0.4.1：发布 v0.4.1。`,
+  },
+  {
+    id: 'reanotes-v042',
+    title: '科研笔记 v0.4.2：发布 v0.4.2 论文翻译与发布工作流',
+    date: '2026-07-19',
+    tags: ['科研笔记', '功能'],
+    body: `将 paper-translate 从工作区工具迁入 ReaNotes 仓库，形成可版本管理、可质量阻断并能直接进入文献库的端到端论文处理能力。
+
+主要变动：
+- 串联 MinerU 解析、DeepSeek 分块翻译、Markdown 后处理和 ReaNotes 发布
+- 保护公式、图片与 HTML 表格占位符，校验 API 截断和占位符完整性并自动重试
+- 将可转换的 HTML 表格展开为 Markdown，处理 rowspan、colspan 与多级表头
+- 规范图片替代文本、共享图注和 ./images 本地路径，检查缺图与表格列漂移
+- 自动修复高置信度 OCR 公式异常，并保留不确定问题供质量门禁审查
+- 建立 publishable、needs_review、blocked 三态质量闸门
+- 自动复制中文正文与图片、更新文献索引，并验证 Prettier、lint、VuePress 构建与生成页面
+- 提供已有译文的独立发布入口，重试时默认复用 MinerU 结果，避免重复 API 成本
+- 补充 README、Skill 说明、迁移文档及 27 项单元与回归测试
+
+真实论文验收：
+- 使用 arXiv 2304.12210《A Cookbook of Self-Supervised Learning》完整执行 MinerU 与 DeepSeek
+- 修复无 Abstract 时正文从中段开始、多面板图注、公式字体动态加载和 VuePress 图片解析问题
+- 将站点公式输出切换为可稳定静态构建的 KaTeX
+- 收录中文全文、16 张引用图片、3 个表格和质量报告，并将文献索引改为本地入口
+- 最终生成页包含 102 个公式，未发现渲染错误或占位符泄漏
+
+版本迭代：
+- 将 ReaNotes 版本提升至 0.4.2
+- 补充 v0.4.2 CHANGELOG 和版本入口
+- 将私有 output、真实 .env 与 Python 缓存保持忽略`,
+  },
+  {
+    id: 'lifenotes-v011',
+    title: '常识笔记 v0.1.1：v0.1.1: 全量迁移至 9 领域',
+    date: '2026-07-09',
+    tags: ['常识笔记', '架构'],
+    body: `- PILOT_DOMAINS 设为 None，编译除「无畏契约」外全部 9 个领域
+- 新增板块：宠物 / 生活 / 社会 / 金融-经济 / 动植物 / 历史
+- 各域仅编译「领域地图」「QA」（转录 / 术语表 / 来源池 不编译）
+- 历史 / 社会 源无上述页面，编译为空板块，附友好空状态提示
+- 修复 app.js eyebrow 残留 commonnotes → lifenotes
+- 空板块新增 home-empty 提示样式`,
+  },
+  {
+    id: 'lifenotes-v012',
+    title: '常识笔记 v0.1.2：v0.1.2: 修复侧边栏导航项点击回跳总览',
+    date: '2026-07-10',
+    tags: ['常识笔记', '功能'],
+    body: `- 根因：renderNav 生成的侧边栏导航 <a> 写死 href="#"，
+  点击把 URL hash 清空 → hashchange → route() 解析为空 → 渲染总览仪表盘。
+- 修复：叶子项与子项 href 改为真实页面 hash \`#<currentBoard>/<pageId>\`，
+  点击由浏览器原生跳转，路由正确渲染对应内容页（保留中键新标签打开）。
+- 顶栏「☰ 总览」(href="#") 与板块切换器(href="#<boardId>") 本就正确，未改动。
+- V0.1.0：lifenotes 首个标注语义版本号的版本（覆盖全量迁移 + 本导航修复构成的初始可用站点）。`,
+  },
+  {
+    id: 'lifenotes-v021',
+    title: '常识笔记 v0.2.1：编译时过滤无价值条目（领域描述、文档骨架、待补TODO）',
+    date: '2026-07-10',
+    tags: ['常识笔记', '功能'],
+    body: `- build-notes.py: parse_map_records 新增过滤逻辑，三种情况跳过：
+  (A) 领域描述（H1 + "这个领域用于记录…"）- 首页已有 desc
+  (B) 文档结构标题（核心问题/来源沉淀/子主题:xxx 等）- 笔记骨架非记录
+  (C) 待补 TODO - 个人任务管理，不应公开
+  (D) 仅含标题标签、无正文的空壳条目
+- 保留有实质内容的记录（即使分类为"未分类"）
+- 效果：29 条垃圾条目被清理，各领域记录列表干净整洁`,
+  },
+  {
+    id: 'cats-v022',
+    title: '猫猫 v0.2.2：v0.2.2: 首页统计卡片可点击筛选',
+    date: '2026-07-06',
+    tags: ['猫猫', '功能'],
+    body: `- 首页 5 张统计卡片支持点击作为快捷筛选器，激活态高亮（summary-clickable / summary-active）
+- 进入筛选状态后首页改为展示带筛选/搜索控件的猫咪网格；未筛选时保留原照片墙
+- 移除排序下拉与 state.sort，统一按猫名拼音排序
+- 精简首页统计项为：全部 / 在校 / 已领养 / 已绝育 / 已三针`,
+  },
+  {
+    id: 'cats-v031',
+    title: '猫猫 v0.3.1：v0.3.1: 新增区域和性别字段',
+    date: '2026-07-07',
+    tags: ['猫猫', '功能'],
+    body: `猫猫升级到 v0.3.1：v0.3.1: 新增区域和性别字段。`,
   }
 ];
 

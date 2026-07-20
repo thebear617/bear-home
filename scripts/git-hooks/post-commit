@@ -1,0 +1,27 @@
+#!/bin/sh
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PERSONAL_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+GAPS=$(python3 "$PERSONAL_DIR/scripts/sync-timeline.py" --json 2>/dev/null | python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+msgs = []
+gaps = d.get('gaps', [])
+new_sites = d.get('new_sites', [])
+
+if gaps:
+    msgs.append(f'\033[33m⚠️  发现 {len(gaps)} 个时间线版本缺口：\033[0m')
+    for g in gaps:
+        msgs.append(f'  - {g[\"zh\"]} {g[\"full_ver\"]} ({g[\"date\"]})')
+if new_sites:
+    names = ', '.join(s['zh'] for s in new_sites)
+    msgs.append(f'\033[36m🆕 发现新站点：{names}\033[0m')
+
+if msgs:
+    msgs.append('\033[90m请让 Agent 执行 sync-timeline skill 同步。\033[0m')
+
+print('\n'.join(msgs))
+")
+
+[ -n "$GAPS" ] && echo "$GAPS"
+exit 0

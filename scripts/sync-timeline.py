@@ -31,6 +31,7 @@ sync-timeline.py — 自动把各站点的「大版本」变更同步到 persona
 import subprocess
 import re
 import sys
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent          # htmls/
@@ -65,7 +66,7 @@ def parse_ver(v):
 
 
 def timeline_max_versions():
-    """解析 data.js，返回 {repo: (major, minor)}，即每站在时间轴里的最高大版本。"""
+    """解析 data.js，返回 {repo: (major, minor, patch)}，即每站在时间轴里的最高版本。"""
     text = DATA_JS.read_text()
     start = text.index("const cookbookEntries")
     end = text.index("];", start)
@@ -79,17 +80,16 @@ def timeline_max_versions():
         v = parse_ver(title)
         if not v:
             continue
-        mm = (v[0], v[1])
-        if repo not in result or mm > result[repo]:
-            result[repo] = mm
+        if repo not in result or v > result[repo]:
+            result[repo] = v
     return result
 
 
-def repo_major_reps(repo):
-    """遍历仓库 main 所有带版本号 commit，返回 {(major,minor): (full_ver, subject, sha)}，
-    每个 (major,minor) 系列取最新 commit（git log 默认新→旧，第一个遇到即最新）。"""
+def repo_version_commits(repo):
+    """遍历仓库 main 所有带版本号 commit，返回 {(major,minor,patch): (full_ver, subject, sha)}，
+    每个完整版本号取最新 commit（git log 默认新→旧，第一个遇到即最新）。"""
     out = run(["git", "-C", str(ROOT / repo), "log", "main", "--format=%H%x00%s"])
-    reps = {}
+    commits = {}
     for line in out.splitlines():
         if not line.strip():
             continue
@@ -98,10 +98,9 @@ def repo_major_reps(repo):
         if not m:
             continue
         v = parse_ver(m.group(1))
-        mm = (v[0], v[1])
-        if mm not in reps:  # 第一个即最新
-            reps[mm] = (m.group(1), subject, sha)
-    return reps
+        if v not in commits:
+            commits[v] = (m.group(1), subject, sha)
+    return commits
 
 
 def commit_meta(repo, sha):
@@ -176,36 +175,106 @@ def find_array(text):
     raise RuntimeError("未找到 cookbookEntries 数组结束")
 
 
+def timeline_all_versions():
+    """解析 data.js，返回 {repo: set of (major, minor, patch)}，即每站在时间轴里的所有版本。"""
+    text = DATA_JS.read_text()
+    start = text.index("const cookbookEntries")
+    end = text.index("];", start)
+    section = text[start:end]
+    result = {}
+    for title, tags in ENTRY_RE.findall(section):
+        zh = tags.split(",")[0].strip().strip("'\"")
+        repo = ZH_TO_REPO.get(zh)
+        if not repo:
+            continue
+        v = parse_ver(title)
+        if not v:
+            continue
+        if repo not in result:
+            result[repo] = set()
+        result[repo].add(v)
+    return result
+
+
 def collect_additions():
-    """对比时间轴与各仓库，返回 (additions, notes)。"""
-    tl = timeline_max_versions()
+    """对比时间轴与各仓库所有版本，返回 (additions, notes, new_sites)。"""
+    tl_all = timeline_all_versions()
+    tl_max = timeline_max_versions()
     additions = []
     notes = []
+    new_sites = []
     for repo, zh in SITES.items():
-        reps = repo_major_reps(repo)
-        if not reps:
+        commits = repo_version_commits(repo)
+        if not commits:
             continue
-        tmax = tl.get(repo)
-        if tmax is None:
-            newest = max(reps)
-            notes.append(f"  {repo} ({zh}) → 时间轴无记录，请手动添加首条（仓库最新 v{newest[0]}.{newest[1]}.x），脚本暂不自动灌历史")
+        existing = tl_all.get(repo, set())
+
+        if not existing:
+            newest = max(commits)
+            notes.append(f"  {repo} ({zh}) → 时间轴无记录（仓库最新 v{newest[0]}.{newest[1]}.{newest[2]}）")
+            new_sites.append({"repo": repo, "zh": zh})
             continue
-        # 仓库里所有 (major,minor) 严格高于时间轴最高的 → 补
-        gaps = sorted(mm for mm in reps if mm > tmax)
-        for mm in gaps:
-            full_ver, subject, sha = reps[mm]
-            body, date = commit_meta(repo, sha)
+
+        all_vs = sorted(commits.keys())
+        tmin = min(existing)
+        all_vs = [v for v in all_vs if v >= tmin]
+        gaps = [v for v in all_vs if v not in existing]
+
+        if not gaps:
+            continue
+
+        prev_sha = ""
+        tmax = tl_max.get(repo)
+        if tmax and tmax in commits:
+            prev_sha = commits[tmax][2]
+        else:
+            lower = [v for v in commits if v < gaps[0]]
+            if lower:
+                prev_sha = commits[max(lower)][2]
+
+        for v in gaps:
+            full_ver, subject, sha = commits[v]
+            body_text, date = commit_meta(repo, sha)
             matter = parse_subject(subject)
-            rest = body_rest(body) or f"{zh}升级到 {full_ver}：{matter}。"
+            rest = body_rest(body_text) or f"{zh}升级到 {full_ver}：{matter}。"
+            old_sha = prev_sha or ""
+            if old_sha:
+                stat_out = run(["git", "-C", str(ROOT / repo), "diff", "--shortstat", old_sha, sha]).strip()
+                fm = re.search(r'(\d+) file', stat_out)
+                im = re.search(r'(\d+) insertion', stat_out)
+                dm = re.search(r'(\d+) deletion', stat_out)
+                file_stats = {
+                    "files_changed": int(fm.group(1)) if fm else 0,
+                    "insertions": int(im.group(1)) if im else 0,
+                    "deletions": int(dm.group(1)) if dm else 0,
+                }
+            else:
+                file_stats = {"files_changed": 0, "insertions": 0, "deletions": 0}
             additions.append({
+                "repo": repo, "zh": zh, "full_ver": full_ver,
+                "major_minor": list(v), "sha": sha, "old_sha": old_sha,
+                "date": date, "subject": subject, "matter": matter,
                 "id": f"{repo}-v{full_ver[1:].replace('.', '')}",
                 "title": f"{zh} {full_ver}：{matter}",
-                "date": date,
                 "tags": [zh, category(subject)],
                 "body": rest,
+                "file_stats": file_stats,
             })
-            notes.append(f"  {repo} ({zh}) → 大版本缺口 v{mm[0]}.{mm[1]}.x（时间轴最高 v{tmax[0]}.{tmax[1]}.x）→ 将新增")
-    return additions, notes
+            notes.append(f"  {repo} ({zh}) → 版本缺口 {full_ver} → 将新增")
+            prev_sha = sha
+    return additions, notes, new_sites
+
+
+def output_json(additions, new_sites):
+    result = {
+        "gaps": [{
+            k: v for k, v in a.items()
+            if k in ("repo", "zh", "full_ver", "major_minor", "sha", "old_sha",
+                     "date", "subject", "matter", "id", "title", "tags", "body", "file_stats")
+        } for a in additions],
+        "new_sites": new_sites,
+    }
+    print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
 def print_status():
@@ -213,12 +282,12 @@ def print_status():
     print("站点        时间轴最高      仓库最新")
     print("-" * 44)
     for repo, zh in SITES.items():
-        reps = repo_major_reps(repo)
+        commits = repo_version_commits(repo)
         tmax = tl.get(repo)
-        tmax_s = f"v{tmax[0]}.{tmax[1]}.x" if tmax else "（无）"
-        newest_s = f"v{max(reps)[0]}.{max(reps)[1]}.x" if reps else "（无）"
+        tmax_s = f"v{tmax[0]}.{tmax[1]}.{tmax[2]}" if tmax else "（无）"
+        newest_s = f"v{max(commits)[0]}.{max(commits)[1]}.{max(commits)[2]}" if commits else "（无）"
         flag = ""
-        if reps and (tmax is None or max(reps) > tmax):
+        if commits and (tmax is None or max(commits) > tmax):
             flag = "  ← 有缺口"
         print(f"{repo:<10} {tmax_s:<14} {newest_s}{flag}")
 
@@ -227,8 +296,14 @@ def main():
     if "--status" in sys.argv:
         print_status()
         return
+    json_mode = "--json" in sys.argv
     dry_run = "--dry-run" in sys.argv
-    additions, notes = collect_additions()
+    additions, notes, new_sites = collect_additions()
+
+    if json_mode:
+        output_json(additions, new_sites)
+        return
+
     for n in notes:
         print(n)
     if not additions:
