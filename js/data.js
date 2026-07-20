@@ -57,6 +57,33 @@ const cookbookEntries = [
 运行 sync-timeline.py 后一次性补全 20 条缺失版本，覆盖全部 6 个站点，时间线从 33 条扩至 53 条。`,
   },
   {
+    id: 'tool-vscode-platform',
+    title: 'VSCode 工作平台集成：Cloud Code + Code X + Open Code',
+    date: '2026-07-20',
+    tags: ['工具', '功能'],
+    body: `将主力工作环境整合到 VSCode 侧边栏，不再依赖 Work Body 之外的工具。
+
+## 集成的插件
+- Cloud Code：云开发辅助
+- Code X：AI 编码助手
+- Open Code：终端 AI Agent，集成到 VSCode 侧边栏
+
+## 工作流变化
+- 以后除了 Work Body，开发工作统一在 VSCode 内完成
+- VSCode 的文件视图更适合编辑开发笔记的博客——博客基于 Astro 5 构建，Markdown 文件变更可即时同步`,
+  },
+  {
+    id: 'tool-openchamber',
+    title: '了解 Open Chamber 插件：Open Code 的 VSCode 辅助侧边栏',
+    date: '2026-07-20',
+    tags: ['工具', '功能'],
+    body: `Open Chamber 是一个 VSCode 插件，用于更好地渲染和使用 Open Code。
+
+## 能力
+- 将 Open Code 集成到 VSCode 的辅助侧边栏，统一工作界面
+- 更好地感知上下文，提升 Agent 对项目结构和当前编辑状态的理解`,
+  },
+  {
     id: 'tool-ohmyzsh',
     title: '安装 Oh My Zsh：经典 ZSH 配置管理框架',
     date: '2026-07-17',
