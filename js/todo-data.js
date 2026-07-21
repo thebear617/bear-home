@@ -19,18 +19,26 @@ const TODO_BOARDS = [
     id: 'research',
     name: '科研',
     icon: '🔍',
-    items: []
+    items: [
+      { id: 'r1', title: '做好端到端的 pdf2html 的 skill', status: 'doing', date: '2026-07-19', createdAt: '2026-07-19', url: '', note: '' }
+    ]
   },
   {
     id: 'coding',
     name: '编程',
     icon: '💻',
-    items: []
+    items: [
+      { id: 'c1', title: '看别人简历上的项目进行复现', status: 'doing', date: '2026-07-19', createdAt: '2026-07-19', url: '', note: '' }
+    ]
   },
   {
     id: 'life',
     name: '生活',
     icon: '🏠',
-    items: []
+    items: [
+      { id: 'l1', title: '给宝宝做相册', status: 'doing', date: '2026-07-19', createdAt: '2026-07-19', url: '', note: '' },
+      { id: 'l2', title: '小猫赫兹-博辰看牙', status: 'todo', date: '2026-07-19', createdAt: '2026-07-19', url: '', note: '' },
+      { id: 'l3', title: '约会安排', status: 'done', date: '2026-07-20', createdAt: '2026-07-20', url: '', note: '' }
+    ]
   }
 ];

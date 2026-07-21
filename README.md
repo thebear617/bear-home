@@ -18,19 +18,19 @@ personal/
 ├── css/style.css           # 单一样式表
 ├── js/
 │   ├── vendor/vue.global.prod.js   # Vue 3 自托管（164KB）
-│   ├── data.js             # 静态数据：路由表、会员记录等
+│   ├── data.js             # 静态数据：路由表、会员记录
 │   ├── todo-data.js        # 每日看板分类与任务数据
 │   ├── valorant-data.js    # 无畏契约攻略数据
 │   ├── lol-data.js         # 英雄联盟法师 / ADC / AP 刺客出装公式数据
 │   ├── components/
 │   │   └── TodoBoard.js    # 每日看板 Vue 组件
 │   └── app.js              # Vue 应用：各 Tab 的组件与交互
-├── assets/lol/             # 英雄联盟装备图标与英雄头像（站内本地资源）
-└── scripts/
-    └── install-hooks.sh    # 安装 Git 钩子
+└── assets/lol/             # 英雄联盟装备图标与英雄头像（站内本地资源）
 ```
 
 > 注：原「每日日历追踪 / 支出记录」Tab（Obsidian 日记 → `diary-data.js` / `expense-data.js` 的自动编译链路）已于 2026-07-11 迁移至 home 站点（`js/expense-data.js` + `js/diary-data.js` + 「每日追踪」Tab），personal 侧相关文件与组件已移除。
+
+> 原「个人开发时间线」已迁移至 DevNotes 的「开发时间线」，personal 侧旧 Tab、数据和同步脚本均已移除。时间线 hook 与同步工具由 `devnotes/scripts/` 统一维护。
 
 ## 本地运行
 
@@ -52,8 +52,6 @@ git add . && git commit -m "chore: 更新" && git push origin main
 ```bash
 git clone https://github.com/thebear617/bear-home.git
 cd bear-home
-ln -s /Users/mokaiche/Documents/notes/日记 _diary
-./scripts/install-hooks.sh
 ```
 
 ## 添加内容

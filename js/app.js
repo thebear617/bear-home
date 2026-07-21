@@ -812,94 +812,6 @@ const MembershipView = {
   }
 };
 
-/* ─── Cookbook Timeline ─── */
-
-const CookbookTimeline = {
-  props: ['entries', 'query', 'siteFilter'],
-  emits: ['select'],
-  template: `
-    <div class="timeline-view">
-      <div v-if="filtered.length === 0" class="empty-state">没有匹配的条目</div>
-      <div class="tl" v-else>
-        <div v-for="post in filtered" :key="post.id" class="tl-item" @click="selectPost(post.id)">
-          <div class="tl-dot"></div>
-          <div class="tl-card">
-            <div class="tl-head">
-              <span class="tl-date">{{ post.date }}</span>
-              <span class="tl-title">{{ post.title }}</span>
-            </div>
-            <div class="tl-tags" v-if="post.tags.length">
-              <span v-for="tag in post.tags" :key="tag" class="cookbook-tag">{{ tag }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
-  methods: {
-    selectPost(id) {
-      this.$emit('select', id);
-    }
-  },
-  computed: {
-    filtered() {
-      const q = (this.query || '').trim().toLowerCase();
-      const sf = this.siteFilter || '';
-      let list = [...this.entries];
-      if (sf) list = list.filter(e => e.tags.includes(sf));
-      if (q) {
-        list = list.filter(e =>
-          e.title.toLowerCase().includes(q) ||
-          e.tags.some(t => t.toLowerCase().includes(q))
-        );
-      }
-      const version = (title) => {
-        const m = (title || '').match(/v(\d+)\.(\d+)\.(\d+)/);
-        return m ? [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])] : [0, 0, 0];
-      };
-      return list.sort((a, b) => {
-        const d = (b.date || '').localeCompare(a.date || '');
-        if (d !== 0) return d;
-        const va = version(a.title), vb = version(b.title);
-        for (let i = 0; i < 3; i++) {
-          if (va[i] !== vb[i]) return vb[i] - va[i];
-        }
-        return 0;
-      });
-    }
-  }
-};
-
-/* ─── Cookbook Detail ─── */
-
-const CookbookDetail = {
-  props: ['entry'],
-  emits: ['back'],
-  template: `
-    <div class="cookbook-detail">
-      <button class="cookbook-back" @click="goBack">← 返回时间轴</button>
-      <div v-if="entry" class="cookbook-card">
-        <div class="cookbook-title">{{ entry.title }}</div>
-        <div class="cookbook-meta">
-          <span class="cookbook-date" v-if="entry.date">{{ entry.date }}</span>
-          <span class="cookbook-tags" v-if="entry.tags && entry.tags.length">
-            <span v-for="tag in entry.tags" :key="tag" class="cookbook-tag">{{ tag }}</span>
-          </span>
-        </div>
-        <div class="cookbook-body" v-html="renderMd(entry.body)"></div>
-      </div>
-    </div>
-  `,
-  methods: {
-    goBack() {
-      this.$emit('back');
-    },
-    renderMd(md) {
-      return marked.parse(md, { breaks: true, gfm: true });
-    }
-  }
-};
-
 /* ─── App ─── */
 
 const app = createApp({
@@ -907,48 +819,19 @@ const app = createApp({
     return {
       tabs: [
         { id: 'routes', title: '路由表', icon: '🗺️' },
-        { id: 'cookbook', title: '个人开发时间线', icon: '🧑‍💻' },
         { id: 'valorant', title: '无畏契约', icon: '🎯' },
         { id: 'lol', title: '英雄联盟', icon: '⚔️' },
         { id: 'membership', title: '会员订阅', icon: '💳' },
         { id: 'todo', title: '每日看板', icon: '📋' }
       ],
       activeTab: 'routes',
-      sidebarOpen: false,
-      cookbookQuery: '',
-      cookbookEntries: cookbookEntries,
-      cookbookView: 'timeline',
-      cookbookDetailId: null,
-      cookbookSiteFilter: ''
+      sidebarOpen: false
     };
   },
-  computed: {
-    cookbookDetailEntry() {
-      return this.cookbookEntries.find(e => e.id === this.cookbookDetailId) || null;
-    },
-    cookbookSites() {
-      return ['猪窝', '猫猫', '科研笔记', '熊窝', '常识笔记', '开发笔记', '工具'];
-    }
-  },
   methods: {
-    renderMarkdown(md) {
-      return marked.parse(md, { breaks: true, gfm: true });
-    },
     switchTab(id) {
       this.activeTab = id;
-      if (id === 'cookbook') {
-        this.cookbookView = 'timeline';
-        this.cookbookDetailId = null;
-      }
       if (window.innerWidth < 720) this.sidebarOpen = false;
-    },
-    openDetail(id) {
-      this.cookbookDetailId = id;
-      this.cookbookView = 'detail';
-    },
-    closeDetail() {
-      this.cookbookView = 'timeline';
-      this.cookbookDetailId = null;
     }
   },
   watch: {
@@ -964,8 +847,6 @@ const app = createApp({
 });
 
 app.component('route-table', RouteTable);
-app.component('cookbook-timeline', CookbookTimeline);
-app.component('cookbook-detail', CookbookDetail);
 app.component('valorant-view', ValorantView);
 app.component('lol-view', LolView);
 app.component('membership-view', MembershipView);

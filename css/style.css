@@ -182,6 +182,10 @@ button {
   padding-top: 1.7rem;
 }
 
+.app-shell.todo-shell {
+  max-width: 1200px;
+}
+
 /* ─── Animations ─── */
 
 @keyframes fadeIn {
@@ -796,361 +800,6 @@ a.route-card:hover {
   .main-area {
     padding-top: .2rem;
   }
-}
-
-/* ─── Filter Bar ─── */
-
-.filter-bar {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  padding: 0.7rem 1rem;
-  margin: 0 0.5rem 0.8rem;
-}
-
-.filter-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-}
-
-.filter-label {
-  flex-shrink: 0;
-  width: 2.8rem;
-  font-size: 0.78rem;
-  font-weight: 800;
-  color: var(--muted);
-  padding-top: 0.3rem;
-}
-
-.filter-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.filter-tag {
-  padding: 0.2rem 0.6rem;
-  font-size: 0.76rem;
-  font-weight: 700;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--surface-soft);
-  color: var(--text);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.filter-tag:hover {
-  border-color: var(--green);
-}
-
-.filter-tag.on {
-  background: var(--green);
-  border-color: var(--green);
-  color: #fff;
-}
-
-.filter-clear {
-  margin-left: auto;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.74rem;
-  font-weight: 700;
-  border: none;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.filter-clear:hover {
-  color: var(--red);
-}
-
-/* ─── Cookbook Timeline ─── */
-
-.cookbook-view {
-  display: flex;
-  flex-direction: column;
-}
-
-.timeline-view {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.tl {
-  position: relative;
-  padding-left: 1.6rem;
-  margin: 0.5rem 0.5rem 1rem;
-}
-
-.tl::before {
-  content: '';
-  position: absolute;
-  left: 0.4rem;
-  top: 0.4rem;
-  bottom: 0.4rem;
-  width: 2px;
-  background: var(--green-bg);
-}
-
-.tl-item {
-  position: relative;
-  margin-bottom: 0.6rem;
-  cursor: pointer;
-}
-
-.tl-dot {
-  position: absolute;
-  left: -1.32rem;
-  top: 1.05rem;
-  width: 0.65rem;
-  height: 0.65rem;
-  border-radius: 50%;
-  background: var(--green);
-  border: 2px solid var(--surface);
-  box-shadow: 0 0 0 2px var(--green-bg);
-  z-index: 2;
-}
-
-.tl-card {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  transition: border-color 0.15s;
-}
-
-.tl-item:hover .tl-card {
-  border-color: var(--green);
-}
-
-.tl-head {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.7rem 0.9rem;
-}
-
-.tl-date {
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: var(--green);
-  background: var(--green-bg);
-  border-radius: 6px;
-  padding: 0.05rem 0.45rem;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.tl-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--text);
-  flex: 1;
-}
-
-.tl-tags {
-  display: flex;
-  gap: 0.3rem;
-  flex-wrap: wrap;
-  padding: 0 0.9rem 0.7rem;
-}
-
-/* ─── Cookbook Detail ─── */
-
-.cookbook-detail {
-  padding-bottom: 2rem;
-}
-
-.cookbook-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0.5rem 0;
-  margin-bottom: 0.8rem;
-  transition: color 0.15s;
-}
-
-.cookbook-back:hover {
-  color: var(--green);
-}
-
-.cookbook-meta {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-top: 0.4rem;
-  margin-bottom: 0.6rem;
-}
-
-.cookbook-date {
-  font-size: 0.78rem;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.cookbook-card {
-  margin-bottom: 1rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  padding: 1.1rem 1.2rem;
-}
-
-.cookbook-title {
-  font-size: 1.05rem;
-  font-weight: 900;
-  color: var(--dark);
-  letter-spacing: .03em;
-}
-
-.cookbook-tags {
-  display: flex;
-  gap: .4rem;
-  flex-wrap: wrap;
-}
-
-.cookbook-tag {
-  font-size: .72rem;
-  font-weight: 700;
-  padding: .15rem .55rem;
-  border-radius: 999px;
-  background: var(--surface-soft);
-  border: 1px solid var(--line);
-  color: var(--muted);
-}
-
-/* ─── Cookbook markdown body ─── */
-
-.cookbook-body {
-  margin-top: .8rem;
-  font-size: .88rem;
-  line-height: 1.65;
-  color: var(--text);
-}
-
-.cookbook-body h2 {
-  margin: 1.1rem 0 .5rem;
-  font-size: .92rem;
-  font-weight: 800;
-  color: var(--dark);
-}
-
-.cookbook-body h3 {
-  margin: .9rem 0 .4rem;
-  font-size: .88rem;
-  font-weight: 800;
-  color: var(--dark);
-}
-
-.cookbook-body p {
-  margin: .4rem 0;
-}
-
-.cookbook-body ul,
-.cookbook-body ol {
-  margin: .4rem 0;
-  padding-left: 1.3rem;
-}
-
-.cookbook-body li {
-  margin: .2rem 0;
-}
-
-.cookbook-body li input[type="checkbox"] {
-  margin-right: .35rem;
-  accent-color: var(--green);
-}
-
-.cookbook-body a {
-  color: var(--blue);
-  text-decoration: none;
-  word-break: break-all;
-}
-
-.cookbook-body a:hover {
-  text-decoration: underline;
-}
-
-.cookbook-body code {
-  font-family: "SF Mono", Menlo, Consolas, monospace;
-  font-size: .8rem;
-  padding: .1rem .35rem;
-  background: var(--surface-soft);
-  border: 1px solid var(--line);
-  border-radius: 4px;
-}
-
-.cookbook-body pre {
-  margin: .6rem 0;
-  padding: .7rem .85rem;
-  background: var(--surface-soft);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  overflow-x: auto;
-}
-
-.cookbook-body pre code {
-  padding: 0;
-  border: none;
-  background: none;
-}
-
-.cookbook-body blockquote {
-  margin: .6rem 0;
-  padding: .4rem .8rem;
-  border-left: 3px solid #c08a2f;
-  background: var(--surface-soft);
-  color: var(--muted);
-  border-radius: 0 6px 6px 0;
-}
-
-.cookbook-body strong {
-  font-weight: 800;
-  color: var(--dark);
-}
-
-.cookbook-body hr {
-  margin: .9rem 0;
-  border: none;
-  border-top: 1px solid var(--line);
-}
-
-.cookbook-body table {
-  margin: .6rem 0;
-  width: 100%;
-  border-collapse: collapse;
-  font-size: .84rem;
-}
-
-.cookbook-body th,
-.cookbook-body td {
-  padding: .45rem .65rem;
-  border: 1px solid var(--line);
-  text-align: left;
-}
-
-.cookbook-body th {
-  background: var(--surface-soft);
-  font-weight: 800;
-  color: var(--dark);
-}
-
-.cookbook-body tr:nth-child(even) td {
-  background: var(--surface-soft);
 }
 
 /* ─── Valorant ─── */
@@ -2492,67 +2141,105 @@ details.callout > summary:hover {
 .todo-board-history-toggle {
   background: #ffffff;
   border: 1px solid #e7dfd3;
-  border-radius: 8px;
-  padding: 6px 14px;
-  font-size: 14px;
-  color: #2f2924;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 13px;
+  color: #5a4f44;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .todo-board-history-toggle:hover {
   background: #fbf6ee;
   border-color: #c2410c;
+  color: #c2410c;
 }
 
+/* 统计条 */
+.todo-board-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 8px 14px;
+  background: #ffffff;
+  border: 1px solid #e7dfd3;
+  border-radius: 10px;
+}
+
+.todo-board-stats-text {
+  font-size: 13px;
+  color: #5a4f44;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.todo-board-stats-bar {
+  flex: 1;
+  height: 6px;
+  background: #e7dfd3;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.todo-board-stats-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #c2410c, #f59e0b);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* 分类 Tab — 药丸风格 */
 .todo-board-tabs {
   display: flex;
-  gap: 4px;
-  border-bottom: 1px solid #e7dfd3;
+  gap: 8px;
   margin-bottom: 20px;
   overflow-x: auto;
+  padding-bottom: 2px;
 }
 
 .todo-board-tab {
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  padding: 10px 18px;
-  font-size: 15px;
+  background: #ffffff;
+  border: 1px solid #e7dfd3;
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-size: 14px;
   color: #5a4f44;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   white-space: nowrap;
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .todo-board-tab:hover {
+  background: #fbf6ee;
+  border-color: #c2410c;
   color: #c2410c;
 }
 
 .todo-board-tab.active {
-  color: #c2410c;
-  border-bottom-color: #c2410c;
+  background: #2f2924;
+  border-color: #2f2924;
+  color: #ffffff;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(47, 41, 36, 0.2);
 }
 
 .todo-board-empty {
   color: #9a8e80;
-  font-size: 14px;
+  font-size: 13px;
   text-align: center;
-  padding: 24px 0;
-  font-style: italic;
+  padding: 32px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-style: normal;
 }
 
-.todo-board-placeholder {
-  color: #9a8e80;
-  font-size: 14px;
-  text-align: center;
-  padding: 24px 0;
-}
-
+/* 列容器 */
 .todo-board-columns {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -2560,24 +2247,26 @@ details.callout > summary:hover {
 }
 
 .todo-board-column {
-  background: #fbf6ee;
-  border: 1px solid #e7dfd3;
   border-radius: 12px;
   display: flex;
   flex-direction: column;
   min-height: 240px;
+  overflow: hidden;
 }
 
+.todo-board-column:nth-child(1) { background: #f8fafc; }
+.todo-board-column:nth-child(2) { background: #fef6ee; }
+.todo-board-column:nth-child(3) { background: #ecfdf5; }
+
 .todo-board-column-header {
-  padding: 12px 16px;
-  font-size: 14px;
+  padding: 14px 16px;
+  font-size: 13px;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 8px;
-  border-bottom: 1px solid #e7dfd3;
-  background: #ffffff;
-  border-radius: 12px 12px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .todo-board-column-dot {
@@ -2590,48 +2279,50 @@ details.callout > summary:hover {
 
 .todo-status-todo .todo-board-column-dot { background: #94a3b8; }
 .todo-status-doing .todo-board-column-dot { background: #c2410c; }
-.todo-status-done .todo-board-column-dot { background: #6b7280; }
+.todo-status-done .todo-board-column-dot { background: #10b981; }
 
 .todo-board-column-count {
   margin-left: auto;
-  background: #f7f3ee;
+  background: rgba(0, 0, 0, 0.06);
   color: #5a4f44;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
   border-radius: 10px;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .todo-board-column-body {
-  padding: 12px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   overflow-y: auto;
 }
 
+/* 卡片 */
 .todo-card {
   background: #ffffff;
-  border: 1px solid #e7dfd3;
   border-radius: 10px;
   padding: 12px 14px;
   display: flex;
   flex-direction: column;
   gap: 6px;
   transition: box-shadow 0.15s ease, transform 0.15s ease;
-}
-
-.todo-card:hover {
-  box-shadow: 0 2px 8px rgba(47, 41, 36, 0.08);
-  transform: translateY(-1px);
+  border-left: 3px solid #94a3b8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .todo-card-doing {
-  border-left: 3px solid #c2410c;
+  border-left-color: #c2410c;
+  box-shadow: 0 1px 4px rgba(194, 65, 12, 0.08);
 }
 
 .todo-card-done {
-  opacity: 0.65;
+  border-left-color: #10b981;
+  background: #f1f5f9;
+  opacity: 0.72;
 }
 
 .todo-card-done .todo-card-title {
@@ -2639,23 +2330,27 @@ details.callout > summary:hover {
   color: #6b7280;
 }
 
+.todo-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
 .todo-card-title {
   font-size: 14px;
   font-weight: 600;
   margin: 0;
   color: #2f2924;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
-.todo-card-url {
-  font-size: 12px;
-  color: #c2410c;
+.todo-card-link {
   text-decoration: none;
-  word-break: break-all;
+  color: inherit;
 }
 
-.todo-card-url:hover {
+.todo-card-link:hover .todo-card-title {
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .todo-card-note {
@@ -2664,18 +2359,31 @@ details.callout > summary:hover {
   font-style: italic;
   margin: 0;
   line-height: 1.4;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease, opacity 0.2s ease;
+}
+
+.todo-card:hover .todo-card-note {
+  max-height: 40px;
+  opacity: 1;
 }
 
 .todo-card-meta {
-  font-size: 11px;
+  font-size: 12px;
   color: #9a8e80;
   margin-top: 2px;
 }
 
-.todo-card-crossday {
-  color: #c2410c;
-  margin-left: 4px;
-  font-weight: 500;
+/* Tab 切换淡入动画 */
+.board-fade-enter-active,
+.board-fade-leave-active {
+  transition: opacity 0.12s ease;
+}
+.board-fade-enter-from,
+.board-fade-leave-to {
+  opacity: 0;
 }
 
 /* 历史面板 */
@@ -2751,6 +2459,9 @@ details.callout > summary:hover {
 @media (max-width: 768px) {
   .todo-board {
     padding: 16px 12px 40px;
+  }
+  .todo-board-stats {
+    flex-wrap: wrap;
   }
   .todo-board-columns {
     grid-template-columns: 1fr;

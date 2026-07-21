@@ -1,5 +1,12 @@
 # 熊窝 personal 更新日志
 
+## v0.13.0 — 2026-07-21
+refactor: 个人开发时间线迁移至 DevNotes，并完善每日看板
+
+- chore: 删除 `.opencode/skills/bear-sync/`，对应工作流（任务/支出 → Obsidian 日记同步）已于 v0.8.0 随日记与支出记录一起迁移至 home 站
+- refactor: 删除「个人开发时间线」Tab、Vue 组件、旧数据与样式，功能迁移至 DevNotes「开发时间线」
+- refactor: 时间线同步脚本和 hook 模板迁移至 `devnotes/scripts/`
+
 ## v0.12.1 — 2026-07-19
 fix: 修复未完成待办跨日后消失
 

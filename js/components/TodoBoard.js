@@ -24,6 +24,13 @@
           </button>
         </header>
 
+        <div v-if="boardsLoaded" class="todo-board-stats">
+          <span class="todo-board-stats-text">总 {{ boardStats.total }} · 已完成 {{ boardStats.done }}</span>
+          <div class="todo-board-stats-bar">
+            <div class="todo-board-stats-fill" :style="{ width: boardStats.rate + '%' }"></div>
+          </div>
+        </div>
+
         <nav class="todo-board-tabs" aria-label="看板分类">
           <button
             v-for="board in boards"
@@ -53,8 +60,8 @@
               </summary>
               <ul class="todo-board-history-list">
                 <li v-for="item in group.items" :key="item.id" class="todo-board-history-item">
-                  {{ item.title }}
-                  <a v-if="item.url" :href="item.url" target="_blank" rel="noopener" class="todo-card-url">🔗 {{ shortUrl(item.url) }}</a>
+                  <a v-if="item.url" :href="item.url" target="_blank" rel="noopener">{{ item.title }}</a>
+                  <span v-else>{{ item.title }}</span>
                 </li>
               </ul>
             </details>
@@ -64,25 +71,25 @@
         <div v-if="!boardsLoaded" class="todo-board-empty">
           看板数据未加载。请检查 js/todo-data.js 是否在 TodoBoard.js 之前加载。
         </div>
-        <div v-else-if="activeBoard" class="todo-board-columns">
+        <Transition name="board-fade" mode="out-in">
+        <div v-if="activeBoard" :key="activeTabId" class="todo-board-columns">
           <div class="todo-board-column">
             <div class="todo-board-column-header todo-status-todo">
               <span class="todo-board-column-dot"></span>
               待办 <span class="todo-board-column-count">{{ todoItems.length }}</span>
             </div>
             <div class="todo-board-column-body">
-              <p v-if="todoItems.length === 0" class="todo-board-empty">还没有 todo</p>
+              <p v-if="todoItems.length === 0" class="todo-board-empty">📥 暂无待办</p>
               <article
                 v-for="item in todoItems"
                 :key="item.id"
                 class="todo-card"
               >
-                <h3 class="todo-card-title">{{ item.title }}</h3>
-                <a v-if="item.url" :href="item.url" target="_blank" rel="noopener" class="todo-card-url">🔗 {{ shortUrl(item.url) }}</a>
+                <a v-if="item.url" :href="item.url" target="_blank" rel="noopener" class="todo-card-link"><h3 class="todo-card-title">{{ item.title }}</h3></a>
+                <h3 v-else class="todo-card-title">{{ item.title }}</h3>
                 <p v-if="item.note" class="todo-card-note">{{ item.note }}</p>
                 <div v-if="item.createdAt" class="todo-card-meta">
-                  创建：{{ item.createdAt }}
-                  <span v-if="item.date && item.date < todayStr" class="todo-card-crossday">（跨天待办）</span>
+                  📅 {{ relativeTime(item.createdAt) }}
                 </div>
               </article>
             </div>
@@ -93,39 +100,40 @@
               进行中 <span class="todo-board-column-count">{{ doingItems.length }}</span>
             </div>
             <div class="todo-board-column-body">
-              <p v-if="doingItems.length === 0" class="todo-board-empty">还没有进行中</p>
+              <p v-if="doingItems.length === 0" class="todo-board-empty">🚀 暂无进行中</p>
               <article
                 v-for="item in doingItems"
                 :key="item.id"
                 class="todo-card todo-card-doing"
               >
-                <h3 class="todo-card-title">{{ item.title }}</h3>
-                <a v-if="item.url" :href="item.url" target="_blank" rel="noopener" class="todo-card-url">🔗 {{ shortUrl(item.url) }}</a>
+                <a v-if="item.url" :href="item.url" target="_blank" rel="noopener" class="todo-card-link"><h3 class="todo-card-title">{{ item.title }}</h3></a>
+                <h3 v-else class="todo-card-title">{{ item.title }}</h3>
                 <p v-if="item.note" class="todo-card-note">{{ item.note }}</p>
-                <div v-if="item.createdAt" class="todo-card-meta">创建：{{ item.createdAt }} <span v-if="item.date && item.date !== todayStr" class="todo-card-crossday">（跨天）</span></div>
+                <div v-if="item.createdAt" class="todo-card-meta">📅 {{ relativeTime(item.createdAt) }}</div>
               </article>
             </div>
           </div>
           <div class="todo-board-column">
             <div class="todo-board-column-header todo-status-done">
               <span class="todo-board-column-dot"></span>
-              已完成 <span class="todo-board-column-count">{{ doneItems.length }}</span>
+              已完成 <span class="todo-board-column-count">{{ doneItems.length }}/{{ allItems.length }}</span>
             </div>
             <div class="todo-board-column-body">
-              <p v-if="doneItems.length === 0" class="todo-board-empty">还没有完成</p>
+              <p v-if="doneItems.length === 0" class="todo-board-empty">✅ 等待你完成第一个任务</p>
               <article
                 v-for="item in doneItems"
                 :key="item.id"
                 class="todo-card todo-card-done"
               >
-                <h3 class="todo-card-title">{{ item.title }}</h3>
-                <a v-if="item.url" :href="item.url" target="_blank" rel="noopener" class="todo-card-url">🔗 {{ shortUrl(item.url) }}</a>
+                <a v-if="item.url" :href="item.url" target="_blank" rel="noopener" class="todo-card-link"><h3 class="todo-card-title">{{ item.title }}</h3></a>
+                <h3 v-else class="todo-card-title">{{ item.title }}</h3>
                 <p v-if="item.note" class="todo-card-note">{{ item.note }}</p>
-                <div v-if="item.createdAt" class="todo-card-meta">创建：{{ item.createdAt }}</div>
+                <div v-if="item.createdAt" class="todo-card-meta">📅 {{ relativeTime(item.createdAt) }}</div>
               </article>
             </div>
           </div>
         </div>
+        </Transition>
       </div>
     `,
     data() {
@@ -176,6 +184,19 @@
       doneItems() {
         return this.byStatusToday('done');
       },
+      boardStats() {
+        const todo = this.todoItems.length;
+        const doing = this.doingItems.length;
+        const done = this.doneItems.length;
+        const total = todo + doing + done;
+        return {
+          total,
+          todo,
+          doing,
+          done,
+          rate: total > 0 ? Math.round((done / total) * 100) : 0
+        };
+      },
       historyGroups() {
         // 历史 = date < 今天 AND status == 'done'，按 board 分组再按 date 倒序
         if (!this.boardsLoaded) return [];
@@ -216,14 +237,18 @@
           return s === status && d === this.dateKey;
         });
       },
-      shortUrl(url) {
-        if (!url) return '';
-        try {
-          const u = new URL(url);
-          return u.hostname + (u.pathname !== '/' ? u.pathname : '');
-        } catch (e) {
-          return url;
-        }
+      relativeTime(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr + 'T00:00:00');
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const diff = Math.round((today - d) / 86400000);
+        if (diff === 0) return '今天';
+        if (diff === 1) return '昨天';
+        if (diff <= 6) return diff + ' 天前';
+        if (diff <= 13) return '1 周前';
+        if (diff <= 30) return Math.round(diff / 7) + ' 周前';
+        return dateStr;
       }
     }
   };
