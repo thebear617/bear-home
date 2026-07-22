@@ -20,7 +20,8 @@ const TODO_BOARDS = [
     name: '科研',
     icon: '🔍',
     items: [
-      { id: 'r1', title: '做好端到端的 pdf2html 的 skill', status: 'doing', date: '2026-07-19', createdAt: '2026-07-19', url: '', note: '' }
+      { id: 'r1', title: '做好端到端的 pdf2html 的 skill', status: 'doing', date: '2026-07-19', createdAt: '2026-07-19', url: '', note: '' },
+      { id: 'r2', title: '如何学习AI全栈 - 数据、算法、模型、硬件、架构', status: 'todo', date: '2026-07-22', createdAt: '2026-07-22', url: 'https://www.xiaohongshu.com/discovery/item/6a4b7f98000000000f01f36b?source=webshare&xhsshare=pc_web&xsec_token=CBMHjeZ8hoJ3FeBuXMLoMZyX80lJmMyDVp4HyJX-wjaFQ=&xsec_source=pc_share', note: '来源：@lvyneko 小红书笔记，含 AI-wiki 思维导图' }
     ]
   },
   {
