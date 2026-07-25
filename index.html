@@ -33,8 +33,8 @@
         </div>
       </nav>
 
-      <div class="main-area" :class="{ 'lol-active': activeTab === 'lol' }">
-        <main class="app-shell" :class="{ 'lol-shell': activeTab === 'lol' }">
+      <div class="main-area" :class="{ 'lol-active': activeTab === 'lol', 'valorant-active': activeTab === 'valorant' }">
+        <main class="app-shell" :class="{ 'lol-shell': activeTab === 'lol', 'valorant-shell': activeTab === 'valorant' }">
           <route-table v-show="activeTab === 'routes'"></route-table>
           <valorant-view v-show="activeTab === 'valorant'"></valorant-view>
           <lol-view v-show="activeTab === 'lol'"></lol-view>

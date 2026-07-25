@@ -804,47 +804,117 @@ a.route-card:hover {
 
 /* ─── Valorant ─── */
 
+.main-area.valorant-active {
+  position: relative;
+  background: #07111f;
+}
+
+.main-area.valorant-active::before {
+  content: '';
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: block;
+  width: 100%;
+  height: 5px;
+  background: #ff4655;
+}
+
+.app-shell.valorant-shell {
+  max-width: 1040px;
+  padding-top: 1.7rem;
+}
+
 .valorant-view {
+  /* 局部深色攻略调色板（与 LoL 同源，红色 accent 强调 Valorant） */
+  --text: #eef5ff;
+  --muted: #91a2b9;
+  --line: #2a3a52;
+  --surface: #121f32;
+  --surface-soft: #0b1525;
+  --dark: #ffffff;
+  --blue: #69b9ff;
+  color: var(--text);
   animation: fadeIn .2s ease;
 }
 
-.vmap-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: .5rem;
-  margin-bottom: 1.5rem;
+.valorant-hero {
+  padding: .15rem 1rem 1.65rem;
+  text-align: center;
 }
 
-.vmap-card {
+.valorant-hero h1 {
+  color: #fff;
+  font-size: clamp(1.85rem, 4.5vw, 3rem);
+  font-weight: 950;
+  line-height: 1.12;
+  letter-spacing: .01em;
+}
+
+.valorant-hero p {
+  margin-top: .25rem;
+  color: #ff7a6b;
+  font-size: clamp(.92rem, 2vw, 1.12rem);
+  font-weight: 850;
+}
+
+.valorant-switcher {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: .45rem;
+  width: min(100%, 760px);
+  margin: 0 auto 1.45rem;
+  padding: .4rem;
+  border: 1px solid #293852;
+  border-radius: 15px;
+  background: #0d192a;
+}
+
+.valorant-switcher button {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: .65rem .75rem;
-  border-radius: var(--radius);
-  font-size: .84rem;
-  font-weight: 800;
-  color: #2f2924;
-  text-decoration: none;
-  border: 1px solid var(--line);
-  cursor: pointer;
-  transition: filter .15s, box-shadow .15s;
+  gap: .55rem;
+  min-height: 48px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: #91a2b9;
   font-family: inherit;
+  cursor: pointer;
+  transition: background .18s, border-color .18s, color .18s, box-shadow .18s;
 }
 
-.vmap-card:hover {
-  filter: brightness(1.06);
-  box-shadow: var(--shadow);
+.valorant-switcher button:hover {
+  color: #eef5ff;
+  background: rgba(255, 255, 255, .045);
 }
 
-.vmap-card.active {
-  box-shadow: 0 0 0 2px var(--green);
-  filter: brightness(0.95);
+.valorant-switcher button.active {
+  border-color: rgba(255, 70, 85, .72);
+  background: linear-gradient(135deg, rgba(255, 70, 85, .22), rgba(255, 70, 85, .06));
+  color: #ffd6d2;
+  box-shadow: inset 0 0 0 1px rgba(255, 70, 85, .08), 0 4px 14px rgba(0, 0, 0, .18);
 }
 
-@media (max-width: 600px) {
-  .vmap-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.valorant-switcher span {
+  color: #ff6b7a;
+  font-size: .65rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+}
+
+.valorant-switcher strong {
+  font-size: .9rem;
+  font-weight: 850;
+}
+
+.valorant-panel {
+  margin-bottom: 1.45rem;
+  padding: 1.3rem 1.25rem 1.1rem;
+  border: 2px solid #2a3a52;
+  border-radius: 22px;
+  background: #121f32;
 }
 
 .vmap-tabs {
@@ -858,35 +928,24 @@ a.route-card:hover {
   padding: .35rem .85rem;
   font-size: .82rem;
   font-weight: 700;
-  color: var(--muted);
-  border: 1px solid var(--line);
+  color: #91a2b9;
+  border: 1px solid #2a3a52;
   border-radius: 999px;
-  background: var(--surface);
+  background: transparent;
   cursor: pointer;
   font-family: inherit;
   transition: background .15s, color .15s, border-color .15s;
 }
 
 .vmap-tab:hover {
-  color: var(--dark);
-  border-color: var(--dark);
+  color: #eef5ff;
+  border-color: #ff7a6b;
 }
 
 .vmap-tab.active {
   color: #fff;
-  background: #2D6A7E;
-  border-color: #2D6A7E;
-}
-
-.vmap-content {
-  max-width: 100%;
-}
-
-.vmap-title {
-  font-size: 1.1rem;
-  font-weight: 900;
-  color: var(--dark);
-  margin-bottom: .8rem;
+  background: #ff4655;
+  border-color: #ff4655;
 }
 
 .valorant-body {
@@ -931,7 +990,7 @@ a.route-card:hover {
 }
 
 .valorant-body a {
-  color: var(--blue);
+  color: #69b9ff;
   text-decoration: none;
   word-break: break-all;
 }
@@ -979,7 +1038,7 @@ a.route-card:hover {
 
 .valorant-body strong {
   font-weight: 800;
-  color: var(--dark);
+  color: #fff;
 }
 
 .valorant-body hr {
@@ -1011,11 +1070,42 @@ a.route-card:hover {
 .valorant-body th {
   background: var(--surface-soft);
   font-weight: 800;
-  color: var(--dark);
+  color: #fff;
 }
 
 .valorant-body tr:nth-child(even) td {
   background: var(--surface-soft);
+}
+
+.valorant-view .empty-state {
+  border-color: #2a3a52;
+  background: var(--surface);
+  color: var(--muted);
+}
+
+/* 深色攻略面板内的 callout 配色重做 */
+.valorant-view .callout {
+  border-color: var(--line);
+  background: var(--surface);
+}
+
+.valorant-view .callout th {
+  background: rgba(255, 255, 255, .04);
+}
+
+.valorant-view .callout-note > :is(.callout-title, summary) { background: rgba(45, 106, 220, .22); color: #93c5fd; }
+.valorant-view .callout-warning > :is(.callout-title, summary) { background: rgba(245, 158, 11, .2); color: #fcd34d; }
+.valorant-view .callout-tip > :is(.callout-title, summary) { background: rgba(16, 185, 129, .2); color: #6ee7b7; }
+.valorant-view .callout-info > :is(.callout-title, summary) { background: rgba(148, 163, 184, .18); color: #cbd5e1; }
+
+@media (max-width: 600px) {
+  .valorant-switcher {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .valorant-panel {
+    padding: 1rem .85rem .85rem;
+    border-radius: 16px;
+  }
 }
 
 /* ─── League of Legends ─── */

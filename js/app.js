@@ -140,18 +140,24 @@ const ValorantView = {
     <div class="valorant-view">
       <div v-if="loading" class="empty-state">加载中...</div>
       <div v-else>
-        <div class="vmap-grid">
+        <header class="valorant-hero">
+          <h1>无畏契约</h1>
+          <p>地图战术 · 排位图池 · 决策框架</p>
+        </header>
+        <div class="valorant-switcher">
           <button
             v-for="(s, i) in sections"
             :key="s.id"
-            class="vmap-card"
             :class="{ active: activeSection === s.id }"
-            :style="cardStyle(i)"
             @click="selectSection(s.id)"
-          >{{ s.title }}</button>
+          ><span>{{ indexLabel(i) }}</span><strong>{{ s.title }}</strong></button>
         </div>
-        <div v-for="section in sections" :key="section.id" v-show="activeSection === section.id" class="vmap-content">
-          <h2 class="vmap-title">{{ section.title }}</h2>
+        <section
+          v-for="section in sections"
+          :key="section.id"
+          v-show="activeSection === section.id"
+          class="valorant-panel"
+        >
           <div v-if="section.subSections && section.subSections.length > 1" class="vmap-tabs">
             <button
               v-for="sub in section.subSections"
@@ -163,7 +169,7 @@ const ValorantView = {
           </div>
           <div v-if="activeSubForSection(section)" class="valorant-body" v-html="activeSubForSection(section).html"></div>
           <div v-else class="valorant-body" v-html="section.html"></div>
-        </div>
+        </section>
       </div>
     </div>
   `,
@@ -172,23 +178,12 @@ const ValorantView = {
       loading: true,
       sections: [],
       activeSection: '',
-      activeSub: {},
-      gradients: [
-        'linear-gradient(135deg, #FFD3B6, #FFAAA5)',
-        'linear-gradient(135deg, #A8E6CF, #DCEDC1)',
-        'linear-gradient(135deg, #E8D5FF, #B388FF)',
-        'linear-gradient(135deg, #A2D2FF, #BDE0FE)',
-        'linear-gradient(135deg, #FFC3A0, #FFAFBD)',
-        'linear-gradient(135deg, #FFF176, #FFB300)',
-        'linear-gradient(135deg, #FADADD, #F4A7B9)',
-        'linear-gradient(135deg, #B5EAD7, #C7CEEA)',
-        'linear-gradient(135deg, #FFE0B2, #FF8A65)'
-      ]
+      activeSub: {}
     };
   },
   methods: {
-    cardStyle(i) {
-      return { background: this.gradients[i % this.gradients.length] };
+    indexLabel(i) {
+      return String(i + 1).padStart(2, '0');
     },
     splitByHeading(html) {
       var sections = [];
