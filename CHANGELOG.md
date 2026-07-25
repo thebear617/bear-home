@@ -1,5 +1,12 @@
 # 熊窝 personal 更新日志
 
+## v0.14.0 — 2026-07-25
+refactor: 每日看板迁移至猪窝 home 站
+
+- refactor: 移除每日看板 Tab、TodoBoard 组件与 todo-data 数据层
+- refactor: 看板功能迁移至 home 站「每日看板」页面，使用 Astro + 原生 JS 重写
+- chore: 删除 js/components/TodoBoard.js、js/todo-data.js
+
 ## v0.13.0 — 2026-07-21
 refactor: 个人开发时间线迁移至 DevNotes，并完善每日看板
 

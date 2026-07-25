@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="version" content="v0.13.0">
+  <meta name="version" content="v0.14.0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>熊窝</title>
   <link rel="stylesheet" href="css/style.css">
@@ -34,11 +34,10 @@
       </nav>
 
       <div class="main-area" :class="{ 'lol-active': activeTab === 'lol' }">
-        <main class="app-shell" :class="{ 'lol-shell': activeTab === 'lol', 'todo-shell': activeTab === 'todo' }">
+        <main class="app-shell" :class="{ 'lol-shell': activeTab === 'lol' }">
           <route-table v-show="activeTab === 'routes'"></route-table>
           <valorant-view v-show="activeTab === 'valorant'"></valorant-view>
           <lol-view v-show="activeTab === 'lol'"></lol-view>
-          <todo-board v-show="activeTab === 'todo'"></todo-board>
           <membership-view v-show="activeTab === 'membership'"></membership-view>
         </main>
       </div>
@@ -46,12 +45,10 @@
   </div>
 
   <script src="js/data.js"></script>
-  <script src="js/todo-data.js?v=0.14.0"></script>
   <script src="js/valorant-data.js"></script>
   <script src="js/lol-data.js"></script>
   <script src="js/vendor/vue.global.prod.js"></script>
   <script src="js/vendor/marked.min.js"></script>
-  <script src="js/components/TodoBoard.js?v=0.13.0"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

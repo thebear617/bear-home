@@ -821,8 +821,7 @@ const app = createApp({
         { id: 'routes', title: '路由表', icon: '🗺️' },
         { id: 'valorant', title: '无畏契约', icon: '🎯' },
         { id: 'lol', title: '英雄联盟', icon: '⚔️' },
-        { id: 'membership', title: '会员订阅', icon: '💳' },
-        { id: 'todo', title: '每日看板', icon: '📋' }
+        { id: 'membership', title: '会员订阅', icon: '💳' }
       ],
       activeTab: 'routes',
       sidebarOpen: false
@@ -850,5 +849,4 @@ app.component('route-table', RouteTable);
 app.component('valorant-view', ValorantView);
 app.component('lol-view', LolView);
 app.component('membership-view', MembershipView);
-app.component('todo-board', window.TodoBoard);
 app.mount('#app');
