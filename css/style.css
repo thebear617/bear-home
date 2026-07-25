@@ -1083,6 +1083,217 @@ a.route-card:hover {
   color: var(--muted);
 }
 
+/* ─── Valorant 阵容卡片 + 阶段时间线（与 LoL 同源配色） ─── */
+
+.valorant-view .val-team-li {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  margin: .35rem 0;
+}
+
+.valorant-view .val-li-label {
+  flex: 0 0 auto;
+  color: var(--lol-gold, #f5c542);
+  font-size: .82rem;
+  font-weight: 850;
+}
+
+.valorant-view .val-team {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: .55rem 1rem;
+  min-width: 0;
+}
+
+.valorant-view .val-pick-agent img,
+.valorant-view .val-role-placeholder {
+  font-size: .62rem;
+  font-weight: 800;
+}
+
+.valorant-view .val-team .figure,
+.valorant-view .val-pick {
+  margin: 0;
+}
+
+.valorant-view .val-pick {
+  width: 58px;
+  color: #cbd6e5;
+  text-align: center;
+  position: relative;
+}
+
+.valorant-view .val-pick img {
+  display: block;
+  width: 50px;
+  height: 50px;
+  margin: 0 auto;
+  border: 3px solid #50617a;
+  border-radius: 11px;
+  background: #0b1525;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .32);
+}
+
+.valorant-view .val-tone-red img    { border-color: #ef6872; }
+.valorant-view .val-tone-blue img   { border-color: #43bdf2; }
+.valorant-view .val-tone-purple img { border-color: #a679e8; }
+.valorant-view .val-tone-green img  { border-color: #33d39a; }
+
+.valorant-view .val-pick figcaption {
+  margin-top: .25rem;
+  font-size: .76rem;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.valorant-view .val-role-tag {
+  display: inline-block;
+  margin-top: .15rem;
+  padding: .05rem .38rem;
+  font-size: .58rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, .08);
+  color: #cbd6e5;
+}
+.valorant-view .val-role-red    { background: rgba(239, 104, 114, .18); color: #ffadb4; }
+.valorant-view .val-role-blue   { background: rgba(67, 189, 242, .16); color: #9dd9f7; }
+.valorant-view .val-role-purple { background: rgba(166, 121, 232, .18); color: #d4b7ff; }
+.valorant-view .val-role-green  { background: rgba(51, 211, 154, .16); color: #80e9bf; }
+
+.valorant-view .val-pick-role img { display: none; }
+.valorant-view .val-role-placeholder {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #50617a;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, .02);
+  color: #91a2b9;
+  font-size: .82rem;
+  font-weight: 850;
+}
+
+.valorant-view .val-team-note {
+  align-self: center;
+  color: var(--muted, #91a2b9);
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+.valorant-view .val-position-li {
+  display: flex;
+  align-items: baseline;
+  gap: .55rem;
+  margin: .3rem 0;
+}
+
+.valorant-view .val-position {
+  color: #cbd6e5;
+  font-size: .86rem;
+}
+
+/* 阶段时间线 */
+.valorant-view .val-timeline {
+  margin: .8rem 0 .4rem;
+}
+
+.valorant-view .val-timeline-track {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: .4rem;
+  margin-bottom: .8rem;
+}
+
+.valorant-view .val-tl-node {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .4rem .6rem;
+  border-radius: 11px;
+  background: rgba(255, 70, 85, .06);
+  border: 1px solid rgba(255, 70, 85, .22);
+}
+.valorant-view .val-tl-node::after {
+  content: '→';
+  flex: 0 0 auto;
+  color: rgba(255, 70, 85, .4);
+}
+.valorant-view .val-tl-node.is-last {
+  background: rgba(245, 197, 66, .08);
+  border-color: rgba(245, 197, 66, .4);
+}
+.valorant-view .val-tl-node.is-last::after { display: none; }
+
+.valorant-view .val-tl-dot {
+  width: 1.35rem;
+  height: 1.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #ff4655;
+  color: #fff;
+  font-size: .62rem;
+  font-weight: 900;
+  flex: 0 0 auto;
+}
+.valorant-view .val-tl-node.is-last .val-tl-dot {
+  background: var(--lol-gold, #f5c542);
+  color: #07111f;
+}
+
+.valorant-view .val-tl-label {
+  font-size: .78rem;
+  font-weight: 800;
+  color: #eef5ff;
+  white-space: nowrap;
+}
+
+.valorant-view .val-timeline-rows {
+  display: grid;
+  gap: .5rem;
+}
+
+.valorant-view .val-tl-row {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: .8rem;
+  padding: .55rem .8rem;
+  border-radius: 12px;
+  background: rgba(7, 17, 31, .45);
+  border: 1px solid #2a3a52;
+}
+
+.valorant-view .val-tl-phase {
+  color: #ff6b7a;
+  font-size: .82rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.valorant-view .val-tl-action {
+  color: #cbd6e5;
+  font-size: .84rem;
+  line-height: 1.55;
+  min-width: 0;
+}
+.valorant-view .val-tl-action strong { color: #fff; }
+
+@media (max-width: 600px) {
+  .valorant-view .val-timeline-track { grid-template-columns: 1fr 1fr; }
+  .valorant-view .val-tl-node::after { display: none; }
+  .valorant-view .val-tl-row { grid-template-columns: 1fr; gap: .25rem; padding: .5rem .65rem; }
+}
+
 /* 深色攻略面板内的 callout 配色重做 */
 .valorant-view .callout {
   border-color: var(--line);

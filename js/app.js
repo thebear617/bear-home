@@ -133,6 +133,155 @@ function preprocessObsidian(md, markedFn) {
   return html;
 }
 
+/* ─── Valorant tactical enhancement ─── */
+
+function valorantRoleLabel(role) {
+  if (!role) return '';
+  return role;
+}
+
+// 把任意字符串解析为「卡片 token」数组：
+// 命中 agent 名/别名 → 头像卡；命中角色位（一突/烟位/先锋位/哨卫/决斗/控场）→ 灰色角色位卡；其余 → 文字残留（单卡合并）
+function valorantParseTeam(str) {
+  if (!str) return [];
+  // 去掉行内括注（如「（可换迷核）」「（首选一突）」），保留主句
+  var cleaned = str.replace(/[（(][^()]*[）)]/g, '').trim();
+  // 标准分隔符
+  var rawTokens = cleaned.split(/[、/，,；;]|或者|或(?=[^])/).map(function (t) { return t.trim(); }).filter(Boolean);
+  // 由于"或"分割会把"捷风/迷核"两类拆开，保留原"X或Y"语义时需把斜杠视作"备选"——这里简化为并列卡
+  var agentMap = (typeof valorantAgents !== 'undefined') ? valorantAgents : {};
+  var aliasMap = (typeof valorantAgentAlias !== 'undefined') ? valorantAgentAlias : {};
+  // 角色位描述词（灰色占位卡）
+  var roleSlots = {
+    '一突': '决斗',
+    '烟位': '控场',
+    '烟卫': '控场',
+    '先锋位': '先锋',
+    '哨卫': '哨卫',
+    '守卫': '哨卫',
+    '决斗': '决斗',
+    '决斗位': '决斗',
+    '控场': '控场',
+    '控场位': '控场',
+    '先锋': '先锋',
+    '双决斗': '决斗',
+    '双烟': '控场'
+  };
+  var result = [];
+  var textTail = [];
+  rawTokens.forEach(function (tok) {
+    if (!tok) return;
+    // 角色位占位
+    if (roleSlots[tok]) {
+      result.push({ kind: 'role', role: roleSlots[tok] });
+      return;
+    }
+    // agent（先走别名归一）
+    var canon = aliasMap[tok] || tok;
+    var info = agentMap[canon];
+    if (info) {
+      result.push({ kind: 'agent', name: canon, role: info.role, tone: info.tone, icon: info.icon });
+      return;
+    }
+    // 形如「捷风+猎枭+瑞娜 中路」（站位混进来了）—— 拆出文字并把里面 agent 挑出来
+    var inlineAgents = tok.match(/[A-Za-zK/O]+|[一-龥]/g);
+    if (inlineAgents && inlineAgents.length > 1) {
+      var foundAny = false;
+      inlineAgents.forEach(function (nm) {
+        var c2 = aliasMap[nm] || nm;
+        var i2 = agentMap[c2];
+        if (i2) { result.push({ kind: 'agent', name: c2, role: i2.role, tone: i2.tone, icon: i2.icon }); foundAny = true; }
+      });
+      if (foundAny) return;
+    }
+    // 其它残留：当作文字尾注
+    textTail.push(tok);
+  });
+  if (textTail.length) result.push({ kind: 'text', text: textTail.join(' / ') });
+  return result;
+}
+
+// HTML 转义
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// 把"推荐阵容"一项渲染成卡片串
+function valorantRenderTeamCards(team) {
+  var html = '<div class="val-team">';
+  team.forEach(function (t) {
+    if (t.kind === 'agent') {
+      html += '<figure class="val-pick val-pick-agent val-tone-' + (t.tone || '') + '">'
+        + '<img src="' + t.icon + '" alt="' + esc(t.name) + '" loading="lazy">'
+        + '<figcaption>' + esc(t.name) + '</figcaption>'
+        + (t.role ? '<span class="val-role-tag val-role-' + (t.tone || '') + '">' + esc(t.role) + '</span>' : '')
+        + '</figure>';
+    } else if (t.kind === 'role') {
+      html += '<figure class="val-pick val-pick-role">'
+        + '<div class="val-role-placeholder">' + esc(t.role) + '</div>'
+        + '<figcaption>' + esc(t.role) + '</figcaption>'
+        + '</figure>';
+    } else if (t.kind === 'text') {
+      html += '<span class="val-team-note">' + esc(t.text) + '</span>';
+    }
+  });
+  html += '</div>';
+  return html;
+}
+
+// 把「阶段 | 动作」表渲染成时间线
+function valorantRenderTimeline(rows) {
+  if (!rows || !rows.length) return '';
+  var html = '<div class="val-timeline">';
+  html += '<div class="val-timeline-track">';
+  rows.forEach(function (r, i) {
+    var isLast = i === rows.length - 1;
+    html += '<div class="val-tl-node' + (isLast ? ' is-last' : '') + '">'
+      + '<span class="val-tl-dot">' + (i + 1) + '</span>'
+      + '<span class="val-tl-label">' + esc(r.phase) + '</span>'
+      + '</div>';
+  });
+  html += '</div>';
+  html += '<div class="val-timeline-rows">';
+  rows.forEach(function (r) {
+    html += '<div class="val-tl-row"><div class="val-tl-phase">' + esc(r.phase) + '</div>'
+      + '<div class="val-tl-action">' + r.action + '</div></div>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
+// 增强 valorant HTML：替换 callout 内的"推荐阵容"列表项 与 「阶段|动作」表
+function enhanceValorantHtml(html) {
+  if (!html) return html;
+  // 1) 替换「推荐阵容：<...></li>」
+  html = html.replace(/<li><strong>推荐阵容<\/strong>：([\s\S]*?)<\/li>/g, function (m, body) {
+    var team = valorantParseTeam(body);
+    if (!team.length) return m;
+    return '<li class="val-team-li"><strong class="val-li-label">推荐阵容</strong>' + valorantRenderTeamCards(team) + '</li>';
+  });
+  // 2) 替换「站位:...</li>」→ 给 li 加个标识类,样式上单独处理
+  html = html.replace(/<li><strong>站位<\/strong>：(.*?)<\/li>/g, '<li class="val-position-li"><strong class="val-li-label">站位</strong><span class="val-position">$1</span></li>');
+  // 3) 把 callout 内的表(首列"阶段"次列"动作")替换成时间线
+  html = html.replace(/<table>([\s\S]*?)<\/table>/g, function (m, inner) {
+    // 仅当表头首格为"阶段"时处理
+    if (!/<th[^>]*>\s*阶段\s*<\/th>/.test(inner)) return m;
+    var rows = [];
+    var trRe = /<tr>([\s\S]*?)<\/tr>/g;
+    var match;
+    while ((match = trRe.exec(inner)) !== null) {
+      var cells = match[1].match(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/g) || [];
+      if (cells.length < 2) continue;
+      var phase = (cells[0] || '').replace(/<[^>]+>/g, '').trim();
+      var action = (cells[1] || '').replace(/^<t[dh][^>]*>/, '').replace(/<\/t[dh]>$/, '').trim();
+      if (!phase || phase === '阶段') continue;
+      rows.push({ phase: phase, action: action });
+    }
+    return valorantRenderTimeline(rows);
+  });
+  return html;
+}
+
 /* ─── Valorant View ─── */
 
 const ValorantView = {
@@ -247,6 +396,7 @@ const ValorantView = {
         mapHtml = mapHtml.replace(/<h1[^>]*>.*?<\/h1>/, '');
         mapHtml = mapHtml.replace(/<h2/g, '<h1').replace(/<\/h2>/g, '</h1>');
         mapHtml = mapHtml.replace(/<h3/g, '<h2').replace(/<\/h3>/g, '</h2>');
+        mapHtml = enhanceValorantHtml(mapHtml);
 
         var rawSections = this.splitByHeading(mapHtml);
         if (rawSections.length >= 2) {
