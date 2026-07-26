@@ -686,6 +686,13 @@ const LolView = {
   components: { LolMageGuide, LolAdcGuide, LolAssassinGuide },
   template: `
     <div class="lol-view">
+      <div class="lol-data-link">
+        <a href="https://www.resg.top/" target="_blank" rel="noopener">
+          <span class="lol-data-link-icon">📊</span>
+          <span class="lol-data-link-text">海克斯大乱斗数据站 RESG</span>
+          <span class="lol-data-link-arrow">↗</span>
+        </a>
+      </div>
       <nav class="lol-guide-switcher" aria-label="英雄联盟攻略切换">
         <button
           v-for="item in guides"
