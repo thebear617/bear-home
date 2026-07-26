@@ -1,0 +1,40 @@
+---
+import SiteSidebar from '../components/SiteSidebar.astro';
+const { title = '熊窝', active = 'routes', children } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="layout">
+    <SiteSidebar active={active} />
+    <div class:list={['main-area', { 'lol-active': active === 'lol' }]}>
+      <main class:list={['app-shell', { 'lol-shell': active === 'lol' }]}>
+        <slot />
+      </main>
+    </div>
+  </div>
+</body>
+</html>
+
+<script is:inline>
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.querySelector('.sidebar-backdrop');
+  document.querySelector('[data-sidebar-open]')?.addEventListener('click', () => {
+    sidebar?.classList.add('open');
+    backdrop?.classList.add('open');
+    document.body.classList.add('sidebar-open');
+    document.body.style.overflow = 'hidden';
+  });
+  document.querySelectorAll('[data-sidebar-close]').forEach((button) => button.addEventListener('click', () => {
+    sidebar?.classList.remove('open');
+    backdrop?.classList.remove('open');
+    document.body.classList.remove('sidebar-open');
+    document.body.style.overflow = '';
+  }));
+</script>

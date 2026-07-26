@@ -1,4 +1,4 @@
-const routeCategories = [
+export const routeCategories = [
   {
     title: '🏠 个人站点',
     items: [
@@ -31,7 +31,7 @@ const routeCategories = [
   }
 ];
 
-const membershipRecords = [
+export const membershipRecords = [
   // ===== 已过期（10 条，到期 < 2026-07-08）=====
   { name: 'monica',                    expireDate: '2026-03-10', price: 865.42, cycleMonths: 12, tags: ['工具'], note: '', source: 'Notion 会员表', url: '' },
   { name: 'ksqnm',                     expireDate: '2025-02-18', price: null,    cycleMonths: 12, tags: ['其他'], note: '', source: 'Notion 会员表', url: '' },

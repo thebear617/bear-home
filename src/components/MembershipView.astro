@@ -1,0 +1,117 @@
+---
+import { membershipRecords } from '../data/site.js';
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+const parseDate = (value) => new Date(`${value}T00:00:00`).getTime();
+const activeRecords = membershipRecords
+  .filter((record) => record.expireDate && parseDate(record.expireDate) >= today.getTime())
+  .sort((a, b) => parseDate(a.expireDate) - parseDate(b.expireDate));
+const expiredRecords = membershipRecords
+  .filter((record) => record.expireDate && parseDate(record.expireDate) < today.getTime())
+  .sort((a, b) => parseDate(b.expireDate) - parseDate(a.expireDate));
+const monthlyTotal = Math.round(activeRecords.reduce((sum, record) => (
+  record.price == null || !record.cycleMonths ? sum : sum + record.price / record.cycleMonths
+), 0));
+const daysInfo = (record) => {
+  if (!record.expireDate) return { text: '未知', className: 'days-unknown' };
+  const days = Math.round((parseDate(record.expireDate) - today.getTime()) / 86400000);
+  if (days < 0) return { text: `已过期 ${-days} 天`, className: 'days-expired' };
+  if (days <= 30) return { text: `${days} 天`, className: 'days-warning' };
+  return { text: `${days} 天`, className: 'days-ok' };
+};
+const groups = (records) => {
+  const map = new Map();
+  records.forEach((record) => {
+    const tag = record.tags?.[0] || '其他';
+    if (!map.has(tag)) map.set(tag, []);
+    map.get(tag).push(record);
+  });
+  return [...map.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0], 'zh-CN'));
+};
+---
+<section class="membership-view">
+  <div class="membership-filter-grid">
+    <button class="membership-filter-card active" data-membership-filter="active" type="button">
+      <div class="mfc-label">未过期</div>
+      <div class="mfc-amount">月均 ¥{monthlyTotal}</div>
+    </button>
+    <button class="membership-filter-card" data-membership-filter="expired" type="button">
+      <div class="mfc-label">已过期</div>
+    </button>
+  </div>
+
+  <div class="route-search">
+    <input data-membership-search type="search" placeholder="搜索会员名或标签..." aria-label="搜索会员名或标签">
+  </div>
+  <div data-membership-empty class="empty-state" hidden>无匹配记录</div>
+
+  {(['active', 'expired']).map((groupName) => (
+    <div data-membership-group={groupName} hidden={groupName !== 'active'}>
+      {groups(groupName === 'active' ? activeRecords : expiredRecords).map(([tag, records]) => (
+        <section class="check-section open" data-membership-category>
+          <button class="section-header" data-section-toggle type="button">
+            <span class="section-header-left"><h2>{tag}</h2></span>
+            <span class="section-header-right"><span class="section-count">{records.length}</span><span class="section-arrow">▸</span></span>
+          </button>
+          <div class="section-body">
+            <div class="table-wrap">
+              <table class="membership-table">
+                <thead><tr><th>会员名称</th><th>到期时间</th><th>剩余天数</th><th>价格</th><th>标签</th><th>备注</th><th>链接</th></tr></thead>
+                <tbody>
+                  {records.map((record) => {
+                    const days = daysInfo(record);
+                    return <tr data-membership-record data-search-text={`${record.name} ${(record.tags || []).join(' ')}`} class:list={{ 'row-unknown': !record.expireDate }}>
+                      <td class="mt-name">{record.name}</td>
+                      <td>{record.expireDate || '未知'}</td>
+                      <td class={days.className}>{days.text}</td>
+                      <td>{record.price != null ? `¥${Math.round(record.price)}` : '—'}</td>
+                      <td>{(record.tags || []).map((tagItem) => <span class="membership-tag">{tagItem}</span>)}</td>
+                      <td class="mt-note" title={record.note}>{record.note}</td>
+                      <td>{record.url ? <a href={record.url} target="_blank" rel="noopener" class="mt-link">↗</a> : '—'}</td>
+                    </tr>;
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      ))}
+    </div>
+  ))}
+</section>
+
+<script is:inline>
+  const membershipEmpty = document.querySelector('[data-membership-empty]');
+  const membershipSearch = document.querySelector('[data-membership-search]');
+  const membershipFilters = [...document.querySelectorAll('[data-membership-filter]')];
+  const membershipGroups = [...document.querySelectorAll('[data-membership-group]')];
+
+  function filterMembership() {
+    const query = membershipSearch.value.trim().toLowerCase();
+    const current = membershipGroups.find((group) => !group.hidden);
+    let visible = 0;
+    current?.querySelectorAll('[data-membership-category]').forEach((category) => {
+      let count = 0;
+      category.querySelectorAll('[data-membership-record]').forEach((record) => {
+        const match = !query || record.dataset.searchText.toLowerCase().includes(query);
+        record.hidden = !match;
+        if (match) count += 1;
+      });
+      category.hidden = count === 0;
+      category.querySelector('.section-count').textContent = count;
+      visible += count;
+    });
+    membershipEmpty.hidden = visible !== 0;
+  }
+
+  membershipFilters.forEach((button) => button.addEventListener('click', () => {
+    membershipFilters.forEach((item) => item.classList.toggle('active', item === button));
+    membershipGroups.forEach((group) => { group.hidden = group.dataset.membershipGroup !== button.dataset.membershipFilter; });
+    filterMembership();
+  }));
+  membershipSearch?.addEventListener('input', filterMembership);
+  document.querySelectorAll('[data-section-toggle]').forEach((button) => {
+    button.addEventListener('click', () => button.closest('.check-section').classList.toggle('open'));
+  });
+</script>

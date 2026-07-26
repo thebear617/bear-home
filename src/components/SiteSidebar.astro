@@ -1,0 +1,26 @@
+---
+const items = [
+  { id: 'routes', title: '路由表', icon: '🗺️', href: '/' },
+  { id: 'valorant', title: '无畏契约', icon: '🎯', href: '/valorant/' },
+  { id: 'lol', title: '英雄联盟', icon: '⚔️', href: '/lol/' },
+  { id: 'membership', title: '会员订阅', icon: '💳', href: '/membership/' }
+];
+const active = Astro.props.active ?? 'routes';
+---
+<button class="sidebar-toggle" data-sidebar-open aria-label="打开侧边栏">☰</button>
+<div class="sidebar-backdrop" data-sidebar-close></div>
+<nav class="sidebar" aria-label="主导航">
+  <div class="sidebar-brand">
+    <button class="sidebar-close" data-sidebar-close aria-label="关闭侧边栏">✕</button>
+    <p class="sidebar-eyebrow">Personal Home</p>
+    <h1 class="sidebar-title">熊窝</h1>
+  </div>
+  <div class="sidebar-nav">
+    {items.map((item) => (
+      <a class:list={['sidebar-item', { active: active === item.id }]} href={item.href}>
+        <span class="sidebar-icon">{item.icon}</span>
+        <span>{item.title}</span>
+      </a>
+    ))}
+  </div>
+</nav>

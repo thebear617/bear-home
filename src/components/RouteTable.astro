@@ -1,0 +1,65 @@
+---
+import { routeCategories } from '../data/site.js';
+---
+<section class="route-table">
+  <div class="route-search">
+    <input data-route-search type="search" placeholder="搜索路由..." aria-label="搜索路由">
+  </div>
+  <div data-route-empty class="empty-state" hidden>没有匹配的路由</div>
+  <div data-route-categories>
+    {routeCategories.map((category) => (
+      <section class="check-section open" data-route-category data-title={category.title}>
+        <button class="section-header" data-section-toggle type="button">
+          <span class="section-header-left"><h2>{category.title}</h2></span>
+          <span class="section-header-right"><span class="section-count">{category.items.length}</span><span class="section-arrow">▸</span></span>
+        </button>
+        <div class="section-body">
+          <div class="route-grid">
+            {category.items.map((item) => (
+              item.url ? (
+                <a href={item.url} target="_blank" rel="noopener" class="route-card" data-route-item data-search-text={`${item.name} ${item.desc ?? ''}`}>
+                  <div class="route-card-name">{item.name}</div>
+                  {item.desc && <div class="route-card-desc">{item.desc}</div>}
+                </a>
+              ) : (
+                <div class="route-card" data-route-item data-search-text={`${item.name} ${item.desc ?? ''}`}>
+                  <div class="route-card-name">{item.name}</div>
+                  {item.desc && <div class="route-card-desc">{item.desc}</div>}
+                  {item.path && <code class="route-card-path">{item.path}</code>}
+                </div>
+              )
+            ))}
+          </div>
+        </div>
+      </section>
+    ))}
+  </div>
+</section>
+
+<script is:inline>
+  const routeSearch = document.querySelector('[data-route-search]');
+  const routeEmpty = document.querySelector('[data-route-empty]');
+  const routeCategories = [...document.querySelectorAll('[data-route-category]')];
+
+  function filterRoutes() {
+    const query = routeSearch.value.trim().toLowerCase();
+    let visibleCount = 0;
+    routeCategories.forEach((category) => {
+      let categoryCount = 0;
+      category.querySelectorAll('[data-route-item]').forEach((item) => {
+        const visible = !query || item.dataset.searchText.toLowerCase().includes(query);
+        item.hidden = !visible;
+        if (visible) categoryCount += 1;
+      });
+      category.querySelector('.section-count').textContent = categoryCount;
+      category.hidden = categoryCount === 0;
+      visibleCount += categoryCount;
+    });
+    routeEmpty.hidden = visibleCount !== 0;
+  }
+
+  routeSearch?.addEventListener('input', filterRoutes);
+  document.querySelectorAll('[data-section-toggle]').forEach((button) => {
+    button.addEventListener('click', () => button.closest('[data-route-category]').classList.toggle('open'));
+  });
+</script>

@@ -6,26 +6,27 @@
 
 | 层面 | 选型 |
 |------|------|
-| 框架 | **Vue 3**（全局构建，自托管 `js/vendor/vue.global.prod.js`，不依赖 CDN） |
+| 框架 | **Astro**（静态构建） + Vue 3（目前仅无畏契约页面保留运行时） |
 | 样式 | 暖色调设计 token（米黄 `#f7f3ee` + 深棕 `#2f2924` 侧栏），同 home/、cats/ |
-| 构建 | **无**。纯静态 HTML + CSS + JS，零依赖 |
+| 构建 | Astro 输出 `dist/`，GitHub Pages 部署构建产物 |
 
 ## 架构
 
 ```
 personal/
-├── index.html              # 入口，Vue 挂载点
-├── css/style.css           # 单一样式表
-├── js/
-│   ├── vendor/vue.global.prod.js   # Vue 3 自托管（164KB）
-│   ├── data.js             # 静态数据：路由表、会员记录
-│   ├── todo-data.js        # 每日看板分类与任务数据
-│   ├── valorant-data.js    # 无畏契约攻略数据
-│   ├── lol-data.js         # 英雄联盟法师 / ADC / AP 刺客出装公式数据
-│   ├── components/
-│   │   └── TodoBoard.js    # 每日看板 Vue 组件
-│   └── app.js              # Vue 应用：各 Tab 的组件与交互
-└── assets/lol/             # 英雄联盟装备图标与英雄头像（站内本地资源）
+├── astro.config.mjs        # Astro 静态构建配置
+├── package.json            # Astro 构建脚本与依赖
+├── src/pages/
+│   ├── index.astro         # 个人主页入口
+│   └── valorant/index.astro # 无畏契约页面入口
+├── public/                 # 静态资源与少量过渡交互脚本
+│   ├── css/style.css
+│   ├── js/vendor/          # 无畏契约过渡页使用的 Vue / marked 运行时
+│   ├── valorant/
+│   └── assets/
+├── src/components/         # Astro 页面组件
+├── src/data/               # Astro 数据模块
+└── dist/                   # Astro 构建产物（不提交）
 ```
 
 > 注：原「每日日历追踪 / 支出记录」Tab（Obsidian 日记 → `diary-data.js` / `expense-data.js` 的自动编译链路）已于 2026-07-11 迁移至 home 站点（`js/expense-data.js` + `js/diary-data.js` + 「每日追踪」Tab），personal 侧相关文件与组件已移除。
@@ -35,8 +36,9 @@ personal/
 ## 本地运行
 
 ```bash
-python3 -m http.server 8000
-# 打开 http://localhost:8000
+npm install
+npm run dev
+# 打开 Astro 输出的本地地址
 ```
 
 ## 部署
@@ -66,7 +68,7 @@ cd bear-home
 
 - **手动记录**：在 `js/data.js` 的 `manualRecords` 中添加日期条目，手动记录会覆盖同日的日记数据。
 
-- **路由表**：在 `js/data.js` 的 `routeCategories` 中添加条目。
-- **英雄联盟**：在 `js/lol-data.js` 中维护法师 / ADC / AP 刺客三个攻略视图的公式、条件分支、装备、英雄和快速规则；图片放在 `assets/lol/`。
-- **每日看板**：在 `js/todo-data.js` 的 `TODO_BOARDS` 中维护视频、科研、编程、生活四类任务；状态使用 `todo`、`doing`、`done`。
-- **会员订阅**：在 `js/data.js` 的 `membershipRecords` 数组中按 `{ name, expireDate, price, tags, note, source, url }` schema 添加条目；`expireDate` 留空视为"未知到期"。组件按 `expireDate < 今日` 自动划分"已过期 / 未过期"两组。
+- **路由表**：在 `src/data/site.js` 的 `routeCategories` 中添加条目。
+- **英雄联盟**：当前页面入口已是 `/lol/`，由 `src/components/LolView.astro` 及三个攻略组件渲染；数据模块位于 `src/data/lol.js`。
+- **无畏契约**：进入 `src/pages/valorant/index.astro` 对应的 `/valorant/` 页面；数据与交互脚本位于 `public/valorant/`。
+- **会员订阅**：在 `src/data/site.js` 的 `membershipRecords` 数组中按 `{ name, expireDate, price, tags, note, source, url }` schema 添加条目。

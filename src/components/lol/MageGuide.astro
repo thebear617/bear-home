@@ -1,0 +1,35 @@
+---
+import ItemPicks from './ItemPicks.astro';
+const { guide } = Astro.props;
+---
+<div class="lol-guide-panel lol-mage-guide">
+  <header class="lol-hero"><h1>{guide.title}</h1><p>{guide.subtitle}</p></header>
+  {guide.builds.map((build) => (
+    <section class:list={['lol-build', `lol-tone-${build.tone}`]}>
+      <div class="lol-build-heading"><h2>{build.title}</h2><span>{build.tagline}</span></div>
+      {build.rows.map((row) => (
+        <div class="lol-row">
+          <div class:list={['lol-row-label', `lol-label-${row.type}`]}>{row.label}</div>
+          <div class="lol-picks">
+            {row.items.map((item, index) => (
+              <>
+                {row.join && index > 0 && <span class="lol-join">{row.join}</span>}
+                <figure class:list={['lol-pick', { 'lol-pick-champion': row.type === 'champion', 'lol-pick-starter': row.type === 'starter' }]}>
+                  <img src={item.icon} alt={item.name} loading="lazy"><figcaption>{item.name}</figcaption>
+                </figure>
+              </>
+            ))}
+          </div>
+        </div>
+      ))}
+    </section>
+  ))}
+  <section class="lol-rules">
+    <h2>快速规则</h2>
+    <ul>{guide.quickRules.map((rule) => <li>{rule}</li>)}</ul>
+    <div class="lol-special">
+      <h3>{guide.special.label}</h3>
+      <ItemPicks items={[guide.special.champion, ...guide.special.items]} className="lol-special-picks" />
+    </div>
+  </section>
+</div>
