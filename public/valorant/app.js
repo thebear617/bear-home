@@ -100,7 +100,8 @@ function valorantParseTeam(str) {
   // 标准分隔符
   var rawTokens = cleaned.split(/[、/，,；;]|或者|或(?=[^])/).map(function (t) { return t.trim(); }).filter(Boolean);
   // 由于"或"分割会把"捷风/迷核"两类拆开，保留原"X或Y"语义时需把斜杠视作"备选"——这里简化为并列卡
-  var agentMap = (typeof valorantAgents !== 'undefined') ? valorantAgents : {};
+    var agentMap = (typeof valorantAgents !== 'undefined') ? valorantAgents : {};
+    var agentDetails = (typeof valorantAgentDetails !== 'undefined') ? valorantAgentDetails : {};
   var aliasMap = (typeof valorantAgentAlias !== 'undefined') ? valorantAgentAlias : {};
   // 角色位描述词（灰色占位卡）
   var roleSlots = {
@@ -130,8 +131,9 @@ function valorantParseTeam(str) {
     // agent（先走别名归一）
     var canon = aliasMap[tok] || tok;
     var info = agentMap[canon];
+    var detail = agentDetails[canon];
     if (info) {
-      result.push({ kind: 'agent', name: canon, role: info.role, tone: info.tone, icon: info.icon });
+      result.push({ kind: 'agent', name: canon, role: info.role, tone: info.tone, icon: detail && detail.icon || info.icon });
       return;
     }
     // 形如「捷风+猎枭+瑞娜 中路」（站位混进来了）—— 拆出文字并把里面 agent 挑出来
@@ -141,7 +143,8 @@ function valorantParseTeam(str) {
       inlineAgents.forEach(function (nm) {
         var c2 = aliasMap[nm] || nm;
         var i2 = agentMap[c2];
-        if (i2) { result.push({ kind: 'agent', name: c2, role: i2.role, tone: i2.tone, icon: i2.icon }); foundAny = true; }
+        var d2 = agentDetails[c2];
+        if (i2) { result.push({ kind: 'agent', name: c2, role: i2.role, tone: i2.tone, icon: d2 && d2.icon || i2.icon }); foundAny = true; }
       });
       if (foundAny) return;
     }
@@ -243,7 +246,12 @@ const ValorantView = {
         <aside class="valorant-sidebar">
           <a class="valorant-backlink" href="../">← 返回熊窝</a>
           <div class="valorant-brand">
-            <span class="valorant-brand-mark">V</span>
+            <span class="valorant-brand-mark" aria-hidden="true">
+              <svg class="valorant-brand-icon" viewBox="0 0 48 48" focusable="false">
+                <path d="M7 7h9l8 23 8-23h9L24 41z" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round" />
+                <path d="M19 7h10l-5 14z" fill="currentColor" />
+              </svg>
+            </span>
             <div><strong>无畏契约</strong><small>战术资料库</small></div>
           </div>
           <div class="valorant-sidebar-meta"><span>KNOWLEDGE BASE</span><strong>{{ sections.length }} 个板块</strong></div>
@@ -254,7 +262,19 @@ const ValorantView = {
               class="valorant-nav-item"
               :class="{ active: activeSection === s.id }"
               @click="selectSection(s.id)"
-            ><span class="valorant-nav-number">{{ indexLabel(i) }}</span><span class="valorant-nav-title">{{ s.title }}</span><span class="valorant-nav-arrow">›</span></button>
+            >
+              <span class="valorant-nav-number">{{ indexLabel(i) }}</span>
+              <span class="valorant-nav-icon" :class="{ 'has-map-image': mapIcon(s.title) }" aria-hidden="true">
+                <img v-if="mapIcon(s.title)" :src="mapIcon(s.title)" :alt="s.title">
+                <svg viewBox="0 0 32 32" focusable="false">
+                  <path d="M6 8.5 12 6l8 3 6-2.5v17L20 26l-8-3-6 2.5z" />
+                  <path d="M12 6v17M20 9v17" />
+                  <path d="m14.5 13 2-2 2 2-2 2z" class="valorant-nav-icon-mark" />
+                </svg>
+              </span>
+              <span class="valorant-nav-title">{{ s.title }}</span>
+              <span class="valorant-nav-arrow">›</span>
+            </button>
           </nav>
         </aside>
         <main class="valorant-content">
@@ -296,6 +316,24 @@ const ValorantView = {
   methods: {
     indexLabel(i) {
       return String(i + 1).padStart(2, '0');
+    },
+    mapIcon(title) {
+      var icons = {
+        '亚海悬城': 'ascent',
+        '霓虹町': 'split',
+        '深海明珠': 'pearl',
+        '莲华古城': 'lotus',
+        '隐世修所': 'haven',
+        '源工重镇': 'bind',
+        '盐海矿镇': 'corrode',
+        '天枢云阙': 'summit',
+        '日落之城': 'sunset',
+        '微风岛屿': 'breeze',
+        '森寒冬港': 'icebox',
+        '裂变峡谷': 'fracture',
+        '深窟幽境': 'abyss'
+      };
+      return icons[title] ? '../assets/valorant/maps/' + icons[title] + '.png' : '';
     },
     splitByHeading(html) {
       var sections = [];
@@ -380,6 +418,30 @@ const ValorantView = {
         } else {
           this.sections = rawSections;
         }
+
+        // 按侧边栏阅读顺序排列：把暂时最少游玩的三张图放到后段。
+        var sectionOrder = [
+          '全局战术总览',
+          '亚海悬城',
+          '霓虹町',
+          '深海明珠',
+          '莲华古城',
+          '隐世修所',
+          '源工重镇',
+          '盐海矿镇',
+          '天枢云阙',
+          '日落之城',
+          '微风岛屿',
+          '森寒冬港',
+          '裂变峡谷',
+          '深窟幽境'
+        ];
+        this.sections.sort(function(a, b) {
+          var aIndex = sectionOrder.indexOf(a.title);
+          var bIndex = sectionOrder.indexOf(b.title);
+          return (aIndex === -1 ? sectionOrder.length : aIndex)
+            - (bIndex === -1 ? sectionOrder.length : bIndex);
+        });
         for (var i = 0; i < this.sections.length; i++) {
           var sec = this.sections[i];
           var subs = this.splitSubSections(sec.html);
