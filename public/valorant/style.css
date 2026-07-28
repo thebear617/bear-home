@@ -514,6 +514,16 @@ button { font: inherit; }
 .valorant-view details.callout[open] .val-tl-phase { color: #ff6b7a; font-size: .82rem; font-weight: 800; }
 .valorant-view details.callout[open] .val-tl-action { font-size: .84rem; line-height: 1.55; }
 
+.valorant-blog-home { max-width: 820px; color: var(--valorant-text-soft); font-size: .98rem; line-height: 1.95; }
+.valorant-blog-meta { display: flex; justify-content: space-between; gap: 18px; margin-bottom: 26px; color: var(--valorant-faint); font: 700 .7rem/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .08em; }
+.valorant-blog-home h3 { max-width: 760px; margin: 0 0 22px; color: #fff; font-size: clamp(1.65rem, 3vw, 2.35rem); line-height: 1.35; letter-spacing: -.035em; }
+.valorant-blog-home h4 { margin: 28px 0 10px; color: #f7fbff; font-size: 1.15rem; }
+.valorant-blog-home h5 { margin: 20px 0 8px; color: var(--valorant-text-soft); font-size: .95rem; }
+.valorant-blog-home p { margin: 0 0 16px; }
+.valorant-blog-home ol { margin: 12px 0 20px; padding-left: 1.6rem; }
+.valorant-blog-home li { margin: 7px 0; padding-left: 6px; }
+.valorant-blog-home hr { margin: 30px 0 25px; border: 0; border-top: 1px solid var(--valorant-line); }
+
 @media (max-width: 600px) {
   .valorant-view details.callout[open] .val-timeline-track { grid-template-columns: 1fr 1fr; }
   .valorant-view details.callout[open] .val-tl-node::after { display: none; }

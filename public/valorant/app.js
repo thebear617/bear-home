@@ -280,7 +280,7 @@ const ValorantView = {
         <main class="valorant-content">
           <header class="valorant-hero">
             <div><span class="valorant-kicker">VALORANT FIELD NOTES</span><h1>无畏契约</h1><p>地图战术 · 排位图池 · 决策框架</p></div>
-            <div class="valorant-hero-count"><strong>{{ indexLabel(sections.findIndex(s => s.id === activeSection) + 1) }}</strong><span>/ {{ sections.length }}</span></div>
+            <div class="valorant-hero-count"><strong>{{ indexLabel(sections.findIndex(s => s.id === activeSection)) }}</strong><span>/ {{ sections.length }}</span></div>
           </header>
           <section
             v-for="section in sections"
@@ -288,7 +288,35 @@ const ValorantView = {
             v-show="activeSection === section.id"
             class="valorant-panel"
           >
-            <div class="valorant-panel-heading"><span>SECTION {{ indexLabel(sections.indexOf(section) + 1) }}</span><h2>{{ section.title }}</h2></div>
+            <div class="valorant-panel-heading"><span>SECTION {{ indexLabel(sections.indexOf(section)) }}</span><h2>{{ section.title }}</h2></div>
+            <article v-if="section.id === 'overview'" class="valorant-blog-home">
+              <header class="valorant-blog-meta"><span>无畏契约 · 战术资料库</span><span>阅读指南</span></header>
+              <h3>把地图理解，整理成可以执行的回合决策</h3>
+              <p>这是一份持续整理中的无畏契约地图笔记。它不追求把所有点位一次性罗列出来，而是从进攻、防守、选位和 Lineup 四个角度，记录地图里的关键约束，以及队伍可以怎样利用这些约束。</p>
+              <p>阅读一张地图时，可以先看它的战术章节，再回到选位和 Lineup。遇到具体回合时，不要只寻找“正确答案”，而是结合敌方站位、技能交换、人数和时间，选择当前信息下更合适的动作。</p>
+              <hr>
+              <h4>战术库建设规范</h4>
+              <p>后续补充地图时，先保证基础覆盖，再增加特殊细节。每张地图至少维护 4 条进攻与 4 条防守战术，并尽量让它们覆盖不同的回合模型：</p>
+              <ol>
+                <li>默认控图：说明开局分工、基础信息和第一轮资源交换。</li>
+                <li>快速爆弹：说明如何集中技能，在短时间内突破一个区域。</li>
+                <li>双向夹击：说明两路如何同步推进，避免队伍被分段处理。</li>
+                <li>假打、转点或针对性战术：说明如何根据对手习惯改变节奏。</li>
+              </ol>
+              <p>每条战术尽量使用统一字段：核心逻辑、推荐阵容、站位、阶段动作、适用场景，以及失败后的调整方案。这样以后复盘时，看到的不只是一套脚本，也能知道这套脚本依赖什么信息、什么时候应该放弃。</p>
+              <hr>
+              <h4>元认知：打瓦本质的理解——每个时间节点的最优解</h4>
+              <p><strong>核心思路链条：</strong>打瓦的本质不是背板，而是能否在每一个时刻、每一个时间节点，找到当前节点的最优解。这个思路链条把散乱的战术、站位、心态问题串成同一个框架。</p>
+              <p>同样的“最优解”在不同时间节点指代不同：开局是分工与信息；中段是资源置换与转点判断；残局是信息整合与个人决策。</p>
+              <h5>三个具体场景</h5>
+              <ol>
+                <li><strong>队伍气氛压抑、连续丢分时：</strong>是否愿意多说几句、主动给出意见、稳定团队情绪，而非沉默不语让气氛继续下沉。软层面的最优解往往是“开口”，不是“打得更好”。</li>
+                <li><strong>面前有大量脚步、判断三四个人同时出时：</strong>是站在开阔视野架枪追求“看到更多”，还是主动利用掩体打闪身枪，只接自己有把握的那一下。微观对枪的最优解通常是“减少不确定对枪”，不是“看到更多”。</li>
+                <li><strong>结合上局信息做调整：</strong>是否能把上局观察沉淀成本局的具体动作（转点、加防、改变默认），让本局获胜概率高于机械重复。调整型最优解的核心是“信息闭环”，不是“打得更准”。</li>
+              </ol>
+              <h5>统一判断口诀</h5>
+              <p>看到信息 → 判断此刻约束（人数、位置、资源、心态） → 选当前约束下的最优动作 → 执行后立即把新信息接进下个节点。沉默、漏信息、按惯性打，都属于“没有找到最优解”。</p>
+            </article>
             <div v-if="section.subSections && section.subSections.length > 1" class="vmap-tabs">
               <button
                 v-for="sub in section.subSections"
@@ -398,18 +426,21 @@ const ValorantView = {
         mapHtml = mapHtml.replace(/<h2/g, '<h1').replace(/<\/h2>/g, '</h1>');
         mapHtml = mapHtml.replace(/<h3/g, '<h2').replace(/<\/h3>/g, '</h2>');
         mapHtml = enhanceValorantHtml(mapHtml);
+        mapHtml = mapHtml.replace(/<h2[^>]*>常见失误<\/h2>/g, '<h2>经典选位</h2>');
+        mapHtml = mapHtml.replace(/<h2[^>]*>零散观察<\/h2>[\s\S]*?(?=<h1|$)/g, '');
 
         var rawSections = this.splitByHeading(mapHtml);
         if (rawSections.length >= 3) {
           var lastSection = rawSections[rawSections.length - 1];
           var mergeCommonTips = lastSection.title === '通用技巧';
-          var mergedHtml = rawSections[0].html + rawSections[1].html;
+          // 首页正文已经承载元认知；排位图池与总表不放进长期入口文章。
+          var mergedHtml = '';
           if (mergeCommonTips) mergedHtml += lastSection.html;
           var merged = {
             id: 'overview',
-            title: '全局战术总览',
+            title: '战术库首页',
             html: mergedHtml,
-            searchText: '元认知 全地图 通用技巧'
+            searchText: '战术库首页 元认知 全地图 通用技巧 建设规范'
           };
           var rest = mergeCommonTips
             ? rawSections.slice(2, -1)
@@ -421,7 +452,7 @@ const ValorantView = {
 
         // 按侧边栏阅读顺序排列：把暂时最少游玩的三张图放到后段。
         var sectionOrder = [
-          '全局战术总览',
+          '战术库首页',
           '亚海悬城',
           '霓虹町',
           '深海明珠',
@@ -444,6 +475,9 @@ const ValorantView = {
         });
         for (var i = 0; i < this.sections.length; i++) {
           var sec = this.sections[i];
+          if (sec.id !== 'overview' && !/<h2[^>]*>经典选位<\/h2>/.test(sec.html)) {
+            sec.html += '<h2>经典选位</h2><p>（待补充）</p>';
+          }
           var subs = this.splitSubSections(sec.html);
           sec.subSections = subs;
           if (subs.length > 0) {
