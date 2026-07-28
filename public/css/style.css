@@ -569,15 +569,13 @@ button {
   color: var(--muted);
 }
 
-/* Route section (reuses check-section pattern) */
-
 .check-section {
   margin-bottom: 1rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
   box-shadow: var(--shadow);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .section-header {
@@ -637,69 +635,128 @@ button {
 }
 
 .section-body {
-  overflow: hidden;
+  overflow: visible;
 }
 
-.route-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: .65rem;
-  padding: .8rem 1rem;
-}
-
-.route-card {
+.pill-group {
   display: flex;
-  flex-direction: column;
-  gap: .2rem;
-  padding: .75rem .85rem;
+  flex-wrap: wrap;
+  gap: .5rem;
+  padding: .9rem 1rem;
+}
+
+.pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .4rem .85rem;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 999px;
   background: var(--surface-soft);
   text-decoration: none;
   color: var(--text);
-  transition: border-color .15s, box-shadow .15s, background .15s;
+  font-size: .84rem;
+  font-weight: 700;
+  transition: border-color .15s, box-shadow .15s, background .15s, color .15s;
   cursor: default;
+  white-space: nowrap;
 }
 
-a.route-card {
+a.pill {
   cursor: pointer;
 }
 
-a.route-card:hover {
+.pill:hover {
+  z-index: 10;
+}
+
+a.pill:hover {
   border-color: #c08a2f;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
   background: var(--surface);
+  color: #8b5e1a;
 }
 
-.route-card-name {
-  font-size: .92rem;
-  font-weight: 800;
-  color: var(--dark);
+.pill-icon img {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  flex-shrink: 0;
 }
 
-.route-card-desc {
-  font-size: .78rem;
-  color: var(--muted);
-  line-height: 1.4;
+.pill-static {
+  background: var(--surface);
+  border-style: dashed;
 }
 
-.route-card-path {
-  display: inline-block;
-  margin-top: .2rem;
-  padding: .15rem .45rem;
-  font-size: .72rem;
+.pill-path {
+  padding: .1rem .35rem;
+  font-size: .68rem;
   font-family: "SF Mono", Menlo, Consolas, monospace;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 4px;
   color: var(--muted);
-  align-self: flex-start;
+  margin-left: .2rem;
+}
+
+.pill-tip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  z-index: 100;
+  max-width: 480px;
+  min-width: 200px;
+  padding: .6rem .9rem;
+  border-radius: 8px;
+  background: #2f2924;
+  color: #f5f0e8;
+  font-size: .84rem;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: normal;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .22);
+}
+
+.pill-tip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #2f2924;
+}
+
+.pill:hover .pill-tip {
+  opacity: 1;
 }
 
 @media (max-width: 719px) {
-  .route-grid {
-    grid-template-columns: 1fr;
-    padding: .6rem .5rem;
+  .pill-group {
+    padding: .7rem .6rem;
+    gap: .4rem;
+  }
+
+  .pill {
+    font-size: .8rem;
+    padding: .35rem .7rem;
+  }
+
+  .pill-tip {
+    left: 0;
+    transform: none;
+    bottom: calc(100% + 4px);
+  }
+
+  .pill-tip::after {
+    left: 1rem;
+    transform: none;
   }
 }
 

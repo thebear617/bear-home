@@ -2,13 +2,18 @@ export const routeCategories = [
   {
     title: '🏠 个人站点',
     items: [
-      { name: '猪窝', desc: '家居生活管理与美食记录', url: 'https://pig.thebear617.cn/' },
       { name: '猫猫', desc: '猫协档案与疫苗绝育追踪', url: 'https://cat.thebear617.cn/' },
-      { name: '熊窝（个人主页）', desc: '个人主页、日历追踪与支出记录', url: 'https://me.thebear617.cn/' },
-      { name: '科研笔记', desc: '个人科研笔记总站', url: 'http://rea.thebear617.cn/' },
-      { name: '开发笔记', desc: '个人开发知识库', url: 'https://dev.thebear617.cn/' },
-      { name: '常识笔记', desc: '个人多领域常识知识站', url: 'https://life.thebear617.cn/' },
       { name: '租房对账表', desc: '租房看房清单', url: 'http://rent.thebear617.cn/' },
+    ]
+  },
+  {
+    title: '🤖 AI 工具',
+    type: 'icon',
+    items: [
+      { name: 'Claude', url: 'https://claude.ai' },
+      { name: 'ChatGPT', url: 'https://chat.openai.com' },
+      { name: '豆包', url: 'https://www.doubao.com' },
+      { name: 'Gemini', url: 'https://gemini.google.com' },
     ]
   },
   {

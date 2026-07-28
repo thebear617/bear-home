@@ -8,27 +8,36 @@ import { routeCategories } from '../data/site.js';
   <div data-route-empty class="empty-state" hidden>没有匹配的路由</div>
   <div data-route-categories>
     {routeCategories.map((category) => (
-      <section class="check-section open" data-route-category data-title={category.title}>
+      <section class="check-section open" data-route-category data-title={category.title} data-type={category.type ?? 'card'}>
         <button class="section-header" data-section-toggle type="button">
           <span class="section-header-left"><h2>{category.title}</h2></span>
           <span class="section-header-right"><span class="section-count">{category.items.length}</span><span class="section-arrow">▸</span></span>
         </button>
         <div class="section-body">
-          <div class="route-grid">
-            {category.items.map((item) => (
-              item.url ? (
-                <a href={item.url} target="_blank" rel="noopener" class="route-card" data-route-item data-search-text={`${item.name} ${item.desc ?? ''}`}>
-                  <div class="route-card-name">{item.name}</div>
-                  {item.desc && <div class="route-card-desc">{item.desc}</div>}
+          <div class="pill-group">
+            {category.type === 'icon' ? (
+              category.items.map((item) => (
+                <a href={item.url} target="_blank" rel="noopener" class="pill pill-icon" data-route-item data-search-text={item.name}>
+                  <img src={`https://www.google.com/s2/favicons?domain=${new URL(item.url).hostname}&sz=64`} alt="" width="16" height="16">
+                  <span>{item.name}</span>
                 </a>
-              ) : (
-                <div class="route-card" data-route-item data-search-text={`${item.name} ${item.desc ?? ''}`}>
-                  <div class="route-card-name">{item.name}</div>
-                  {item.desc && <div class="route-card-desc">{item.desc}</div>}
-                  {item.path && <code class="route-card-path">{item.path}</code>}
-                </div>
-              )
-            ))}
+              ))
+            ) : (
+              category.items.map((item) => (
+                item.url ? (
+                  <a href={item.url} target="_blank" rel="noopener" class="pill" data-route-item data-search-text={`${item.name} ${item.desc ?? ''}`}>
+                    <span>{item.name}</span>
+                    {item.desc && <span class="pill-tip">{item.desc}</span>}
+                  </a>
+                ) : (
+                  <div class="pill pill-static" data-route-item data-search-text={`${item.name} ${item.desc ?? ''}`}>
+                    <span>{item.name}</span>
+                    {item.path && <code class="pill-path">{item.path}</code>}
+                    {item.desc && <span class="pill-tip">{item.desc}</span>}
+                  </div>
+                )
+              ))
+            )}
           </div>
         </div>
       </section>
