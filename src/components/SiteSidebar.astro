@@ -1,8 +1,9 @@
 ---
+const rootHref = Astro.url.pathname === '/' ? './' : '../';
 const items = [
-  { id: 'routes', title: '路由表', icon: '🗺️', href: '/' },
-  { id: 'valorant', title: '无畏契约', icon: '🎯', href: '/valorant/' },
-  { id: 'lol', title: '英雄联盟', icon: '⚔️', href: '/lol/' }
+  { id: 'routes', title: '路由表', icon: '🗺️', href: rootHref },
+  { id: 'valorant', title: '无畏契约', icon: '🎯', href: `${rootHref}valorant/` },
+  { id: 'lol', title: '英雄联盟', icon: '⚔️', href: `${rootHref}lol/` }
 ];
 const active = Astro.props.active ?? 'routes';
 ---
