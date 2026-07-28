@@ -1,6 +1,6 @@
 ---
 const rootHref = Astro.url.pathname === '/' ? './' : '../';
-const routeTableHref = import.meta.env.DEV ? '/' : 'https://me.thebear617.cn/';
+const routeTableHref = import.meta.env.DEV ? '/index.html' : 'https://me.thebear617.cn/';
 const items = [
   { id: 'routes', title: '路由表', icon: '🗺️', href: routeTableHref },
   { id: 'valorant', title: '无畏契约', icon: '🎯', href: `${rootHref}valorant/` },
