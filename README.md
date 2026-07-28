@@ -71,4 +71,3 @@ cd bear-home
 - **路由表**：在 `src/data/site.js` 的 `routeCategories` 中添加条目。
 - **英雄联盟**：当前页面入口已是 `/lol/`，由 `src/components/LolView.astro` 及三个攻略组件渲染；数据模块位于 `src/data/lol.js`。
 - **无畏契约**：进入 `src/pages/valorant/index.astro` 对应的 `/valorant/` 页面；数据与交互脚本位于 `public/valorant/`。
-- **会员订阅**：在 `src/data/site.js` 的 `membershipRecords` 数组中按 `{ name, expireDate, price, tags, note, source, url }` schema 添加条目。
