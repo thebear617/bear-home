@@ -33,6 +33,16 @@ export const routeCategories = [
     ]
   },
   {
+    id: 'campus',
+    title: '校园服务',
+    icon: '🎓',
+    items: [
+      { name: 'QQ 邮箱', desc: 'QQ 邮箱官方登录入口', url: 'https://mail.qq.com/', tags: ['邮箱', '常用'], addedAt: '2026-07-29' },
+      { name: '西电学生邮箱', desc: '西安电子科技大学学生邮箱登录入口', url: 'https://mail.stu.xidian.edu.cn/coremail/index.jsp?nodetect=true', tags: ['校园', '邮箱'], addedAt: '2026-07-29' },
+      { name: '西电智课平台', desc: '西安电子科技大学智课平台', url: 'https://xdspoc.xidian.edu.cn/', tags: ['校园', '课程'], addedAt: '2026-07-29' },
+    ]
+  },
+  {
     id: 'local',
     title: '本地文件',
     icon: '📂',

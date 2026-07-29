@@ -447,7 +447,7 @@ button {
 
 .weather-widget-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: .85rem;
 }
 
@@ -472,7 +472,7 @@ button {
 
 .weather-widget-frame iframe {
   display: block;
-  width: min(100%, 420px);
+  width: min(100%, 320px);
   max-width: 100%;
   border: 0;
 }
@@ -600,6 +600,120 @@ button {
   font-weight: 800;
 }
 
+.music-library { min-height: 430px; }
+
+.playlist-card-list {
+  display: grid;
+  gap: .7rem;
+}
+
+.playlist-card {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 1.7rem;
+  align-items: center;
+  gap: .75rem;
+  min-height: 116px;
+  width: 100%;
+  padding: .75rem;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+
+.playlist-card[hidden] { display: none; }
+
+.playlist-card:hover {
+  border-color: #b6d4c8;
+  box-shadow: 0 7px 17px rgba(45, 91, 72, .1);
+  transform: translateY(-1px);
+}
+
+.playlist-card img {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.playlist-card-copy { min-width: 0; }
+.playlist-card-copy strong,
+.playlist-card-copy small { display: block; }
+.playlist-card-copy strong {
+  overflow: hidden;
+  color: var(--dark);
+  font-size: .82rem;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.playlist-card-copy small {
+  margin-top: .35rem;
+  color: var(--muted);
+  font-size: .68rem;
+}
+.playlist-card-play {
+  display: grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  font-size: .62rem;
+}
+
+.playlist-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .7rem;
+  margin-top: .8rem;
+}
+
+.playlist-pagination button,
+.music-player-actions button {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.playlist-pagination button { width: 1.8rem; height: 1.8rem; }
+.playlist-pagination button:disabled { cursor: default; opacity: .4; }
+.playlist-pagination span { color: var(--muted); font-size: .72rem; }
+
+.music-player-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .75rem;
+}
+
+.music-player-actions button { padding: .4rem .55rem; font-size: .72rem; }
+.music-player-actions a { color: var(--green); font-size: .75rem; font-weight: 800; text-decoration: none; }
+.music-player-actions a:hover { text-decoration: underline; }
+
+.music-widget-frame {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: #fff;
+}
+
+.music-widget-frame iframe {
+  display: block;
+  width: min(100%, 340px);
+  max-width: 100%;
+  border: 0;
+}
+
 .weather-widget-caption {
   margin-top: .75rem;
   color: var(--muted);
@@ -617,6 +731,13 @@ button {
   }
 
   .dashboard-widget-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+@media (max-width: 760px) {
+  .weather-widget-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

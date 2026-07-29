@@ -1,8 +1,43 @@
 ---
 const weatherLocations = [
   { name: '西安', city: 'Xi%27an' },
-  { name: '南宁', city: 'Nanning' }
+  { name: '南宁', city: 'Nanning' },
+  { name: '威海', city: 'Weihai' }
 ];
+const musicPlaylists = [
+  {
+    id: '18198937818',
+    name: '漂浮在别处',
+    trackCount: 6,
+    cover: 'https://p1.music.126.net/ZECYfM7fRdfS_aQCVLB8DA==/109951165613007177.jpg',
+  },
+  {
+    id: '18198968767',
+    name: '华语慢慢听',
+    trackCount: 6,
+    cover: 'https://p1.music.126.net/wztA5smxFjIfv98u7-IrQQ==/109951168933355255.jpg',
+  },
+  {
+    id: '18198844294',
+    name: '青春和乐队',
+    trackCount: 6,
+    cover: 'https://p1.music.126.net/4NJvc1HOi4uv7cs4501Bjg==/109951166324714668.jpg',
+  },
+  {
+    id: '18198912008',
+    name: '节拍与态度',
+    trackCount: 6,
+    cover: 'https://p1.music.126.net/Xt828TSPcC9C6rAZrtpdMQ==/17858267858596629.jpg',
+  },
+  {
+    id: '18198921004',
+    name: '夜间低空飞行',
+    trackCount: 6,
+    cover: 'https://p1.music.126.net/LhjAzfyCqtlXWEDgbpcW4A==/18494885092709549.jpg',
+  },
+];
+const playlistsPerPage = 3;
+const musicPageCount = Math.ceil(musicPlaylists.length / playlistsPerPage);
 import GithubProfileCard from './GithubProfileCard.astro';
 import SearchBox from './SearchBox.astro';
 ---
@@ -52,7 +87,7 @@ import SearchBox from './SearchBox.astro';
         </article>
       ))}
     </div>
-    <p class="weather-widget-caption">天气数据由 Open-Meteo 提供，当前显示西安和南宁。</p>
+    <p class="weather-widget-caption">天气数据由 Open-Meteo 提供，当前显示西安、南宁和威海。</p>
   </section>
 
   <div class="dashboard-widget-grid">
@@ -105,6 +140,52 @@ import SearchBox from './SearchBox.astro';
       </div>
       <GithubProfileCard />
     </section>
+
+    <section class="dashboard-section dashboard-music-section" aria-labelledby="music-title">
+      <div class="dashboard-section-heading">
+        <div>
+          <p class="dashboard-section-kicker">正在听</p>
+          <h3 id="music-title">我的歌单</h3>
+        </div>
+      </div>
+      <div class="music-library" data-music-library>
+        <div class="playlist-card-list">
+          {musicPlaylists.map((playlist, index) => (
+            <button
+              class="playlist-card"
+              type="button"
+              data-playlist-card
+              data-playlist-page={Math.floor(index / playlistsPerPage)}
+              data-playlist-id={playlist.id}
+              data-playlist-name={playlist.name}
+            >
+              <img src={playlist.cover} alt="" width="64" height="64" loading="lazy" />
+              <span class="playlist-card-copy">
+                <strong>{playlist.name}</strong>
+                <small>{playlist.trackCount} 首歌曲 · 网易云音乐</small>
+              </span>
+              <span class="playlist-card-play" aria-hidden="true">▶</span>
+            </button>
+          ))}
+        </div>
+        {musicPageCount > 1 && (
+          <nav class="playlist-pagination" aria-label="歌单分页">
+            <button type="button" data-playlist-prev aria-label="上一页">←</button>
+            <span data-playlist-page-label>1 / {musicPageCount}</span>
+            <button type="button" data-playlist-next aria-label="下一页">→</button>
+          </nav>
+        )}
+      </div>
+      <div class="music-player" data-music-player hidden>
+        <div class="music-player-actions">
+          <button type="button" data-music-back>← 全部歌单</button>
+          <a data-music-open target="_blank" rel="noopener">在网易云打开 ↗</a>
+        </div>
+        <div class="music-widget-frame">
+          <iframe data-music-iframe title="网易云音乐歌单预览" loading="lazy" width="340" height="430"></iframe>
+        </div>
+      </div>
+    </section>
   </div>
 </section>
 
@@ -118,4 +199,52 @@ import SearchBox from './SearchBox.astro';
     }).format(new Date());
     dateLabel.textContent = `${formattedDate}，从看看窗外开始。`;
   }
+
+  const playlistCards = [...document.querySelectorAll('[data-playlist-card]')];
+  const musicLibrary = document.querySelector('[data-music-library]');
+  const musicPlayer = document.querySelector('[data-music-player]');
+  const musicFrame = document.querySelector('[data-music-iframe]');
+  const musicOpenLink = document.querySelector('[data-music-open]');
+  const pageLabel = document.querySelector('[data-playlist-page-label]');
+  const previousPage = document.querySelector('[data-playlist-prev]');
+  const nextPage = document.querySelector('[data-playlist-next]');
+  const pageCount = Math.max(...playlistCards.map((card) => Number(card.dataset.playlistPage)), 0) + 1;
+  let currentPlaylistPage = 0;
+
+  function showPlaylistPage() {
+    playlistCards.forEach((card) => {
+      card.hidden = Number(card.dataset.playlistPage) !== currentPlaylistPage;
+    });
+    if (pageLabel) pageLabel.textContent = `${currentPlaylistPage + 1} / ${pageCount}`;
+    if (previousPage) previousPage.disabled = currentPlaylistPage === 0;
+    if (nextPage) nextPage.disabled = currentPlaylistPage === pageCount - 1;
+  }
+
+  playlistCards.forEach((card) => {
+    card.addEventListener('click', () => {
+      const { playlistId, playlistName } = card.dataset;
+      musicFrame.src = `https://music.163.com/outchain/player?type=0&id=${playlistId}&auto=0&height=430`;
+      musicFrame.title = `${playlistName} · 网易云音乐歌单预览`;
+      musicOpenLink.href = `https://music.163.com/playlist?id=${playlistId}`;
+      musicLibrary.hidden = true;
+      musicPlayer.hidden = false;
+    });
+  });
+
+  document.querySelector('[data-music-back]')?.addEventListener('click', () => {
+    musicFrame.src = '';
+    musicPlayer.hidden = true;
+    musicLibrary.hidden = false;
+  });
+
+  previousPage?.addEventListener('click', () => {
+    currentPlaylistPage = Math.max(0, currentPlaylistPage - 1);
+    showPlaylistPage();
+  });
+  nextPage?.addEventListener('click', () => {
+    currentPlaylistPage = Math.min(pageCount - 1, currentPlaylistPage + 1);
+    showPlaylistPage();
+  });
+
+  showPlaylistPage();
 </script>
