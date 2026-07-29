@@ -1,0 +1,871 @@
+---
+import { routeCategories } from '../data/site.js';
+
+const totalLinks = routeCategories.reduce((sum, cat) => sum + cat.items.length, 0);
+const routeItems = routeCategories.flatMap((category) => category.items.map((item, index) => ({
+  ...item,
+  categoryId: category.id,
+  categoryTitle: category.title,
+  categoryIcon: category.icon,
+  index,
+  host: item.url ? new URL(item.url).hostname : item.path,
+  displayDate: item.addedAt.replaceAll('-', '/'),
+  searchText: `${item.name} ${item.desc ?? ''} ${category.title} ${item.tags?.join(' ') ?? ''}`,
+})));
+---
+
+<section class="route-hub">
+  <!-- 顶部工具栏 -->
+  <div class="hub-toolbar">
+    <div class="hub-search">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input data-route-search type="search" placeholder="搜索链接..." aria-label="搜索链接">
+      <kbd class="search-shortcut">⌘ K</kbd>
+    </div>
+    <div class="hub-actions">
+      <div class="view-switcher">
+        <button class="view-btn active" data-view="group" title="分组视图">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          <span>分组视图</span>
+        </button>
+        <button class="view-btn" data-view="list" title="列表视图">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="6" x2="21" y2="6"/>
+            <line x1="8" y1="12" x2="21" y2="12"/>
+            <line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/>
+            <line x1="3" y1="12" x2="3.01" y2="12"/>
+            <line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+          <span>列表视图</span>
+        </button>
+        <button class="view-btn" data-view="masonry" title="瀑布流">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="9" rx="1"/>
+            <rect x="14" y="3" width="7" height="5" rx="1"/>
+            <rect x="14" y="12" width="7" height="9" rx="1"/>
+            <rect x="3" y="16" width="7" height="5" rx="1"/>
+          </svg>
+          <span>瀑布流</span>
+        </button>
+      </div>
+      <button class="filter-btn" data-filter-toggle>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+        </svg>
+        <span>筛选</span>
+      </button>
+      <div class="filter-popover" data-filter-panel hidden>
+        <div class="filter-heading">
+          <strong>筛选链接</strong>
+          <button type="button" class="filter-clear" data-filter-clear>清除</button>
+        </div>
+        <div class="filter-section">
+          <span>分类</span>
+          <div class="filter-chips">
+            {routeCategories.map((category) => <button type="button" data-filter-category={category.id}>{category.icon} {category.title}</button>)}
+          </div>
+        </div>
+        <div class="filter-section">
+          <span>标签</span>
+          <div class="filter-chips">
+            {[...new Set(routeItems.flatMap((item) => item.tags ?? []))].map((tag) => <button type="button" data-filter-tag={tag}>{tag}</button>)}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 空状态 -->
+  <div data-route-empty class="empty-state" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="11" cy="11" r="8"/>
+      <path d="m21 21-4.35-4.35"/>
+    </svg>
+    <p>没有匹配的链接</p>
+  </div>
+
+  <!-- 分组网格 -->
+  <div class="hub-grid" data-view-panel="group" data-route-categories>
+    {routeCategories.map((category) => (
+      <div class="hub-group" data-route-category data-category-id={category.id}>
+        <div class="group-header">
+          <div class="group-title">
+            <span class="group-icon">{category.icon}</span>
+            <h2>{category.title}</h2>
+            <span class="group-count">{category.items.length} 个链接</span>
+          </div>
+          <a href="#" class="group-view-all" data-view-all={category.id}>查看全部 →</a>
+        </div>
+        <div class="group-cards">
+          {category.items.map((item) => (
+            item.url ? (
+              <a href={item.url} target="_blank" rel="noopener" class="link-card" data-route-item data-category={category.id} data-tags={item.tags?.join('|') ?? ''} data-search-text={`${item.name} ${item.desc ?? ''} ${item.tags?.join(' ') ?? ''}`}>
+                <div class="card-favicon">
+                  <img src={`https://www.google.com/s2/favicons?domain=${new URL(item.url).hostname}&sz=64`} alt="" width="32" height="32" loading="lazy">
+                </div>
+                <div class="card-content">
+                  <h3 class="card-title">{item.name}</h3>
+                  <p class="card-desc">{item.desc}</p>
+                  <span class="card-domain">{new URL(item.url).hostname}</span>
+                  {item.tags && item.tags.length > 0 && (
+                    <div class="card-tags">
+                      {item.tags.map((tag) => (
+                        <span class="tag">{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </a>
+            ) : (
+              <div class="link-card static" data-route-item data-category={category.id} data-tags={item.tags?.join('|') ?? ''} data-search-text={`${item.name} ${item.desc ?? ''} ${item.tags?.join(' ') ?? ''}`}>
+                <div class="card-favicon">
+                  <span class="folder-icon">📁</span>
+                </div>
+                <div class="card-content">
+                  <h3 class="card-title">{item.name}</h3>
+                  <p class="card-desc">{item.desc}</p>
+                  {item.path && <code class="card-path">{item.path}</code>}
+                  {item.tags && item.tags.length > 0 && (
+                    <div class="card-tags">
+                      {item.tags.map((tag) => (
+                        <span class="tag">{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <!-- 列表视图 -->
+  <section class="hub-list-panel" data-view-panel="list" hidden aria-label="链接列表">
+    <div class="list-toolbar">
+      <div class="list-summary">
+        <strong>全部</strong>
+        <span>{totalLinks} 个链接</span>
+      </div>
+      <button class="sort-btn" type="button" data-list-sort data-sort-order="desc">
+        添加时间 <span aria-hidden="true">↓</span>
+      </button>
+    </div>
+    <div class="list-scroll">
+      <table class="hub-list-table">
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>分类</th>
+            <th>标签</th>
+            <th>添加时间</th>
+            <th class="table-actions">操作</th>
+          </tr>
+        </thead>
+        <tbody data-list-body>
+          {routeItems.map((item) => (
+            <tr data-route-item data-category={item.categoryId} data-tags={item.tags?.join('|') ?? ''} data-search-text={item.searchText} data-added-at={item.addedAt}>
+              <td>
+                <div class="list-link-main">
+                  <div class="list-favicon">
+                    {item.url ? <img src={`https://www.google.com/s2/favicons?domain=${new URL(item.url).hostname}&sz=64`} alt="" width="28" height="28" loading="lazy" /> : <span>📁</span>}
+                  </div>
+                  <div>
+                    <strong>{item.name}</strong>
+                    <span>{item.desc}</span>
+                    <small>{item.host}</small>
+                  </div>
+                </div>
+              </td>
+              <td><span class="list-category">{item.categoryIcon} {item.categoryTitle}</span></td>
+              <td><div class="card-tags">{item.tags?.map((tag) => <span class="tag">{tag}</span>)}</div></td>
+              <td class="list-date">{item.displayDate}</td>
+              <td class="table-actions">
+                {item.url ? <a href={item.url} target="_blank" rel="noopener" aria-label={`打开 ${item.name}`}>↗</a> : <span aria-label="本地文件">—</span>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 瀑布流视图 -->
+  <div class="masonry-grid" data-view-panel="masonry" hidden>
+    {routeItems.map((item) => (
+      item.url ? (
+        <a href={item.url} target="_blank" rel="noopener" class={`masonry-card masonry-${item.categoryId} masonry-${item.index % 3}`} data-route-item data-category={item.categoryId} data-tags={item.tags?.join('|') ?? ''} data-search-text={item.searchText}>
+          <div class="masonry-cover">
+            <span>{item.categoryIcon}</span>
+            <img src={`https://www.google.com/s2/favicons?domain=${new URL(item.url).hostname}&sz=64`} alt="" width="34" height="34" loading="lazy" />
+          </div>
+          <div class="masonry-content">
+            <h2>{item.name}</h2>
+            <p>{item.desc}</p>
+            <small>{item.host}</small>
+            <div class="card-tags">{item.tags?.map((tag) => <span class="tag">{tag}</span>)}</div>
+            <footer><time>{item.displayDate}</time><span aria-hidden="true">↗</span></footer>
+          </div>
+        </a>
+      ) : (
+        <article class={`masonry-card masonry-${item.categoryId} masonry-${item.index % 3} is-static`} data-route-item data-category={item.categoryId} data-tags={item.tags?.join('|') ?? ''} data-search-text={item.searchText}>
+          <div class="masonry-cover"><span>{item.categoryIcon}</span><b>本地</b></div>
+          <div class="masonry-content">
+            <h2>{item.name}</h2>
+            <p>{item.desc}</p>
+            <small>{item.host}</small>
+            <div class="card-tags">{item.tags?.map((tag) => <span class="tag">{tag}</span>)}</div>
+            <footer><time>{item.displayDate}</time><span aria-hidden="true">⌂</span></footer>
+          </div>
+        </article>
+      )
+    ))}
+  </div>
+</section>
+
+<script is:inline>
+  const routeSearch = document.querySelector('[data-route-search]');
+  const routeEmpty = document.querySelector('[data-route-empty]');
+  const routeCategories = [...document.querySelectorAll('[data-route-category]')];
+  const viewBtns = document.querySelectorAll('.view-btn');
+  const viewPanels = document.querySelectorAll('[data-view-panel]');
+  const listBody = document.querySelector('[data-list-body]');
+  const filterButton = document.querySelector('[data-filter-toggle]');
+  const filterPanel = document.querySelector('[data-filter-panel]');
+  let activeCategory = '';
+  let activeTag = '';
+
+  // 搜索过滤
+  function filterRoutes() {
+    const query = routeSearch.value.trim().toLowerCase();
+    let visibleCount = 0;
+    routeCategories.forEach((category) => {
+      let categoryCount = 0;
+      category.querySelectorAll('[data-route-item]').forEach((item) => {
+        const matchesQuery = !query || item.dataset.searchText.toLowerCase().includes(query);
+        const matchesCategory = !activeCategory || item.dataset.category === activeCategory;
+        const matchesTag = !activeTag || item.dataset.tags.split('|').includes(activeTag);
+        const visible = matchesQuery && matchesCategory && matchesTag;
+        item.hidden = !visible;
+        if (visible) categoryCount += 1;
+      });
+      category.querySelector('.group-count').textContent = `${categoryCount} 个链接`;
+      category.hidden = categoryCount === 0;
+      visibleCount += categoryCount;
+    });
+    document.querySelectorAll('[data-view-panel="list"] [data-route-item], [data-view-panel="masonry"] [data-route-item]').forEach((item) => {
+      const matchesQuery = !query || item.dataset.searchText.toLowerCase().includes(query);
+      const matchesCategory = !activeCategory || item.dataset.category === activeCategory;
+      const matchesTag = !activeTag || item.dataset.tags.split('|').includes(activeTag);
+      const visible = matchesQuery && matchesCategory && matchesTag;
+      item.hidden = !visible;
+    });
+    routeEmpty.hidden = visibleCount !== 0;
+  }
+
+  routeSearch?.addEventListener('input', filterRoutes);
+
+  // 快捷键 ⌘K
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      routeSearch?.focus();
+    }
+  });
+
+  // 视图切换
+  viewBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const view = btn.dataset.view;
+      viewBtns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      viewPanels.forEach((panel) => {
+        panel.hidden = panel.dataset.viewPanel !== view;
+      });
+      filterRoutes();
+    });
+  });
+
+  // 列表按添加时间切换正序／倒序
+  document.querySelector('[data-list-sort]')?.addEventListener('click', (event) => {
+    const button = event.currentTarget;
+    const order = button.dataset.sortOrder === 'desc' ? 'asc' : 'desc';
+    button.dataset.sortOrder = order;
+    button.querySelector('span').textContent = order === 'desc' ? '↓' : '↑';
+    [...listBody.children]
+      .sort((a, b) => order === 'desc'
+        ? b.dataset.addedAt.localeCompare(a.dataset.addedAt)
+        : a.dataset.addedAt.localeCompare(b.dataset.addedAt))
+      .forEach((row) => listBody.append(row));
+  });
+
+  // 查看全部（预留）
+  document.querySelectorAll('[data-view-all]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const categoryId = link.dataset.viewAll;
+      const category = document.querySelector(`[data-category-id="${categoryId}"]`);
+      if (category) {
+        category.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // 分类与标签筛选
+  function refreshFilterUI() {
+    document.querySelectorAll('[data-filter-category]').forEach((button) => {
+      button.classList.toggle('active', button.dataset.filterCategory === activeCategory);
+    });
+    document.querySelectorAll('[data-filter-tag]').forEach((button) => {
+      button.classList.toggle('active', button.dataset.filterTag === activeTag);
+    });
+    const count = Number(Boolean(activeCategory)) + Number(Boolean(activeTag));
+    filterButton.classList.toggle('has-filter', count > 0);
+    filterButton.querySelector('span').textContent = count ? `筛选 · ${count}` : '筛选';
+  }
+
+  filterButton?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    filterPanel.hidden = !filterPanel.hidden;
+  });
+
+  document.querySelectorAll('[data-filter-category]').forEach((button) => {
+    button.addEventListener('click', () => {
+      activeCategory = activeCategory === button.dataset.filterCategory ? '' : button.dataset.filterCategory;
+      refreshFilterUI();
+      filterRoutes();
+    });
+  });
+
+  document.querySelectorAll('[data-filter-tag]').forEach((button) => {
+    button.addEventListener('click', () => {
+      activeTag = activeTag === button.dataset.filterTag ? '' : button.dataset.filterTag;
+      refreshFilterUI();
+      filterRoutes();
+    });
+  });
+
+  document.querySelector('[data-filter-clear]')?.addEventListener('click', () => {
+    activeCategory = '';
+    activeTag = '';
+    refreshFilterUI();
+    filterRoutes();
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!filterPanel?.contains(event.target) && !filterButton?.contains(event.target)) filterPanel.hidden = true;
+  });
+</script>
+
+<style>
+  .route-hub {
+    padding: 1.5rem 2rem;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  /* .hub-grid 的 display:grid 会覆盖浏览器对 hidden 的默认样式。 */
+  [data-view-panel][hidden] {
+    display: none !important;
+  }
+
+  /* 工具栏 */
+  .hub-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .hub-search {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: #9ca3af;
+  }
+
+  .hub-search input {
+    width: 100%;
+    padding: 0.625rem 1rem 0.625rem 2.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    background: #fff;
+    transition: all 0.2s;
+  }
+
+  .hub-search input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  }
+
+  .search-shortcut {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0.125rem 0.375rem;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-family: monospace;
+  }
+
+  .hub-actions {
+    position: relative;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .view-switcher {
+    display: flex;
+    background: #f3f4f6;
+    border-radius: 8px;
+    padding: 0.25rem;
+    gap: 0.25rem;
+  }
+
+  .view-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .view-btn:hover {
+    color: #1f2937;
+  }
+
+  .view-btn.active {
+    background: #fff;
+    color: #4f46e5;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .view-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: #4b5563;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover {
+    border-color: #d1d5db;
+    background: #f9fafb;
+  }
+
+  .filter-btn.has-filter {
+    border-color: #c7d2fe;
+    background: #eef2ff;
+    color: #4338ca;
+  }
+
+  .filter-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .filter-popover {
+    position: absolute;
+    z-index: 10;
+    top: calc(100% + 0.6rem);
+    right: 0;
+    width: min(320px, calc(100vw - 2rem));
+    padding: 0.9rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 12px 28px rgba(31, 41, 55, 0.13);
+  }
+
+  .filter-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.8rem; }
+  .filter-heading strong { color: #1f2937; font-size: 0.85rem; }
+  .filter-clear { border: 0; padding: 0; background: transparent; color: #6366f1; font-size: 0.75rem; cursor: pointer; }
+  .filter-clear:hover { color: #4338ca; text-decoration: underline; }
+  .filter-section + .filter-section { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid #f1f3f5; }
+  .filter-section > span { display: block; margin-bottom: 0.45rem; color: #9ca3af; font-size: 0.7rem; }
+  .filter-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .filter-chips button {
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    padding: 0.3rem 0.55rem;
+    background: #fff;
+    color: #64748b;
+    font-size: 0.72rem;
+    cursor: pointer;
+  }
+  .filter-chips button:hover { border-color: #c7d2fe; color: #4f46e5; }
+  .filter-chips button.active { border-color: #c7d2fe; background: #eef2ff; color: #4338ca; }
+
+  /* 空状态 */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #9ca3af;
+  }
+
+  .empty-state svg {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 1rem;
+  }
+
+  /* 分组网格 — 双栏 */
+  .hub-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 1024px) {
+    .hub-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .hub-group {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: box-shadow 0.2s;
+  }
+
+  .hub-group:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .group-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .group-icon {
+    font-size: 1.25rem;
+  }
+
+  .group-title h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+  }
+
+  .group-count {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-left: 0.5rem;
+  }
+
+  .group-view-all {
+    font-size: 0.875rem;
+    color: #4f46e5;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .group-view-all:hover {
+    color: #4338ca;
+  }
+
+  /* 卡片网格 */
+  .group-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .link-card {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.875rem;
+    border: 1px solid #f3f4f6;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s;
+    background: #fafafa;
+  }
+
+  .link-card:hover {
+    border-color: #e5e7eb;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .link-card.static {
+    cursor: default;
+  }
+
+  .card-favicon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #f3f4f6;
+  }
+
+  .card-favicon img {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+  }
+
+  .folder-icon {
+    font-size: 1.25rem;
+  }
+
+  .card-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .card-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.25rem 0;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .card-desc {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin: 0 0 0.375rem 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-domain {
+    font-size: 0.7rem;
+    color: #9ca3af;
+    display: block;
+    margin-bottom: 0.375rem;
+  }
+
+  .card-path {
+    font-size: 0.7rem;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 0.375rem;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .tag {
+    font-size: 0.65rem;
+    padding: 0.125rem 0.375rem;
+    background: #eef2ff;
+    color: #4f46e5;
+    border-radius: 4px;
+    border: 1px solid #e0e7ff;
+  }
+
+  .tag:nth-child(2n) {
+    background: #f0fdf4;
+    color: #16a34a;
+    border-color: #dcfce7;
+  }
+
+  .tag:nth-child(3n) {
+    background: #fef3c7;
+    color: #d97706;
+    border-color: #fde68a;
+  }
+
+  /* 列表视图 */
+  .hub-list-panel {
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+  }
+
+  .list-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.875rem 1.125rem;
+    border-bottom: 1px solid #eef0f3;
+  }
+
+  .list-summary { display: flex; align-items: baseline; gap: 0.5rem; color: #1f2937; }
+  .list-summary strong { font-size: 0.9rem; }
+  .list-summary span { color: #9ca3af; font-size: 0.75rem; }
+
+  .sort-btn {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    background: #fff;
+    color: #6b7280;
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+
+  .sort-btn:hover { border-color: #c7d2fe; color: #4f46e5; }
+  .list-scroll { overflow-x: auto; }
+
+  .hub-list-table { width: 100%; min-width: 740px; border-collapse: collapse; table-layout: fixed; }
+  .hub-list-table th {
+    padding: 0.7rem 1.125rem;
+    background: #fafafa;
+    border-bottom: 1px solid #eef0f3;
+    color: #9ca3af;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-align: left;
+  }
+  .hub-list-table th:nth-child(1) { width: 39%; }
+  .hub-list-table th:nth-child(2) { width: 15%; }
+  .hub-list-table th:nth-child(3) { width: 20%; }
+  .hub-list-table th:nth-child(4) { width: 16%; }
+  .hub-list-table th:nth-child(5) { width: 10%; }
+  .hub-list-table td { padding: 0.75rem 1.125rem; border-bottom: 1px solid #f1f3f5; vertical-align: middle; }
+  .hub-list-table tbody tr:last-child td { border-bottom: 0; }
+  .hub-list-table tbody tr:hover { background: #fafafa; }
+
+  .list-link-main { display: flex; align-items: center; gap: 0.7rem; min-width: 0; }
+  .list-favicon { display: grid; flex: 0 0 auto; width: 34px; height: 34px; place-items: center; border: 1px solid #f0f1f3; border-radius: 8px; background: #fff; }
+  .list-favicon img { width: 20px; height: 20px; border-radius: 4px; }
+  .list-link-main div:last-child { min-width: 0; }
+  .list-link-main strong, .list-link-main span, .list-link-main small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .list-link-main strong { color: #273244; font-size: 0.82rem; }
+  .list-link-main span { margin-top: 0.1rem; color: #70798a; font-size: 0.72rem; }
+  .list-link-main small { margin-top: 0.18rem; color: #aab1bd; font-size: 0.67rem; }
+  .list-category { color: #64748b; font-size: 0.75rem; white-space: nowrap; }
+  .list-date { color: #94a3b8; font-size: 0.72rem; white-space: nowrap; }
+  .table-actions { text-align: center !important; }
+  .table-actions a, .table-actions span { color: #64748b; text-decoration: none; font-size: 1rem; }
+  .table-actions a:hover { color: #4f46e5; }
+
+  /* 瀑布流视图 */
+  .masonry-grid { columns: 4 230px; column-gap: 1.25rem; }
+  .masonry-card {
+    display: inline-block;
+    width: 100%;
+    margin: 0 0 1.25rem;
+    overflow: hidden;
+    break-inside: avoid;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    color: inherit;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  }
+  a.masonry-card:hover { transform: translateY(-3px); border-color: #d9dcff; box-shadow: 0 10px 24px rgba(35, 43, 78, 0.1); }
+  .masonry-card[hidden] { display: none; }
+  .masonry-cover {
+    position: relative;
+    display: flex;
+    height: 132px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    overflow: hidden;
+    background: linear-gradient(135deg, #e9edff, #f8f8ff);
+  }
+  .masonry-cover::after { position: absolute; right: -1.75rem; bottom: -3.6rem; width: 9rem; height: 9rem; border-radius: 50%; background: rgba(255, 255, 255, 0.55); content: ''; }
+  .masonry-cover > span { position: relative; z-index: 1; font-size: 2.5rem; filter: drop-shadow(0 5px 8px rgba(55, 65, 110, 0.16)); }
+  .masonry-cover img, .masonry-cover b { position: relative; z-index: 1; width: 34px; height: 34px; padding: 5px; border: 1px solid rgba(255,255,255,0.7); border-radius: 9px; background: rgba(255,255,255,0.8); object-fit: contain; box-sizing: border-box; }
+  .masonry-cover b { display: grid; place-items: center; color: #64748b; font-size: 0.65rem; }
+  .masonry-ai .masonry-cover { background: linear-gradient(135deg, #eee8ff, #faf8ff); }
+  .masonry-links .masonry-cover { background: linear-gradient(135deg, #e7f7f3, #f7fcfb); }
+  .masonry-local .masonry-cover { background: linear-gradient(135deg, #fff1dc, #fffaf2); }
+  .masonry-1 .masonry-cover { height: 172px; }
+  .masonry-2 .masonry-cover { height: 104px; }
+  .masonry-content { padding: 1rem; }
+  .masonry-content h2 { margin: 0 0 0.35rem; color: #273244; font-size: 0.95rem; line-height: 1.35; }
+  .masonry-content p { margin: 0 0 0.55rem; color: #6b7280; font-size: 0.76rem; line-height: 1.55; }
+  .masonry-content small { display: block; margin-bottom: 0.7rem; overflow: hidden; color: #9ca3af; font-size: 0.68rem; text-overflow: ellipsis; white-space: nowrap; }
+  .masonry-content footer { display: flex; align-items: center; justify-content: space-between; margin-top: 0.8rem; padding-top: 0.7rem; border-top: 1px solid #f0f1f3; color: #aab1bd; font-size: 0.68rem; }
+  .masonry-content footer span { color: #7c86a0; font-size: 0.9rem; }
+
+  @media (max-width: 760px) {
+    .route-hub { padding: 1rem; }
+    .hub-toolbar, .hub-actions { align-items: stretch; }
+    .hub-search { max-width: none; flex-basis: 100%; }
+    .hub-actions { width: 100%; justify-content: space-between; }
+    .view-btn { padding: 0.5rem; }
+    .view-btn span { display: none; }
+    .masonry-grid { columns: 2 150px; gap: 0.85rem; }
+  }
+
+  @media (max-width: 430px) {
+    .masonry-grid { columns: 1; }
+    .filter-btn span { display: none; }
+  }
+</style>

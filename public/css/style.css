@@ -187,6 +187,12 @@ button {
   max-width: 1180px;
 }
 
+.app-shell.routes-shell {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
 .app-shell.todo-shell {
   max-width: 1200px;
 }

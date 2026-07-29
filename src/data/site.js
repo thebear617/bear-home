@@ -1,37 +1,44 @@
 export const routeCategories = [
   {
-    title: '🏠 个人站点',
+    id: 'personal',
+    title: '个人站点',
+    icon: '🏠',
     items: [
-      { name: '猫猫', desc: '猫协档案与疫苗绝育追踪', url: 'https://cat.thebear617.cn/' },
-      { name: '租房对账表', desc: '租房看房清单', url: 'http://rent.thebear617.cn/' },
+      { name: '猫猫', desc: '猫协档案与疫苗绝育追踪', url: 'https://cat.thebear617.cn/', tags: ['宠物', '管理'], addedAt: '2024-01-15' },
+      { name: '租房对账表', desc: '租房看房清单', url: 'http://rent.thebear617.cn/', tags: ['生活', '工具'], addedAt: '2024-02-01' },
     ]
   },
   {
-    title: '🤖 AI 工具',
-    type: 'icon',
+    id: 'ai',
+    title: 'AI 工具',
+    icon: '🤖',
     items: [
-      { name: 'Claude', url: 'https://claude.ai' },
-      { name: 'ChatGPT', url: 'https://chat.openai.com' },
-      { name: '豆包', url: 'https://www.doubao.com' },
-      { name: 'Gemini', url: 'https://gemini.google.com' },
+      { name: 'Claude', desc: 'Anthropic 的 AI 助手', url: 'https://claude.ai', tags: ['AI', '效率'], addedAt: '2024-03-01' },
+      { name: 'ChatGPT', desc: 'OpenAI 的对话式 AI', url: 'https://chat.openai.com', tags: ['AI', '效率'], addedAt: '2024-03-01' },
+      { name: '豆包', desc: '字节的 AI 助手', url: 'https://www.doubao.com', tags: ['AI', '效率'], addedAt: '2024-03-15' },
+      { name: 'Gemini', desc: 'Google 的 AI 助手', url: 'https://gemini.google.com', tags: ['AI', '效率'], addedAt: '2024-03-01' },
     ]
   },
   {
-    title: '🔗 常用链接',
+    id: 'links',
+    title: '常用链接',
+    icon: '🔗',
     items: [
-      { name: 'LDXP 神秘小铺', desc: '买 ChatGPT / Claude 订阅，比官方便宜', url: 'https://pay.ldxp.cn/shop/T37M9N2N/' },
-      { name: 'Hero SMS 接码平台', desc: '接码平台，ChatGPT 电话验证登录时收验证码用', url: 'https://hero-sms.com/cn' },
-      { name: 'OpenTheRank', desc: '查全球各家大模型官方订阅在各地区的价格', url: 'https://opentherank.com/zh/' },
-      { name: 'OpenRouter Rankings', desc: '看全球所有大模型的实时用量 + 实时性能排行', url: 'https://openrouter.ai/rankings' },
-      { name: '鲜枣课堂', desc: '大量优质领域科普 PPT，可直接在线浏览', url: 'http://www.xzclass.com/?page_id=1' },
-      { name: 'JavaGuide', desc: 'GitHub 156K+ Star 的 Java 面试与后端知识体系：计算机基础、数据库、分布式、高并发、系统设计与 AI 应用开发', url: 'https://javaguide.cn/' },
+      { name: 'LDXP 神秘小铺', desc: '买 ChatGPT / Claude 订阅，比官方便宜', url: 'https://pay.ldxp.cn/shop/T37M9N2N/', tags: ['AI', '订阅'], addedAt: '2024-04-01' },
+      { name: 'Hero SMS 接码平台', desc: '接码平台，ChatGPT 电话验证登录时收验证码用', url: 'https://hero-sms.com/cn', tags: ['工具', '验证'], addedAt: '2024-04-05' },
+      { name: 'OpenTheRank', desc: '查全球各家大模型官方订阅在各地区的价格', url: 'https://opentherank.com/zh/', tags: ['AI', '价格'], addedAt: '2024-04-10' },
+      { name: 'OpenRouter Rankings', desc: '看全球所有大模型的实时用量 + 实时性能排行', url: 'https://openrouter.ai/rankings', tags: ['AI', '排行'], addedAt: '2024-04-10' },
+      { name: '鲜枣课堂', desc: '大量优质领域科普 PPT，可直接在线浏览', url: 'http://www.xzclass.com/?page_id=1', tags: ['学习', '科普'], addedAt: '2024-05-01' },
+      { name: 'JavaGuide', desc: 'GitHub 156K+ Star 的 Java 面试与后端知识体系', url: 'https://javaguide.cn/', tags: ['学习', '开发'], addedAt: '2024-05-01' },
     ]
   },
   {
-    title: '📂 本地文件',
+    id: 'local',
+    title: '本地文件',
+    icon: '📂',
     items: [
-      { name: 'htmls', desc: '所有个人站点源码合集', path: '~/Documents/htmls' },
-      { name: 'Obsidian Vault', desc: '知识库与笔记', path: '~/Documents/notes' },
+      { name: 'htmls', desc: '所有个人站点源码合集', path: '~/Documents/htmls', tags: ['开发', '源码'], addedAt: '2024-01-01' },
+      { name: 'Obsidian Vault', desc: '知识库与笔记', path: '~/Documents/notes', tags: ['笔记', '知识'], addedAt: '2024-01-01' },
     ]
   }
 ];
