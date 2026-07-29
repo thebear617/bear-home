@@ -1,0 +1,28 @@
+---
+const repos = [
+  { name: 'bear-home', description: '熊窝 · 个人主页' },
+  { name: 'pig-home', description: '猪窝 · 家庭管理工具' },
+  { name: 'devnotes', description: '开发笔记 · DevNotes' }
+];
+---
+<article class="github-profile-card">
+  <div class="github-profile-summary">
+    <img src="https://github.com/thebear617.png?size=160" alt="orangebear 的 GitHub 头像" width="56" height="56" loading="lazy">
+    <div>
+      <strong>orangebear</strong>
+      <a href="https://github.com/thebear617" target="_blank" rel="noopener">@thebear617 ↗</a>
+    </div>
+    <span class="github-repo-count">7 个公开仓库</span>
+  </div>
+  <ul class="github-repo-list">
+    {repos.map((repo) => (
+      <li>
+        <a href={`https://github.com/thebear617/${repo.name}`} target="_blank" rel="noopener">
+          <span class="github-repo-icon" aria-hidden="true">⌘</span>
+          <span><strong>{repo.name}</strong><small>{repo.description}</small></span>
+          <span aria-hidden="true">↗</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</article>

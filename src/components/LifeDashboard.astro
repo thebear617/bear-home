@@ -1,0 +1,121 @@
+---
+const weatherLocations = [
+  { name: '西安', city: 'Xi%27an' },
+  { name: '南宁', city: 'Nanning' }
+];
+import GithubProfileCard from './GithubProfileCard.astro';
+import SearchBox from './SearchBox.astro';
+---
+
+<section class="life-dashboard">
+  <div class="dashboard-hero">
+    <div>
+      <header class="dashboard-welcome">
+        <p class="dashboard-eyebrow">Life dashboard</p>
+        <h2>今天也慢慢过</h2>
+        <p data-dashboard-date>从看看窗外开始。</p>
+      </header>
+      <SearchBox />
+    </div>
+    <div class="gradient-sky-frame">
+      <iframe
+        src="https://widgets.saifsaber.com/Gradient-sky.html?lang=zh&theme=light&size=regular&format=24&title=%E6%AD%A4%E5%88%BB"
+        title="随当前时间变化的渐变天空"
+        loading="lazy"
+        width="420"
+        height="240"
+      ></iframe>
+    </div>
+  </div>
+
+  <section class="dashboard-section" aria-labelledby="weather-title">
+    <div class="dashboard-section-heading">
+      <div>
+          <p class="dashboard-section-kicker">此刻</p>
+          <h3 id="weather-title">抬头看看窗外，怎么样？</h3>
+      </div>
+      <span class="dashboard-section-note">每 15 分钟更新</span>
+    </div>
+    <div class="weather-widget-grid">
+      {weatherLocations.map((location) => (
+        <article class="weather-place">
+          <h4>{location.name}</h4>
+          <div class="weather-widget-frame">
+            <iframe
+              src={`https://widgets.saifsaber.com/Weather.html?city=${location.city}&lang=zh&theme=light&size=compact&forecast=off&details=off`}
+              title={`${location.name}天气`}
+              loading="lazy"
+              width="320"
+              height="280"
+            ></iframe>
+          </div>
+        </article>
+      ))}
+    </div>
+    <p class="weather-widget-caption">天气数据由 Open-Meteo 提供，当前显示西安和南宁。</p>
+  </section>
+
+  <div class="dashboard-widget-grid">
+    <section class="dashboard-section dashboard-calendar-section" aria-labelledby="calendar-title">
+      <div class="dashboard-section-heading">
+        <div>
+          <p class="dashboard-section-kicker">时间</p>
+          <h3 id="calendar-title">本月日历</h3>
+        </div>
+        <span class="dashboard-section-note">可翻月查看</span>
+      </div>
+      <div class="calendar-widget-frame">
+        <iframe
+          src="https://widgets.saifsaber.com/Calendar.html?lang=zh&theme=light&size=compact&weekStart=mon&showHijri=off"
+          title="本月日历"
+          loading="lazy"
+          width="340"
+          height="430"
+        ></iframe>
+      </div>
+    </section>
+
+    <section class="dashboard-section" aria-labelledby="focus-title">
+      <div class="dashboard-section-heading">
+        <div>
+          <p class="dashboard-section-kicker">专注</p>
+          <h3 id="focus-title">番茄钟</h3>
+        </div>
+        <span class="dashboard-section-note">25 分钟专注 · 5 分钟休息</span>
+      </div>
+      <div class="pomodoro-widget-frame">
+        <iframe
+          src="https://widgets.saifsaber.com/Pomodoro.html?lang=zh&theme=light&size=compact&work=25&break=5&longBreak=15&cycles=4"
+          title="番茄钟"
+          loading="lazy"
+          width="340"
+          height="400"
+        ></iframe>
+      </div>
+      <p class="weather-widget-caption">计时状态保存在当前浏览器中；可在组件内开始、暂停、跳过或重置。</p>
+    </section>
+
+    <section class="dashboard-section" aria-labelledby="github-title">
+      <div class="dashboard-section-heading">
+        <div>
+          <p class="dashboard-section-kicker">创作</p>
+          <h3 id="github-title">GitHub 主页</h3>
+        </div>
+        <span class="dashboard-section-note">@thebear617</span>
+      </div>
+      <GithubProfileCard />
+    </section>
+  </div>
+</section>
+
+<script>
+  const dateLabel = document.querySelector('[data-dashboard-date]');
+  if (dateLabel) {
+    const formattedDate = new Intl.DateTimeFormat('zh-CN', {
+      month: 'long',
+      day: 'numeric',
+      weekday: 'long'
+    }).format(new Date());
+    dateLabel.textContent = `${formattedDate}，从看看窗外开始。`;
+  }
+</script>

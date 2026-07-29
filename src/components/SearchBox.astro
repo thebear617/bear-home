@@ -1,0 +1,66 @@
+<section class="dashboard-search" aria-label="统一搜索">
+  <form data-dashboard-search data-engine="google" action="https://www.google.com/search" method="get" target="_blank">
+    <label class="search-field" for="dashboard-search-input">
+      <svg class="search-field-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="11" cy="11" r="6.5"></circle>
+        <path d="m16 16 4 4"></path>
+      </svg>
+      <input id="dashboard-search-input" name="q" type="search" placeholder="搜索内容…" autocomplete="off" required>
+    </label>
+    <kbd class="search-enter-hint" aria-hidden="true">↵</kbd>
+    <details class="search-engine-menu">
+      <summary aria-label="当前使用 Google，选择搜索引擎" title="当前：Google；点击切换搜索引擎">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="4" y="4" width="6" height="6" rx="1"></rect>
+          <rect x="14" y="4" width="6" height="6" rx="1"></rect>
+          <rect x="4" y="14" width="6" height="6" rx="1"></rect>
+          <rect x="14" y="14" width="6" height="6" rx="1"></rect>
+        </svg>
+      </summary>
+      <div class="search-engine-options" role="menu" aria-label="选择搜索引擎">
+        <button type="button" data-engine-option="google" class="active">Google</button>
+        <button type="button" data-engine-option="baidu">百度</button>
+        <button type="button" data-engine-option="bing">Bing</button>
+      </div>
+    </details>
+  </form>
+</section>
+
+<script>
+  const searchForm = document.querySelector('[data-dashboard-search]');
+  const engineMenu = document.querySelector('.search-engine-menu');
+  const engineSummary = engineMenu?.querySelector('summary');
+
+  const engines = {
+    google: { url: 'https://www.google.com/search', parameter: 'q' },
+    baidu: { url: 'https://www.baidu.com/s', parameter: 'wd' },
+    bing: { url: 'https://www.bing.com/search', parameter: 'q' }
+  };
+
+  searchForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const query = new FormData(searchForm).get('q')?.toString().trim();
+    const engine = engines[searchForm.dataset.engine] ?? engines.google;
+    if (!query) return;
+
+    const searchUrl = new URL(engine.url);
+    searchUrl.searchParams.set(engine.parameter, query);
+    window.open(searchUrl, '_blank', 'noopener');
+  });
+
+  engineMenu?.querySelectorAll('[data-engine-option]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const selected = button.dataset.engineOption;
+      if (!selected || !engines[selected] || !searchForm) return;
+
+      searchForm.dataset.engine = selected;
+      engineMenu.querySelectorAll('[data-engine-option]').forEach((item) => {
+        item.classList.toggle('active', item === button);
+      });
+      const label = button.textContent?.trim() || selected;
+      engineSummary?.setAttribute('aria-label', `当前使用 ${label}，选择搜索引擎`);
+      engineSummary?.setAttribute('title', `当前：${label}；点击切换搜索引擎`);
+      engineMenu.removeAttribute('open');
+    });
+  });
+</script>

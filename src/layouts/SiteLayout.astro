@@ -14,7 +14,7 @@ const { title = '熊窝', active = 'routes', children } = Astro.props;
   <div class="layout">
     <SiteSidebar active={active} />
     <div class:list={['main-area', { 'lol-active': active === 'lol' }]}>
-      <main class:list={['app-shell', { 'lol-shell': active === 'lol' }]}>
+      <main class:list={['app-shell', { 'lol-shell': active === 'lol', 'dashboard-shell': active === 'dashboard' }]}>
         <slot />
       </main>
     </div>
