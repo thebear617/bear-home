@@ -162,7 +162,8 @@ import SearchBox from './SearchBox.astro';
               <img src={playlist.cover} alt="" width="64" height="64" loading="lazy" />
               <span class="playlist-card-copy">
                 <strong>{playlist.name}</strong>
-                <small>{playlist.trackCount} 首歌曲 · 网易云音乐</small>
+                <small class="playlist-card-desktop-meta">{playlist.trackCount} 首歌曲 · 网易云音乐</small>
+                <small class="playlist-card-mobile-meta">在网易云中播放 ↗</small>
               </span>
               <span class="playlist-card-play" aria-hidden="true">▶</span>
             </button>
@@ -223,9 +224,16 @@ import SearchBox from './SearchBox.astro';
   playlistCards.forEach((card) => {
     card.addEventListener('click', () => {
       const { playlistId, playlistName } = card.dataset;
+      const playlistUrl = `https://music.163.com/playlist?id=${playlistId}`;
+
+      if (window.matchMedia('(max-width: 760px)').matches) {
+        window.location.assign(playlistUrl);
+        return;
+      }
+
       musicFrame.src = `https://music.163.com/outchain/player?type=0&id=${playlistId}&auto=0&height=430`;
       musicFrame.title = `${playlistName} · 网易云音乐歌单预览`;
-      musicOpenLink.href = `https://music.163.com/playlist?id=${playlistId}`;
+      musicOpenLink.href = playlistUrl;
       musicLibrary.hidden = true;
       musicPlayer.hidden = false;
     });

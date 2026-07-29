@@ -655,6 +655,7 @@ button {
   color: var(--muted);
   font-size: .68rem;
 }
+.playlist-card-mobile-meta { display: none; }
 .playlist-card-play {
   display: grid;
   width: 1.7rem;
@@ -739,6 +740,13 @@ button {
 @media (max-width: 760px) {
   .weather-widget-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .playlist-card-desktop-meta { display: none; }
+  .playlist-card-mobile-meta {
+    display: block;
+    color: var(--green);
+    font-weight: 800;
   }
 }
 
