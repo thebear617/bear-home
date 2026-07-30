@@ -28,15 +28,16 @@ function trackerSyncPlugin() {
               schemaVersion: 1,
               snapshotAt: payload.snapshotAt || new Date().toISOString(),
               startedOn: payload.startedOn,
-              dailyRecords: payload.dailyRecords
+              dailyRecords: payload.dailyRecords,
+              longTerm: payload.longTerm || { goals: [] }
             };
             let currentSnapshot = null;
             if (existsSync(trackerSnapshotPath)) {
               try { currentSnapshot = JSON.parse(readFileSync(trackerSnapshotPath, 'utf8')); } catch { currentSnapshot = null; }
             }
 
-            const currentData = JSON.stringify(currentSnapshot?.dailyRecords || {});
-            const nextData = JSON.stringify(nextSnapshot.dailyRecords);
+            const currentData = JSON.stringify({ dailyRecords: currentSnapshot?.dailyRecords || {}, longTerm: currentSnapshot?.longTerm || { goals: [] } });
+            const nextData = JSON.stringify({ dailyRecords: nextSnapshot.dailyRecords, longTerm: nextSnapshot.longTerm });
             if (currentSnapshot?.schemaVersion === 1 && currentData === nextData) {
               response.writeHead(200, { 'Content-Type': 'application/json' });
               response.end(JSON.stringify({ changed: false, snapshotAt: currentSnapshot.snapshotAt }));

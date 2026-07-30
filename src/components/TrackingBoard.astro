@@ -25,6 +25,10 @@ const teas = [
       <button class="tracking-view-button" type="button" data-tracking-view="month" aria-label="本月看板" title="本月看板">▥</button>
       <button class="tracking-view-button" type="button" data-tracking-view="focus" aria-label="专注视图" title="专注视图">♟</button>
     </div>
+    <div class="tracking-view-heading" data-tracking-view-heading hidden>
+      <strong data-tracking-view-heading-title></strong>
+      <small data-tracking-view-heading-range></small>
+    </div>
     <div class="tracking-board-clock">
       <span>SESSION <strong data-work-session-clock>00:00:00</strong></span>
       <span>TOTAL <strong data-work-total-clock>00:00:00</strong></span>
@@ -130,29 +134,78 @@ const teas = [
   </div>
 
   <section class="tracking-history-view" data-tracking-view-panel="week" hidden aria-labelledby="tracking-week-title">
-    <div class="tracking-history-heading"><div><p>本周看板</p><h2 id="tracking-week-title">Weekly overview</h2></div><span data-history-range></span></div>
-    <div class="tracking-history-summary" data-history-summary></div>
+    <div class="tracking-history-heading tracking-week-subheading"><div><p>本周看板</p><h2 id="tracking-week-title">Weekly overview</h2></div><span data-history-range></span></div>
+    <h3 class="tracking-week-summary-title">WEEK SUMMARY</h3>
+    <div class="tracking-history-summary tracking-week-summary" data-history-summary></div>
+    <div class="tracking-week-breakdown-heading"><h3>DAILY BREAKDOWN</h3><div class="tracking-week-legend"><span><i class="tracking-legend-work"></i>Work（h）</span><span><i class="tracking-legend-pomodoro"></i>Pomodoros</span><span><i class="tracking-legend-habit"></i>Habits %</span><span><i class="tracking-legend-best">★</i>Best day</span><span><i class="tracking-legend-streak">●</i>Streak day</span></div></div>
     <div class="tracking-history-grid" data-history-grid></div>
+    <div class="tracking-week-insight-grid">
+      <section class="tracking-week-insights"><h3>WEEKLY INSIGHTS</h3><div data-week-insights></div></section>
+      <section class="tracking-week-panel tracking-week-trend"><h3>HABIT TREND</h3><div class="tracking-week-trend-chart" data-week-habit-trend></div><small>本周平均完成率</small></section>
+      <section class="tracking-week-panel tracking-week-notes"><h3>📖 LAYOUT NOTES</h3><ul><li>每天的卡片显示习惯、工作与番茄钟。</li><li>星标代表本周投入最高的一天。</li><li>连续天数帮助你安排下一周节奏。</li></ul></section>
+    </div>
+    <div class="tracking-week-footer">
+      <section class="tracking-week-footer-panel tracking-week-habit-legend"><h3>HABIT LEGEND <small>(Completion %)</small></h3><div>{habits.map((habit) => <span><i>{habit.icon}</i>{habit.name.replace('Read 10 pages', 'Read')}</span>)}<small class="tracking-week-legend-average">Average across<br />all 4 habits</small></div></section>
+      <section class="tracking-week-footer-panel tracking-week-navigation"><h3>WEEK NAVIGATION</h3><div><button type="button" data-week-nav="previous" aria-label="上一周">←</button><b data-week-control-label></b><button type="button" data-week-nav="next" aria-label="下一周">→</button></div></section>
+      <button class="tracking-week-export" type="button" data-week-export>⇧ <span>EXPORT WEEKLY REPORT</span></button>
+    </div>
+    <div class="tracking-history-note">每天的记录来自本地看板，按日期保留习惯、工作和番茄钟完成情况。</div>
   </section>
 
   <section class="tracking-history-view" data-tracking-view-panel="month" hidden aria-labelledby="tracking-month-title">
     <div class="tracking-history-heading"><div><p>本月看板</p><h2 id="tracking-month-title">Monthly overview</h2></div><span data-history-range></span></div>
-    <div class="tracking-history-summary" data-history-summary></div>
-    <div class="tracking-month-grid" data-history-grid></div>
+    <div class="tracking-month-summary" data-history-summary></div>
+    <div class="tracking-month-main-grid">
+      <section class="tracking-month-calendar-panel">
+        <h3 data-month-calendar-title>MONTH OVERVIEW</h3>
+        <div class="tracking-month-weekdays"><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span></div>
+        <div class="tracking-month-grid" data-history-grid></div>
+        <div class="tracking-month-legend" data-month-legend></div>
+      </section>
+      <div class="tracking-month-side-panels">
+        <section class="tracking-month-panel tracking-work-type-panel"><h3>WORK TYPE SUMMARY <small>(HOURS)</small></h3><div data-month-breakdown></div></section>
+        <section class="tracking-month-panel tracking-habit-type-panel"><h3>HABIT TYPE SUMMARY <small>(COMPLETION RATE)</small></h3><div data-month-habit-breakdown></div></section>
+      </div>
+    </div>
+    <div class="tracking-month-insight-grid">
+      <section class="tracking-month-insights"><h3>TREND INSIGHTS</h3><div data-month-insights></div></section>
+      <section class="tracking-month-panel tracking-pomodoro-summary"><h3>🍅 POMODORO TRENDS</h3><div data-month-pomodoro-summary></div></section>
+      <section class="tracking-month-panel tracking-month-notes"><h3>📖 LAYOUT NOTES</h3><ul><li>颜色越深代表当天工作投入越高。</li><li>彩色圆点代表当天完成过的习惯。</li><li>摘要数据来自当前浏览器快照。</li></ul></section>
+    </div>
+    <div class="tracking-month-controls"><span>月份 <b data-month-control-label></b></span><span class="tracking-month-filter"><b>习惯筛选</b><i>💧 Water</i><i>☕ Coffee & Tea</i><i>💪 Exercise</i><i>📖 Read</i></span><span class="tracking-month-source">当前视图只读快照</span></div>
   </section>
 
-  <section class="tracking-history-view tracking-focus-view" data-tracking-view-panel="focus" hidden aria-labelledby="tracking-focus-title">
-    <div class="tracking-history-heading"><div><p>专注视图</p><h2 id="tracking-focus-title">Active timers</h2></div><span>当前浏览器</span></div>
-    <div class="tracking-focus-list" data-focus-list></div>
+  <section class="tracking-history-view tracking-goals-view" data-tracking-view-panel="focus" hidden aria-labelledby="tracking-focus-title">
+    <div class="tracking-history-heading"><div><p>长期目标</p><h2 id="tracking-focus-title">Long-term goals</h2></div><span>状态总览</span></div>
+    <div class="tracking-goal-summary" data-goal-summary></div>
+    <div class="tracking-goal-layout">
+      <div class="tracking-goal-main-column">
+        <section class="tracking-goal-section tracking-project-goals"><h3>PROJECT GOALS</h3><div class="tracking-goal-grid" data-goal-project-grid></div></section>
+        <section class="tracking-goal-section tracking-money-goals"><h3>MONEY GOALS</h3><div class="tracking-goal-grid" data-goal-money-grid></div></section>
+        <section class="tracking-goal-section tracking-goal-history"><h3>HISTORY</h3><div class="tracking-goal-grid tracking-goal-history-grid" data-goal-history-grid></div></section>
+      </div>
+      <aside class="tracking-goal-sidebar">
+        <section class="tracking-goal-panel tracking-money-summary"><h3>MONEY GOALS SUMMARY</h3><div data-money-summary></div></section>
+        <section class="tracking-goal-panel tracking-goal-notes"><h3>📖 LAYOUT NOTES</h3><ul><li>长期目标与每日记录分开保存。</li><li>目标完成后保留在历史区。</li><li>状态用于筛选进行中、暂停和已归档目标。</li></ul></section>
+      </aside>
+    </div>
+    <div class="tracking-goal-controls"><span>目标状态</span><div><button type="button" class="active" data-goal-filter="all">全部</button><button type="button" data-goal-filter="active">进行中</button><button type="button" data-goal-filter="paused">暂停</button><button type="button" data-goal-filter="completed">已完成</button><button type="button" data-goal-filter="archived">已归档</button></div><span>当前视图只读快照</span></div>
   </section>
 </section>
 
 <script>
   const trackingBoard = document.querySelector('[data-tracking-board]');
   const boardToday = new Intl.DateTimeFormat('en-CA').format(new Date());
-  const trackerStorageKey = 'bear-home-tracker-v1';
+    const trackerStorageKey = 'bear-home-tracker-v1';
+  const habitDefinitions = [
+    { id: 'water', name: 'Water', target: 2200, tone: 'blue' },
+    { id: 'coffee', name: 'Coffee & Tea', target: 4, tone: 'slate' },
+    { id: 'exercise', name: 'Exercise', target: 6, tone: 'purple' },
+    { id: 'reading', name: 'Read 10 pages', target: 10, tone: 'amber' }
+  ];
 
   if (trackingBoard) {
+    let selectedWeekOffset = 0;
     const defaultDayRecord = {
       habits: { water: 1100, coffee: 2, exercise: 3, reading: 0 },
       work: { timers: { inbox: 7730, development: 0 }, counts: { 'blog-writing': 4 } },
@@ -160,11 +213,19 @@ const teas = [
       countdowns: {},
       sideProject: { elapsed: 0, remaining: 10800 }
     };
+    const defaultLongTerm = {
+      goals: [
+        { id: 'money-to-save', title: '我要攒的钱', type: 'money', icon: '💰', current: 0, target: 10000, unit: '¥', status: 'active', startedAt: boardToday, completedAt: null },
+        { id: 'money-owed-to-me', title: '别人还没还我的钱', type: 'money', icon: '↩', current: 1000, target: 4350, unit: '¥', status: 'active', startedAt: boardToday, completedAt: null },
+        { id: 'money-i-owe', title: '我要还别人的钱', type: 'money', icon: '📤', current: 0, target: 1184.88, unit: '¥', status: 'active', startedAt: boardToday, completedAt: null }
+      ]
+    };
     let trackerState = {};
     try { trackerState = JSON.parse(localStorage.getItem(trackerStorageKey) || '{}'); } catch { trackerState = {}; }
     if (!trackerState.version || !trackerState.dailyRecords) {
-      trackerState = { version: 1, startedOn: boardToday, dailyRecords: { [boardToday]: defaultDayRecord } };
+      trackerState = { version: 1, startedOn: boardToday, dailyRecords: { [boardToday]: defaultDayRecord }, longTerm: defaultLongTerm };
     }
+    trackerState.longTerm = { ...defaultLongTerm, ...(trackerState.longTerm || {}), goals: trackerState.longTerm?.goals || defaultLongTerm.goals };
     const storedToday = trackerState.dailyRecords[boardToday] || {};
     trackerState.dailyRecords[boardToday] = {
       ...defaultDayRecord,
@@ -191,6 +252,7 @@ const teas = [
           historyState = snapshot;
           renderWeekView();
           renderMonthView();
+          renderLongTermView();
         }
       } catch { /* 静态页面无法读取快照时，保留当前视图 */ }
     }
@@ -206,7 +268,7 @@ const teas = [
         const response = await fetch(`${window.location.origin}/__tracker_sync`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ schemaVersion: 1, snapshotAt: new Date().toISOString(), startedOn: trackerState.startedOn, dailyRecords: trackerState.dailyRecords })
+          body: JSON.stringify({ schemaVersion: 1, snapshotAt: new Date().toISOString(), startedOn: trackerState.startedOn, dailyRecords: trackerState.dailyRecords, longTerm: trackerState.longTerm })
         });
         const responseText = await response.text();
         let result = {};
@@ -450,14 +512,15 @@ const teas = [
     }
 
     function getDayRecord(key) {
-      return historyState.dailyRecords[key] || { habits: {}, work: { timers: {}, counts: {} }, pomodoro: { completed: 0 }, sideProject: { elapsed: 0 } };
+      const dailyRecords = historyState?.dailyRecords || trackerState?.dailyRecords || {};
+      return dailyRecords[key] || { habits: {}, work: { timers: {}, counts: {} }, pomodoro: { completed: 0 }, sideProject: { elapsed: 0 } };
     }
 
-    function getWeekDays() {
+    function getWeekDays(weekOffset = selectedWeekOffset) {
       const today = new Date(`${boardToday}T12:00:00`);
       const day = today.getDay() || 7;
       const monday = new Date(today);
-      monday.setDate(today.getDate() - day + 1);
+      monday.setDate(today.getDate() - day + 1 + weekOffset * 7);
       return Array.from({ length: 7 }, (_, index) => {
         const date = new Date(monday);
         date.setDate(monday.getDate() + index);
@@ -470,25 +533,52 @@ const teas = [
       const panel = trackingBoard.querySelector('[data-tracking-view-panel="week"]');
       const grid = panel?.querySelector('[data-history-grid]');
       if (!panel || !grid) return;
-      panel.querySelector('[data-history-range]').textContent = `${dateKey(days[0])} — ${dateKey(days[6])}`;
+      const range = panel.querySelector('[data-history-range]');
+      if (range) range.textContent = `${dateKey(days[0])} — ${dateKey(days[6])}`;
       let workTotal = 0;
       let pomodoroTotal = 0;
       let habitTotal = 0;
-      grid.innerHTML = days.map((date) => {
+      const dayStats = days.map((date) => {
         const key = dateKey(date);
         const record = getDayRecord(key);
         const workSeconds = Object.values(record.work?.timers || {}).reduce((sum, value) => sum + Number(value || 0), 0) + Number(record.sideProject?.elapsed || 0);
         const completedHabits = Object.entries(record.habits || {}).reduce((sum, [id, value]) => {
-          const habit = habits.find((item) => item.id === id);
+          const habit = habitDefinitions.find((item) => item.id === id);
           return sum + (habit && Number(value) >= habit.target ? 1 : 0);
         }, 0);
+        const habitPercentage = Math.round((habitDefinitions.reduce((sum, habit) => sum + Math.min(1, Number(record.habits?.[habit.id] || 0) / habit.target), 0) / habitDefinitions.length) * 100);
         const pomodoros = Number(record.pomodoro?.completed || 0);
         workTotal += workSeconds;
         pomodoroTotal += pomodoros;
         habitTotal += completedHabits;
-        return `<article class="tracking-history-day"><strong>${date.toLocaleDateString('zh-CN', { weekday: 'short' })}</strong><small>${key.slice(5)}</small><span>${completedHabits} 个习惯</span><span>${formatShortDuration(workSeconds)} 工作</span><span>${pomodoros} 个番茄</span></article>`;
+        return { date, key, workSeconds, pomodoros, completedHabits, habitPercentage, isActive: workSeconds > 0 || pomodoros > 0 || completedHabits > 0 };
+      });
+      const activeDays = dayStats.filter((day) => day.workSeconds > 0 || day.pomodoros > 0 || day.completedHabits > 0).length;
+      const habitRate = Math.round((habitTotal / Math.max(days.length * habitDefinitions.length, 1)) * 100);
+      const bestDay = [...dayStats].sort((a, b) => (b.workSeconds + b.completedHabits * 900 + b.pomodoros * 1500) - (a.workSeconds + a.completedHabits * 900 + a.pomodoros * 1500))[0];
+      let streak = 0;
+      dayStats.forEach((day) => { day.streak = day.isActive ? streak + 1 : 0; streak = day.streak; });
+      const currentStreak = dayStats[dayStats.length - 1]?.streak || 0;
+      grid.innerHTML = dayStats.map((day) => {
+        const isBest = day.key === bestDay?.key && day.isActive;
+        const isToday = day.key === boardToday;
+        const isStreakDay = day.isActive && !isBest;
+        const state = isBest ? 'best' : day.isActive ? 'active' : 'rest';
+        const statusIcon = isBest ? '★' : isStreakDay ? '●' : '○';
+        const statusText = isBest ? 'BEST DAY' : day.isActive ? `STREAK +${day.streak}` : 'NO RECORD';
+        const note = isBest ? 'Best day!' : day.isActive ? (day.completedHabits ? 'Steady progress' : 'Work recorded') : 'Rest day';
+        return `<article class="tracking-week-day-card is-${state}${isToday ? ' is-today' : ''}" style="--day-percent:${day.habitPercentage}%"><header><div><strong>${day.date.toLocaleDateString('en-US', { weekday: 'long' })}</strong><small>${day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</small></div><b aria-label="${statusText}">${statusIcon}</b></header><div class="tracking-week-progress"><span><b>${day.habitPercentage}%</b></span></div><div class="tracking-week-metrics"><span>◷ <b>${formatWorkTime(day.workSeconds)}</b></span><span>🍅 <b>${day.pomodoros}</b></span></div><div class="tracking-week-note"><small>${note}</small><em>${statusText}</em></div></article>`;
       }).join('');
-      panel.querySelector('[data-history-summary]').innerHTML = `<span><b>${habitTotal}</b> 个习惯达成</span><span><b>${formatShortDuration(workTotal)}</b> 总工作</span><span><b>${pomodoroTotal}</b> 个番茄完成</span>`;
+      const summary = panel.querySelector('[data-history-summary]');
+      if (summary) summary.innerHTML = `<article class="tracking-week-summary-card tracking-week-summary-work"><span class="tracking-week-summary-icon" aria-hidden="true">🕒</span><div class="tracking-week-summary-copy"><b>${formatShortDuration(workTotal)}</b><small>Total work hours</small><em>No previous-week comparison</em></div><span class="tracking-week-summary-action is-trend" aria-label="工作时长趋势"><i></i><i></i><i></i><i></i></span></article><article class="tracking-week-summary-card tracking-week-summary-habits"><span class="tracking-week-summary-icon" aria-hidden="true">💪</span><div class="tracking-week-summary-copy"><b>${habitRate}%</b><small>Habit completion rate</small><em>${activeDays} active day${activeDays === 1 ? '' : 's'}</em></div><span class="tracking-week-summary-action is-trend" aria-label="习惯趋势"><i></i><i></i><i></i><i></i></span></article><article class="tracking-week-summary-card tracking-week-summary-pomodoros"><span class="tracking-week-summary-icon" aria-hidden="true">🍅</span><div class="tracking-week-summary-copy"><b>${pomodoroTotal}</b><small>Total pomodoros</small><em>This week total</em></div><span class="tracking-week-summary-action is-trend" aria-label="番茄钟趋势"><i></i><i></i><i></i><i></i></span></article><article class="tracking-week-summary-card tracking-week-summary-streak"><span class="tracking-week-summary-icon" aria-hidden="true">⭐</span><div class="tracking-week-summary-copy"><b>${currentStreak} days</b><small>Current streak</small><em>${bestDay?.isActive ? `Best: ${bestDay.key.slice(5)}` : 'No record yet'}</em></div><span class="tracking-week-summary-action is-calendar" aria-label="连续记录日历"><i></i></span></article>`;
+      const control = panel.querySelector('[data-week-control-label]');
+      if (control) control.textContent = `${dateKey(days[0])} — ${dateKey(days[6])}`;
+      const nextButton = panel.querySelector('[data-week-nav="next"]');
+      if (nextButton) nextButton.disabled = selectedWeekOffset >= 0;
+      const insights = panel.querySelector('[data-week-insights]');
+      if (insights) insights.innerHTML = `<article><strong>★</strong><small>BEST DAY</small><b>${bestDay ? bestDay.date.toLocaleDateString('zh-CN', { weekday: 'long' }) : '—'}</b><span>${bestDay ? formatShortDuration(bestDay.workSeconds) : '暂无数据'}</span></article><article><strong>◷</strong><small>MOST ACTIVE</small><b>${activeDays} days</b><span>${formatShortDuration(workTotal)} 工作</span></article><article><strong>⚠</strong><small>NEEDS ATTENTION</small><b>${activeDays < 7 ? '休息日' : '保持节奏'}</b><span>${activeDays < 7 ? `${7 - activeDays} 天没有记录` : '本周每天都有活动'}</span></article>`;
+      const trend = panel.querySelector('[data-week-habit-trend]');
+      if (trend) trend.innerHTML = dayStats.map((day) => `<span title="${day.key}"><i style="height:${Math.max(8, Math.min(100, Math.round((day.completedHabits / Math.max(habitDefinitions.length, 1)) * 100)))}%"></i><small>${day.date.toLocaleDateString('zh-CN', { weekday: 'short' }).replace('周', '')}</small></span>`).join('');
     }
 
     function renderMonthView() {
@@ -499,31 +589,99 @@ const teas = [
       const panel = trackingBoard.querySelector('[data-tracking-view-panel="month"]');
       const grid = panel?.querySelector('[data-history-grid]');
       if (!panel || !grid) return;
+      const monthLabel = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(today);
       panel.querySelector('[data-history-range]').textContent = `${year} 年 ${month + 1} 月`;
+      panel.querySelector('[data-month-calendar-title]').textContent = `${monthLabel.toUpperCase()} OVERVIEW`;
+      panel.querySelector('[data-month-control-label]').textContent = monthLabel;
       let workTotal = 0;
       let activeDays = 0;
-      grid.innerHTML = Array.from({ length: daysInMonth }, (_, index) => {
+      const categoryTotals = {};
+      let habitTotal = 0;
+      let pomodoroTotal = 0;
+      const habitStats = Object.fromEntries(habitDefinitions.map((habit) => [habit.id, { ...habit, active: 0, completed: 0, percentage: 0 }]));
+      const dayStats = [];
+      for (let index = 0; index < daysInMonth; index += 1) {
         const date = new Date(year, month, index + 1, 12);
         const record = getDayRecord(dateKey(date));
         const workSeconds = Object.values(record.work?.timers || {}).reduce((sum, value) => sum + Number(value || 0), 0) + Number(record.sideProject?.elapsed || 0);
-        const habitCount = Object.keys(record.habits || {}).length;
+        const habitCount = Object.values(record.habits || {}).filter((value) => Number(value) > 0).length;
+        const completedHabits = Object.entries(record.habits || {}).reduce((sum, [id, value]) => {
+          const habit = habitDefinitions.find((item) => item.id === id);
+          const numericValue = Number(value || 0);
+          if (habit && numericValue > 0) habitStats[id].active += 1;
+          if (habit && numericValue >= habit.target) { habitStats[id].completed += 1; return sum + 1; }
+          return sum;
+        }, 0);
+        const pomodoros = Number(record.pomodoro?.completed || 0);
+        habitTotal += completedHabits;
+        pomodoroTotal += pomodoros;
+        Object.entries(record.work?.timers || {}).forEach(([id, value]) => { categoryTotals[id] = (categoryTotals[id] || 0) + Number(value || 0); });
         workTotal += workSeconds;
-        if (workSeconds > 0 || habitCount > 0) activeDays += 1;
-        const intensity = Math.min(4, Math.ceil((workSeconds / 3600 + habitCount) / 2));
-        return `<article class="tracking-month-day" data-intensity="${intensity}"><strong>${index + 1}</strong><small>${formatShortDuration(workSeconds)}</small></article>`;
+        if (workSeconds > 0 || habitCount > 0 || pomodoros > 0) activeDays += 1;
+        dayStats.push({ date, key: dateKey(date), workSeconds, habitCount, completedHabits, pomodoros });
+      }
+      const bestDay = [...dayStats].sort((a, b) => (b.workSeconds + b.completedHabits * 900) - (a.workSeconds + a.completedHabits * 900))[0];
+      const busiestDay = [...dayStats].sort((a, b) => b.workSeconds - a.workSeconds)[0];
+      const firstDayOffset = (new Date(year, month, 1, 12).getDay() + 6) % 7;
+      const calendarCells = Array.from({ length: 42 }, (_, cellIndex) => {
+        const dayNumber = cellIndex - firstDayOffset + 1;
+        const date = new Date(year, month, dayNumber, 12);
+        const inMonth = date.getMonth() === month;
+        if (!inMonth) return `<article class="tracking-month-day is-muted"><strong>${date.getDate()}</strong></article>`;
+        const stat = dayStats[dayNumber - 1];
+        const record = getDayRecord(stat.key);
+        const intensity = Math.min(4, Math.ceil((stat.workSeconds / 3600 + stat.habitCount) / 2));
+        const dots = habitDefinitions.map((habit) => Number(record.habits?.[habit.id] || 0) > 0 ? `<i class="tracking-month-habit-dot tracking-dot-${habit.tone}" title="${habit.name}"></i>` : '').join('');
+        const isToday = stat.key === boardToday;
+        const badge = stat.key === bestDay?.key && stat.workSeconds > 0 ? '<em>★</em>' : '';
+        return `<article class="tracking-month-day${isToday ? ' is-today' : ''}" data-intensity="${intensity}"><strong>${dayNumber}</strong>${badge}<div class="tracking-month-work-bars"><i></i><i></i><i></i><i></i><i></i></div><div class="tracking-month-dots">${dots || '<i class="tracking-month-habit-dot tracking-dot-none"></i>'}</div><small>🍅 ${stat.pomodoros}</small></article>`;
       }).join('');
-      panel.querySelector('[data-history-summary]').innerHTML = `<span><b>${activeDays}</b> 个活跃日</span><span><b>${formatShortDuration(workTotal)}</b> 总工作</span><span><b>${daysInMonth}</b> 天记录范围</span>`;
+      grid.innerHTML = calendarCells;
+      panel.querySelector('[data-history-summary]').innerHTML = `<article><span>⏱️</span><div><small>TOTAL WORK HOURS</small><b>${formatShortDuration(workTotal)}</b><em>本月累计</em></div></article><article><span>💪</span><div><small>ACTIVE DAYS</small><b>${activeDays} / ${daysInMonth}</b><em>${Math.round((activeDays / daysInMonth) * 100)}% of month</em></div></article><article><span>📖</span><div><small>TOTAL HABIT COMPLETIONS</small><b>${habitTotal}</b><em>达成目标次数</em></div></article><article><span>🍅</span><div><small>AVG POMODOROS / DAY</small><b>${activeDays ? (pomodoroTotal / activeDays).toFixed(1) : '0.0'}</b><em>最佳日：${bestDay ? bestDay.date.getDate() : '—'} 日</em></div></article>`;
+      const breakdown = panel.querySelector('[data-month-breakdown]');
+      if (breakdown) {
+        const maxWork = Math.max(...Object.values(categoryTotals), 1);
+        breakdown.innerHTML = Object.entries(categoryTotals).map(([id, value]) => `<div class="tracking-month-breakdown-row"><span>${work.find((item) => item.id === id)?.icon || '💻'}</span><div><strong>${work.find((item) => item.id === id)?.name || id}</strong><i><b style="width:${Math.round((value / maxWork) * 100)}%"></b></i></div><em>${formatShortDuration(value)}</em><small>${Math.round((value / Math.max(workTotal, 1)) * 100)}%</small></div>`).join('') || '<div class="tracking-empty-state">本月还没有工作时长</div>';
+      }
+      const habitBreakdown = panel.querySelector('[data-month-habit-breakdown]');
+      if (habitBreakdown) habitBreakdown.innerHTML = habitDefinitions.map((habit) => {
+        const stats = habitStats[habit.id];
+        const rate = activeDays ? Math.round((stats.completed / activeDays) * 100) : 0;
+        return `<div class="tracking-month-habit-row"><span>${habit.icon}</span><strong>${habit.name}</strong><i>${Array.from({ length: 12 }, (_, index) => `<b class="${index < Math.round(rate / 100 * 12) ? `tracking-habit-block-${habit.tone}` : ''}"></b>`).join('')}</i><em>${rate}%</em></div>`;
+      }).join('');
+      const insights = panel.querySelector('[data-month-insights]');
+      if (insights) insights.innerHTML = `<article><strong>★</strong><small>BEST DAY</small><b>${bestDay ? bestDay.date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }) : '—'}</b><span>${bestDay ? `${formatShortDuration(bestDay.workSeconds)} 工作` : '暂无数据'}</span></article><article><strong>◷</strong><small>BUSIEST DAY</small><b>${busiestDay ? busiestDay.date.toLocaleDateString('zh-CN', { weekday: 'long' }) : '—'}</b><span>${busiestDay ? formatShortDuration(busiestDay.workSeconds) : '暂无数据'}</span></article><article><strong>✓</strong><small>CONSISTENCY</small><b>${Math.round((activeDays / daysInMonth) * 100)}%</b><span>${activeDays} 个活跃日</span></article>`;
+      const pomodoroSummary = panel.querySelector('[data-month-pomodoro-summary]');
+      if (pomodoroSummary) pomodoroSummary.innerHTML = `<p><span>完成番茄钟</span><b>${pomodoroTotal}</b></p><p><span>平均每天</span><b>${activeDays ? (pomodoroTotal / activeDays).toFixed(1) : '0.0'}</b></p><p><span>最长工作日</span><b>${busiestDay ? busiestDay.date.getDate() + ' 日' : '—'}</b></p>`;
+      const legend = panel.querySelector('[data-month-legend]');
+      if (legend) legend.innerHTML = `<span><i class="tracking-month-legend-scale"></i>工作时长</span>${habitDefinitions.map((habit) => `<span><i class="tracking-month-habit-dot tracking-dot-${habit.tone}"></i>${habit.name.replace('Read 10 pages', 'Read')}</span>`).join('')}`;
     }
 
-    function renderFocusView() {
+    function renderLongTermView() {
       const panel = trackingBoard.querySelector('[data-tracking-view-panel="focus"]');
-      const list = panel?.querySelector('[data-focus-list]');
-      if (!panel || !list) return;
-      const activeItems = [
-        ...workCards.filter((card) => card.dataset.workSeconds !== undefined).map((card) => ({ name: card.querySelector('.tracking-work-copy small')?.textContent || card.dataset.workId, value: card.querySelector('[data-work-time]')?.textContent || '00:00:00' })),
-        ...[...trackingBoard.querySelectorAll('[data-tea-time]')].map((time) => ({ name: time.parentElement.querySelector('small')?.textContent || 'Tea timer', value: time.textContent }))
-      ];
-      list.innerHTML = activeItems.map((item) => `<div class="tracking-focus-item"><span>${item.name}</span><strong>${item.value}</strong></div>`).join('');
+      if (!panel) return;
+      const goals = historyState.longTerm?.goals || trackerState.longTerm?.goals || [];
+      const counts = goals.reduce((result, goal) => { result[goal.status || 'active'] = (result[goal.status || 'active'] || 0) + 1; return result; }, {});
+      const statusLabels = { active: '进行中', paused: '已暂停', completed: '已完成', archived: '已归档' };
+      panel.querySelector('[data-goal-summary]').innerHTML = Object.entries(statusLabels).map(([status, label]) => `<span><b>${counts[status] || 0}</b> ${label}</span>`).join('');
+      const goalCard = (goal) => {
+        const current = Number(goal.current || 0);
+        const target = Number(goal.target || 0);
+        const percentage = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
+        const status = goal.status || 'active';
+        return `<article class="tracking-goal-card" data-goal-status="${status}"><span class="tracking-goal-icon">${goal.icon || '◆'}</span><div class="tracking-goal-main"><div class="tracking-goal-title"><strong>${goal.title}</strong><small>${statusLabels[status] || status}</small></div><div class="tracking-goal-values"><b>${goal.unit || ''}${current.toLocaleString('zh-CN')}</b><span>/ ${goal.unit || ''}${target.toLocaleString('zh-CN')}</span><em>${percentage}%</em></div><div class="tracking-goal-progress"><i style="width:${percentage}%"></i></div><small class="tracking-goal-date">开始于 ${goal.startedAt || '—'}${goal.completedAt ? ` · 完成于 ${goal.completedAt}` : ''}</small></div></article>`;
+      };
+      const projectGoals = goals.filter((goal) => goal.type !== 'money' && !['completed', 'archived'].includes(goal.status));
+      const moneyGoals = goals.filter((goal) => goal.type === 'money' && !['completed', 'archived'].includes(goal.status));
+      const historyGoals = goals.filter((goal) => ['completed', 'archived'].includes(goal.status));
+      const fill = (selector, items, emptyText) => { const target = panel.querySelector(selector); if (target) target.innerHTML = items.length ? items.map(goalCard).join('') : `<div class="tracking-empty-state">${emptyText}</div>`; };
+      fill('[data-goal-project-grid]', projectGoals, '还没有进行中的项目目标');
+      fill('[data-goal-money-grid]', moneyGoals, '还没有进行中的金钱目标');
+      fill('[data-goal-history-grid]', historyGoals, '完成或归档的目标会保留在这里');
+      const moneyTarget = goals.filter((goal) => goal.type === 'money').reduce((sum, goal) => sum + Number(goal.target || 0), 0);
+      const moneyCurrent = goals.filter((goal) => goal.type === 'money').reduce((sum, goal) => sum + Number(goal.current || 0), 0);
+      const moneySummary = panel.querySelector('[data-money-summary]');
+      if (moneySummary) moneySummary.innerHTML = `<div class="tracking-money-summary-row"><span>💰</span><strong>¥${moneyTarget.toLocaleString('zh-CN')}</strong><small>总目标</small></div><div class="tracking-money-summary-row"><span>📊</span><strong>¥${moneyCurrent.toLocaleString('zh-CN')}</strong><small>当前进度 <b>${moneyTarget ? Math.round((moneyCurrent / moneyTarget) * 100) : 0}%</b></small></div><div class="tracking-money-summary-row"><span>✓</span><strong>${goals.filter((goal) => goal.type === 'money' && goal.status === 'active').length}</strong><small>进行中</small></div>`;
     }
 
     const trackingViewButtons = [...trackingBoard.querySelectorAll('[data-tracking-view]')];
@@ -536,11 +694,65 @@ const teas = [
     function switchTrackingView(view) {
       Object.entries(trackingViewPanels).forEach(([key, panel]) => { if (panel) panel.hidden = key !== view; });
       trackingViewButtons.forEach((button) => button.classList.toggle('active', button.dataset.trackingView === view));
+      const heading = trackingBoard.querySelector('[data-tracking-view-heading]');
+      const headingTitle = heading?.querySelector('[data-tracking-view-heading-title]');
+      const headingRange = heading?.querySelector('[data-tracking-view-heading-range]');
+      const headingConfig = {
+        cards: null,
+        week: { title: 'WEEKLY REVIEW', range: `${getWeekDays().map(dateKey)[0]} — ${getWeekDays().map(dateKey)[6]}` },
+        month: { title: 'MONTHLY TRENDS', range: new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(`${boardToday}T12:00:00`)) },
+        focus: { title: 'LONG-TERM GOALS', range: 'Where do my long-term goals stand?' }
+      }[view];
+      if (heading && headingTitle && headingRange) {
+        heading.hidden = !headingConfig;
+        if (headingConfig) { headingTitle.textContent = headingConfig.title; headingRange.textContent = headingConfig.range; }
+      }
+      const clocks = trackingBoard.querySelector('.tracking-board-clock');
+      if (clocks) clocks.hidden = view !== 'cards';
       if (view === 'week') renderWeekView();
       if (view === 'month') renderMonthView();
-      if (view === 'focus') renderFocusView();
+      if (view === 'focus') renderLongTermView();
     }
     trackingViewButtons.forEach((button) => button.addEventListener('click', () => switchTrackingView(button.dataset.trackingView)));
+    trackingBoard.querySelectorAll('[data-week-nav]').forEach((button) => button.addEventListener('click', () => {
+      if (button.dataset.weekNav === 'previous') selectedWeekOffset -= 1;
+      if (button.dataset.weekNav === 'next') selectedWeekOffset = Math.min(0, selectedWeekOffset + 1);
+      renderWeekView();
+      const days = getWeekDays();
+      const headingRange = trackingBoard.querySelector('[data-tracking-view-heading-range]');
+      if (headingRange) headingRange.textContent = `${dateKey(days[0])} — ${dateKey(days[6])}`;
+    }));
+    trackingBoard.querySelector('[data-week-export]')?.addEventListener('click', () => {
+      const days = getWeekDays();
+      const lines = [`# 熊窝 · 本周报告`, ``, `范围：${dateKey(days[0])} — ${dateKey(days[6])}`, ``];
+      let workTotal = 0;
+      let pomodoroTotal = 0;
+      days.forEach((date) => {
+        const record = getDayRecord(dateKey(date));
+        const workSeconds = Object.values(record.work?.timers || {}).reduce((sum, value) => sum + Number(value || 0), 0) + Number(record.sideProject?.elapsed || 0);
+        const pomodoros = Number(record.pomodoro?.completed || 0);
+        const completed = habitDefinitions.filter((habit) => Number(record.habits?.[habit.id] || 0) >= habit.target).length;
+        workTotal += workSeconds;
+        pomodoroTotal += pomodoros;
+        lines.push(`- ${dateKey(date)}：${formatWorkTime(workSeconds)} 工作，${pomodoros} 个番茄钟，${completed}/${habitDefinitions.length} 个习惯达成`);
+      });
+      lines.push(``, `总工作时长：${formatWorkTime(workTotal)}`, `番茄钟：${pomodoroTotal}`);
+      const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `bear-home-weekly-${dateKey(days[0])}.md`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    });
+    trackingBoard.querySelectorAll('[data-goal-filter]').forEach((button) => button.addEventListener('click', () => {
+      const filter = button.dataset.goalFilter;
+      trackingBoard.querySelectorAll('[data-goal-filter]').forEach((item) => item.classList.toggle('active', item === button));
+      trackingBoard.querySelectorAll('[data-goal-status]').forEach((goal) => { goal.hidden = filter !== 'all' && goal.dataset.goalStatus !== filter; });
+    }));
+    renderWeekView();
+    renderMonthView();
+    renderLongTermView();
 
   }
 </script>
