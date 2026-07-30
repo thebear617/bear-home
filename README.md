@@ -68,6 +68,6 @@ cd bear-home
 
 - **手动记录**：在 `js/data.js` 的 `manualRecords` 中添加日期条目，手动记录会覆盖同日的日记数据。
 
-- **路由表**：在 `src/data/site.js` 的 `routeCategories` 中添加条目。
+- **路由表**：在 `src/data/site.js` 的 `routeCategories` 中添加条目，`addedAt` 一律使用添加当天的日期（格式 `YYYY-MM-DD`）。
 - **英雄联盟**：当前页面入口已是 `/lol/`，由 `src/components/LolView.astro` 及三个攻略组件渲染；数据模块位于 `src/data/lol.js`。
 - **无畏契约**：进入 `src/pages/valorant/index.astro` 对应的 `/valorant/` 页面；数据与交互脚本位于 `public/valorant/`。
