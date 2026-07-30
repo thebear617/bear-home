@@ -1,0 +1,31 @@
+#!/bin/sh
+set -eu
+
+snapshot="public/data/tracker-snapshot.json"
+
+if [ ! -f "$snapshot" ]; then
+  echo "错误：缺少 $snapshot，请先在 localhost 点击同步按钮。" >&2
+  exit 1
+fi
+
+if ! git ls-files --error-unmatch -- "$snapshot" >/dev/null 2>&1; then
+  echo "错误：$snapshot 尚未加入 Git，请先 git add/commit。" >&2
+  exit 1
+fi
+
+node --input-type=module -e '
+import fs from "node:fs";
+const path = process.argv[1];
+const snapshot = JSON.parse(fs.readFileSync(path, "utf8"));
+if (snapshot.schemaVersion !== 1 || !snapshot.snapshotAt || !snapshot.startedOn || !snapshot.dailyRecords || typeof snapshot.dailyRecords !== "object") {
+  throw new Error("快照结构不完整");
+}
+' "$snapshot" || {
+  echo "错误：追踪快照格式无效，请重新同步。" >&2
+  exit 1
+}
+
+if ! git diff --quiet HEAD -- "$snapshot"; then
+  echo "错误：追踪快照尚未提交，请先 git add/commit $snapshot。" >&2
+  exit 1
+fi

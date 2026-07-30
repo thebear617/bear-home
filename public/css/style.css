@@ -483,6 +483,7 @@ button {
 }
 .tracking-view-button.active { background: #19283b; border-color: #19283b; color: #fff; }
 .tracking-board-settings { margin-left: auto; border-color: #315ba4; background: #f3f8ff; color: #315ba4; }
+.tracking-sync-status { color: #5b6b79; font-size: .62rem; white-space: nowrap; }
 .tracking-board-clock { display: flex; gap: 1.2rem; margin-left: auto; padding-left: 1.2rem; border-left: 1px solid #e1e5ea; color: #66717d; font-size: .56rem; letter-spacing: .07em; }
 .tracking-board-clock span { display: flex; flex-direction: column; }
 .tracking-board-clock strong { color: #172231; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1.35rem; letter-spacing: .03em; }

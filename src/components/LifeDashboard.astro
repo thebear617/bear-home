@@ -39,6 +39,7 @@ const musicPlaylists = [
 const playlistsPerPage = 3;
 const musicPageCount = Math.ceil(musicPlaylists.length / playlistsPerPage);
 import GithubProfileCard from './GithubProfileCard.astro';
+import TrackingBoard from './TrackingBoard.astro';
 import SearchBox from './SearchBox.astro';
 ---
 
@@ -110,26 +111,6 @@ import SearchBox from './SearchBox.astro';
       </div>
     </section>
 
-    <section class="dashboard-section" aria-labelledby="focus-title">
-      <div class="dashboard-section-heading">
-        <div>
-          <p class="dashboard-section-kicker">专注</p>
-          <h3 id="focus-title">番茄钟</h3>
-        </div>
-        <span class="dashboard-section-note">25 分钟专注 · 5 分钟休息</span>
-      </div>
-      <div class="pomodoro-widget-frame">
-        <iframe
-          src="https://widgets.saifsaber.com/Pomodoro.html?lang=zh&theme=light&size=compact&work=25&break=5&longBreak=15&cycles=4"
-          title="番茄钟"
-          loading="lazy"
-          width="340"
-          height="400"
-        ></iframe>
-      </div>
-      <p class="weather-widget-caption">计时状态保存在当前浏览器中；可在组件内开始、暂停、跳过或重置。</p>
-    </section>
-
     <section class="dashboard-section" aria-labelledby="github-title">
       <div class="dashboard-section-heading">
         <div>
@@ -188,6 +169,8 @@ import SearchBox from './SearchBox.astro';
       </div>
     </section>
   </div>
+
+  <TrackingBoard />
 </section>
 
 <script>

@@ -1,0 +1,546 @@
+---
+const habits = [
+  { id: 'water', name: 'Water', icon: '💧', initial: 1100, target: 2200, tone: 'blue', ago: '6 minutes ago', step: 100 },
+  { id: 'coffee', name: 'Coffee & Tea', icon: '☕', initial: 2, target: 4, tone: 'slate', ago: '6 minutes ago', step: 1 },
+  { id: 'exercise', name: 'Exercise', icon: '💪', initial: 3, target: 6, tone: 'purple', ago: '6 minutes ago', step: 1 },
+  { id: 'reading', name: 'Read 10 pages', icon: '📖', initial: 0, target: 10, tone: 'amber', ago: '--', step: 1 },
+];
+const work = [
+  { id: 'inbox', name: 'Inbox', value: '02:08:50', subtitle: '工作总计', ago: '', icon: '🔵', tone: 'blue', large: true, seconds: 7730, targetSeconds: 10800 },
+  { id: 'blog-writing', name: 'Blog writing', value: '4 / 5', icon: '✍️', tone: 'blue', compact: true, count: 4, targetCount: 5 },
+  { id: 'development', name: 'Development', value: '00:00:00', subtitle: '今日累计', ago: '', icon: '🔵', tone: 'blue', tall: true, seconds: 0, targetSeconds: 10800 },
+];
+const teas = [
+  { id: 'green-tea', name: 'Green tea', duration: 180, tone: 'green', icon: '🍵' },
+  { id: 'black-tea', name: 'Black tea', duration: 300, tone: 'orange', icon: '☕' },
+  { id: 'herbal-tea', name: 'Herbal tea', duration: 600, tone: 'yellow', icon: '☕' },
+];
+---
+
+<section class="tracking-board" data-tracking-board aria-labelledby="tracking-board-title">
+  <div class="tracking-board-toolbar">
+    <div class="tracking-board-views" aria-label="追踪工作台视图">
+      <button class="tracking-view-button active" type="button" data-tracking-view="cards" aria-label="当前看板视图" title="当前看板">▦</button>
+      <button class="tracking-view-button" type="button" data-tracking-view="week" aria-label="本周看板" title="本周看板">◷</button>
+      <button class="tracking-view-button" type="button" data-tracking-view="month" aria-label="本月看板" title="本月看板">▥</button>
+      <button class="tracking-view-button" type="button" data-tracking-view="focus" aria-label="专注视图" title="专注视图">♟</button>
+    </div>
+    <div class="tracking-board-clock">
+      <span>SESSION <strong data-work-session-clock>00:00:00</strong></span>
+      <span>TOTAL <strong data-work-total-clock>00:00:00</strong></span>
+    </div>
+    <span class="tracking-sync-status" data-tracking-sync-status aria-live="polite"></span>
+    <button class="tracking-board-settings" type="button" data-tracking-sync aria-label="同步追踪数据到站点" title="同步到站点">⇧</button>
+  </div>
+
+  <div class="tracking-board-body">
+    <section class="tracking-board-section tracking-habits" aria-labelledby="tracking-board-title">
+      <h2 id="tracking-board-title">HABITS</h2>
+      <div class="tracking-habit-grid">
+        {habits.map((habit) => (
+          <article class:list={['tracking-habit-card', `tracking-tone-${habit.tone}`]} data-board-habit data-habit-id={habit.id} data-habit-target={habit.target} data-habit-initial={habit.initial} data-habit-step={habit.step}>
+            <span class="tracking-card-edit" aria-hidden="true">↗</span>
+            <button class="tracking-card-close" type="button" aria-label={`移除${habit.name}`}>×</button>
+            <span class="tracking-habit-fill" aria-hidden="true"></span>
+            <span class="tracking-habit-icon" aria-hidden="true">{habit.icon}</span>
+            <div class="tracking-habit-copy">
+              <strong><b data-board-habit-count>{habit.initial}</b>/{habit.target}</strong>
+              <small>{habit.name}</small>
+              <em>{habit.ago}</em>
+            </div>
+            <div class="tracking-card-actions">
+              <button type="button" data-board-habit-decrease aria-label={`减少${habit.name}`}>−</button>
+              <button type="button" data-board-habit-increase aria-label={`增加${habit.name}`}>＋</button>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="tracking-board-section tracking-pomodoro" aria-labelledby="tracking-pomodoro-title">
+      <h2 id="tracking-pomodoro-title">🍅 POMODORO</h2>
+      <div class="tracking-pomodoro-grid">
+        <article class="tracking-pomodoro-card done" data-pomodoro-card><span class="tracking-pomodoro-icon" aria-hidden="true">🌟</span><div class="tracking-pomodoro-copy"><strong data-pomodoro-count>4 / 6</strong><small>Today</small><em>6 minutes ago</em></div><div class="tracking-card-actions"><button type="button" data-pomodoro-decrease aria-label="减少番茄钟完成数">−</button><button type="button" data-pomodoro-increase aria-label="增加番茄钟完成数">＋</button></div></article>
+        <article class="tracking-timer-card"><span class="tracking-timer-icon" aria-hidden="true">🟠</span><div><strong>52:00</strong><small>52 Minutes</small></div><button type="button" data-board-timer data-countdown-id="pomodoro-work" data-seconds="3120" aria-label="开始工作计时">▶</button></article>
+        <article class="tracking-timer-card"><span class="tracking-timer-icon" aria-hidden="true">🍩</span><div><strong>05:00</strong><small>5 mins break</small></div><button type="button" data-board-timer data-countdown-id="pomodoro-short-break" data-seconds="300" aria-label="开始短休息计时">▶</button></article>
+        <article class="tracking-timer-card"><span class="tracking-timer-icon" aria-hidden="true">🍔</span><div><strong>25:00</strong><small>25 mins break</small></div><button type="button" data-board-timer data-countdown-id="pomodoro-long-break" data-seconds="1500" aria-label="开始长休息计时">▶</button></article>
+      </div>
+    </section>
+
+    <div class="tracking-board-main-grid">
+      <section class="tracking-board-section tracking-work" aria-labelledby="tracking-work-title">
+        <h2 id="tracking-work-title">WORK</h2>
+        <div class="tracking-work-grid">
+          {work.map((item) => (
+              <article class:list={['tracking-work-card', `tracking-tone-${item.tone}`, { 'tracking-work-large': item.large, 'tracking-work-tall': item.tall, 'tracking-work-compact': item.compact }]} data-work-card data-work-id={item.id} data-work-seconds={item.seconds} data-work-target={item.targetSeconds} data-work-count={item.count} data-work-count-target={item.targetCount}>
+              <span class="tracking-card-edit" aria-hidden="true">↗</span>
+              <button class="tracking-card-close" type="button" aria-label={`移除${item.name}`}>×</button>
+              <span class="tracking-work-icon" aria-hidden="true">{item.icon}</span>
+              <div class="tracking-work-copy">
+                <strong data-work-time={item.seconds !== undefined ? true : undefined} data-work-count-value={item.count !== undefined ? true : undefined}>{item.value}</strong>
+                <small>{item.name}</small>
+                {item.ago && <em>{item.ago}</em>}
+              </div>
+              <div class="tracking-work-fill"><i></i></div>
+              {(item.large || item.tall) && <span class="tracking-work-mascot" aria-hidden="true">🔵</span>}
+              {(item.large || item.tall) && <button class="tracking-work-timer" type="button" data-work-timer data-work-id={item.id} data-work-seconds={item.seconds} data-work-target={item.targetSeconds}>{item.value}</button>}
+              {!item.large && !item.tall && !item.compact && <em>{item.subtitle}</em>}
+              {item.compact && <div class="tracking-card-actions"><button type="button" data-work-decrease aria-label={`减少${item.name}`}>−</button><button type="button" data-work-increase aria-label={`增加${item.name}`}>＋</button></div>}
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="tracking-board-section tracking-side-project" aria-labelledby="tracking-side-title">
+        <h2 id="tracking-side-title">SIDE PROJECT</h2>
+        <article class="tracking-project-card" data-side-project>
+          <span class="tracking-card-edit" aria-hidden="true">↗</span>
+          <button class="tracking-card-close" type="button" aria-label="移除项目">×</button>
+          <div class="tracking-project-copy"><strong data-project-time>00:00:00</strong><small>Project #1</small></div>
+          <div class="tracking-project-orb" aria-hidden="true">🌙</div>
+          <button class="tracking-project-timer" type="button" data-project-timer data-seconds="10800">03:00:00</button>
+        </article>
+      </section>
+
+      <section class="tracking-board-section tracking-achievements" aria-labelledby="tracking-achievements-title">
+        <h2 id="tracking-achievements-title">FINANCIAL STATUS</h2>
+        <article class="tracking-achievement-card">
+          <button class="tracking-card-close" type="button" aria-label="移除长期成就">×</button>
+          <div class="tracking-achievement-heading"><strong>Personal finances</strong><small>Current overview</small></div>
+          <div class="tracking-achievement-percent">—</div>
+          <div class="tracking-achievement-row"><span>💰</span><strong>0/10000</strong><small>Money to save</small></div>
+          <div class="tracking-achievement-row"><span>↩</span><strong>1000/4350</strong><small>Money owed to me</small></div>
+          <div class="tracking-achievement-row"><span>📤</span><strong>0/1184.88</strong><small>Money I owe</small></div>
+        </article>
+      </section>
+    </div>
+
+    <section class="tracking-board-section tracking-tea" aria-labelledby="tracking-tea-title">
+      <h2 id="tracking-tea-title">TEA TIMERS</h2>
+      <div class="tracking-tea-grid">
+        {teas.map((tea) => (
+          <article class:list={['tracking-tea-card', `tracking-tone-${tea.tone}`]}>
+            <span class="tracking-tea-icon" aria-hidden="true">{tea.icon}</span>
+            <div><strong data-tea-time data-seconds={tea.duration}>{Math.floor(tea.duration / 60).toString().padStart(2, '0')}:00</strong><small>{tea.name}</small></div>
+            <button type="button" data-board-timer data-countdown-id={tea.id} data-seconds={tea.duration} aria-label={`开始${tea.name}计时`}>▶</button>
+          </article>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <section class="tracking-history-view" data-tracking-view-panel="week" hidden aria-labelledby="tracking-week-title">
+    <div class="tracking-history-heading"><div><p>本周看板</p><h2 id="tracking-week-title">Weekly overview</h2></div><span data-history-range></span></div>
+    <div class="tracking-history-summary" data-history-summary></div>
+    <div class="tracking-history-grid" data-history-grid></div>
+  </section>
+
+  <section class="tracking-history-view" data-tracking-view-panel="month" hidden aria-labelledby="tracking-month-title">
+    <div class="tracking-history-heading"><div><p>本月看板</p><h2 id="tracking-month-title">Monthly overview</h2></div><span data-history-range></span></div>
+    <div class="tracking-history-summary" data-history-summary></div>
+    <div class="tracking-month-grid" data-history-grid></div>
+  </section>
+
+  <section class="tracking-history-view tracking-focus-view" data-tracking-view-panel="focus" hidden aria-labelledby="tracking-focus-title">
+    <div class="tracking-history-heading"><div><p>专注视图</p><h2 id="tracking-focus-title">Active timers</h2></div><span>当前浏览器</span></div>
+    <div class="tracking-focus-list" data-focus-list></div>
+  </section>
+</section>
+
+<script>
+  const trackingBoard = document.querySelector('[data-tracking-board]');
+  const boardToday = new Intl.DateTimeFormat('en-CA').format(new Date());
+  const trackerStorageKey = 'bear-home-tracker-v1';
+
+  if (trackingBoard) {
+    const defaultDayRecord = {
+      habits: { water: 1100, coffee: 2, exercise: 3, reading: 0 },
+      work: { timers: { inbox: 7730, development: 0 }, counts: { 'blog-writing': 4 } },
+      pomodoro: { completed: 4 },
+      countdowns: {},
+      sideProject: { elapsed: 0, remaining: 10800 }
+    };
+    let trackerState = {};
+    try { trackerState = JSON.parse(localStorage.getItem(trackerStorageKey) || '{}'); } catch { trackerState = {}; }
+    if (!trackerState.version || !trackerState.dailyRecords) {
+      trackerState = { version: 1, startedOn: boardToday, dailyRecords: { [boardToday]: defaultDayRecord } };
+    }
+    const storedToday = trackerState.dailyRecords[boardToday] || {};
+    trackerState.dailyRecords[boardToday] = {
+      ...defaultDayRecord,
+      ...storedToday,
+      habits: { ...defaultDayRecord.habits, ...(storedToday.habits || {}) },
+      work: { ...defaultDayRecord.work, ...(storedToday.work || {}), timers: { ...defaultDayRecord.work.timers, ...(storedToday.work?.timers || {}) }, counts: { ...defaultDayRecord.work.counts, ...(storedToday.work?.counts || {}) } },
+      pomodoro: { ...defaultDayRecord.pomodoro, ...(storedToday.pomodoro || {}) },
+      countdowns: { ...defaultDayRecord.countdowns, ...(storedToday.countdowns || {}) },
+      sideProject: { ...defaultDayRecord.sideProject, ...(storedToday.sideProject || {}) }
+    };
+    const todayRecord = trackerState.dailyRecords[boardToday];
+    function saveTracker() { localStorage.setItem(trackerStorageKey, JSON.stringify(trackerState)); }
+    saveTracker();
+    let historyState = trackerState;
+    const syncStatus = trackingBoard.querySelector('[data-tracking-sync-status]');
+    const isLocalDevelopment = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+    async function loadPublishedSnapshot() {
+      try {
+        const response = await fetch(new URL('data/tracker-snapshot.json', document.baseURI));
+        if (!response.ok) return;
+        const snapshot = await response.json();
+        if (snapshot?.schemaVersion === 1 && snapshot.dailyRecords && !isLocalDevelopment) {
+          historyState = snapshot;
+          renderWeekView();
+          renderMonthView();
+        }
+      } catch { /* 静态页面无法读取快照时，保留当前视图 */ }
+    }
+
+    async function syncTrackerSnapshot() {
+      saveTracker();
+      if (!isLocalDevelopment) {
+        if (syncStatus) syncStatus.textContent = '请在 localhost 同步';
+        return;
+      }
+      if (syncStatus) syncStatus.textContent = '同步中…';
+      try {
+        const response = await fetch(`${window.location.origin}/__tracker_sync`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ schemaVersion: 1, snapshotAt: new Date().toISOString(), startedOn: trackerState.startedOn, dailyRecords: trackerState.dailyRecords })
+        });
+        const responseText = await response.text();
+        let result = {};
+        try { result = JSON.parse(responseText); } catch { /* 非 JSON 响应 */ }
+        if (!response.ok) throw new Error(result.error || `接口返回 ${response.status}`);
+        if (syncStatus) syncStatus.textContent = result.changed ? '已同步' : '已是最新';
+        window.setTimeout(() => { if (syncStatus) syncStatus.textContent = ''; }, 2800);
+      } catch (error) {
+        console.error('[tracker-sync]', error);
+        if (syncStatus) syncStatus.textContent = '同步接口不可用';
+      }
+    }
+    trackingBoard.querySelector('[data-tracking-sync]')?.addEventListener('click', syncTrackerSnapshot);
+    loadPublishedSnapshot();
+    const todayCounts = todayRecord.habits;
+    const habitCards = [...trackingBoard.querySelectorAll('[data-board-habit]')];
+
+    function renderBoardHabits() {
+      habitCards.forEach((card) => {
+        const count = Math.max(0, Number(todayCounts[card.dataset.habitId] ?? card.dataset.habitInitial ?? 0));
+        const target = Number(card.dataset.habitTarget);
+        const percentage = Math.min(100, (count / target) * 100);
+        card.querySelector('[data-board-habit-count]').textContent = String(count);
+        card.style.setProperty('--habit-fill', `${percentage}%`);
+        card.style.setProperty('--habit-percent', String(percentage));
+        card.toggleAttribute('data-habit-done', count >= Number(card.dataset.habitTarget));
+      });
+    }
+    function saveBoardHabits() {
+      saveTracker();
+    }
+    habitCards.forEach((card) => {
+      const id = card.dataset.habitId;
+      const step = Number(card.dataset.habitStep || 1);
+      card.querySelector('[data-board-habit-decrease]').addEventListener('click', () => { todayCounts[id] = Math.max(0, Number(todayCounts[id] ?? card.dataset.habitInitial ?? 0) - step); saveBoardHabits(); renderBoardHabits(); });
+      card.querySelector('[data-board-habit-increase]').addEventListener('click', () => { todayCounts[id] = Number(todayCounts[id] ?? card.dataset.habitInitial ?? 0) + step; saveBoardHabits(); renderBoardHabits(); });
+    });
+    renderBoardHabits();
+
+    const workState = todayRecord.work;
+    const workCards = [...trackingBoard.querySelectorAll('[data-work-card]')];
+    const workIntervals = new Map();
+    let activeWorkId;
+    let sessionSeconds = 0;
+
+    function formatWorkTime(totalSeconds) {
+      const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+      const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+      const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+      return `${hours}:${minutes}:${seconds}`;
+    }
+
+    function saveWork() {
+      saveTracker();
+    }
+
+    function renderWorkSummary() {
+      const sessionClock = trackingBoard.querySelector('[data-work-session-clock]');
+      const totalClock = trackingBoard.querySelector('[data-work-total-clock]');
+      const totalSeconds = Object.values(workState.timers || {}).reduce((sum, seconds) => sum + Math.max(0, Number(seconds || 0)), 0);
+      if (sessionClock) sessionClock.textContent = formatWorkTime(activeWorkId ? sessionSeconds : 0);
+      if (totalClock) totalClock.textContent = formatWorkTime(totalSeconds);
+    }
+
+    function renderWorkCard(card) {
+      const id = card.dataset.workId;
+      if (card.dataset.workSeconds !== undefined) {
+        const seconds = Math.max(0, Number(workState.timers?.[id] ?? card.dataset.workSeconds ?? 0));
+        const target = Math.max(1, Number(card.dataset.workTarget || 10800));
+        const percentage = Math.min(100, (seconds / target) * 100);
+        card.querySelector('[data-work-time]').textContent = formatWorkTime(seconds);
+        card.querySelector('[data-work-timer]').textContent = formatWorkTime(seconds);
+        card.style.setProperty('--work-fill', `${Math.max(2, percentage)}%`);
+        card.style.setProperty('--work-percent', String(percentage));
+        card.toggleAttribute('data-work-running', workIntervals.has(id));
+      } else {
+        const count = Math.max(0, Number(workState.counts?.[id] ?? card.dataset.workCount ?? 0));
+        const target = Number(card.dataset.workCountTarget || 1);
+        card.querySelector('[data-work-count-value]').textContent = `${count} / ${target}`;
+      }
+      renderWorkSummary();
+    }
+
+    workCards.forEach((card) => {
+      const id = card.dataset.workId;
+      if (card.dataset.workSeconds !== undefined) {
+        card.querySelector('[data-work-timer]').addEventListener('click', () => {
+          if (workIntervals.has(id)) {
+            clearInterval(workIntervals.get(id));
+            workIntervals.delete(id);
+            if (activeWorkId === id) {
+              activeWorkId = undefined;
+              sessionSeconds = 0;
+            }
+            saveWork();
+            renderWorkCard(card);
+            return;
+          }
+          workIntervals.forEach((interval, runningId) => {
+            clearInterval(interval);
+            workIntervals.delete(runningId);
+            const runningCard = trackingBoard.querySelector(`[data-work-card][data-work-id="${runningId}"]`);
+            if (runningCard) runningCard.removeAttribute('data-work-running');
+          });
+          activeWorkId = id;
+          sessionSeconds = 0;
+          if (!workState.timers) workState.timers = {};
+          workIntervals.set(id, setInterval(() => {
+            workState.timers[id] = Number(workState.timers[id] ?? card.dataset.workSeconds ?? 0) + 1;
+            sessionSeconds += 1;
+            renderWorkCard(card);
+            if (workState.timers[id] % 5 === 0) saveWork();
+          }, 1000));
+          renderWorkCard(card);
+        });
+      } else {
+        if (!workState.counts) workState.counts = {};
+        card.querySelector('[data-work-decrease]').addEventListener('click', () => {
+          workState.counts[id] = Math.max(0, Number(workState.counts[id] ?? card.dataset.workCount ?? 0) - 1);
+          saveWork();
+          renderWorkCard(card);
+        });
+        card.querySelector('[data-work-increase]').addEventListener('click', () => {
+          workState.counts[id] = Number(workState.counts[id] ?? card.dataset.workCount ?? 0) + 1;
+          saveWork();
+          renderWorkCard(card);
+        });
+      }
+      renderWorkCard(card);
+    });
+    renderWorkSummary();
+
+    const pomodoroState = todayRecord.pomodoro;
+    const pomodoroCard = trackingBoard.querySelector('[data-pomodoro-card]');
+    const pomodoroCount = pomodoroCard?.querySelector('[data-pomodoro-count]');
+    function renderPomodoroCount() {
+      if (pomodoroCount) pomodoroCount.textContent = `${Math.max(0, Number(pomodoroState.completed ?? 4))} / 6`;
+    }
+    pomodoroCard?.querySelector('[data-pomodoro-decrease]')?.addEventListener('click', () => {
+      pomodoroState.completed = Math.max(0, Number(pomodoroState.completed ?? 4) - 1);
+      saveTracker();
+      renderPomodoroCount();
+    });
+    pomodoroCard?.querySelector('[data-pomodoro-increase]')?.addEventListener('click', () => {
+      pomodoroState.completed = Math.min(6, Number(pomodoroState.completed ?? 4) + 1);
+      saveTracker();
+      renderPomodoroCount();
+    });
+    renderPomodoroCount();
+
+    const countdownState = todayRecord.countdowns;
+    const countdownIntervals = new Map();
+    function formatCountdown(totalSeconds) {
+      const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+      const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+      return `${minutes}:${seconds}`;
+    }
+    function renderCountdown(button, remaining) {
+      const timerCard = button.closest('.tracking-timer-card');
+      const teaCard = button.closest('.tracking-tea-card');
+      if (timerCard) timerCard.querySelector('strong').textContent = formatCountdown(remaining);
+      if (teaCard) teaCard.querySelector('[data-tea-time]').textContent = formatCountdown(remaining);
+      button.textContent = countdownIntervals.has(button.dataset.countdownId) ? 'Ⅱ' : '▶';
+    }
+    trackingBoard.querySelectorAll('[data-board-timer]').forEach((button) => {
+      const id = button.dataset.countdownId;
+      let remaining = Math.max(0, Number(countdownState[id] ?? button.dataset.seconds ?? 0));
+      renderCountdown(button, remaining);
+      button.addEventListener('click', () => {
+        if (countdownIntervals.has(id)) {
+          clearInterval(countdownIntervals.get(id));
+          countdownIntervals.delete(id);
+          countdownState[id] = remaining;
+          saveTracker();
+          renderCountdown(button, remaining);
+          return;
+        }
+        if (remaining <= 0) remaining = Number(button.dataset.seconds || 0);
+        countdownIntervals.set(id, setInterval(() => {
+          remaining = Math.max(0, remaining - 1);
+          countdownState[id] = remaining;
+          renderCountdown(button, remaining);
+          if (remaining % 5 === 0) saveTracker();
+          if (remaining <= 0) {
+            clearInterval(countdownIntervals.get(id));
+            countdownIntervals.delete(id);
+            saveTracker();
+            renderCountdown(button, remaining);
+          }
+        }, 1000));
+        renderCountdown(button, remaining);
+      });
+    });
+
+    const sideProjectState = todayRecord.sideProject;
+    const sideProject = trackingBoard.querySelector('[data-side-project]');
+    const sideProjectTimer = sideProject?.querySelector('[data-project-timer]');
+    let sideProjectInterval;
+    function renderSideProject() {
+      if (!sideProject || !sideProjectTimer) return;
+      const elapsed = Math.max(0, Number(sideProjectState.elapsed ?? 0));
+      const remaining = Math.max(0, Number(sideProjectState.remaining ?? sideProjectTimer.dataset.seconds ?? 10800));
+      sideProject.querySelector('[data-project-time]').textContent = formatWorkTime(elapsed);
+      sideProjectTimer.textContent = formatWorkTime(remaining);
+      sideProject.style.setProperty('--project-fill', `${Math.min(100, (elapsed / 10800) * 100)}%`);
+      sideProject.toggleAttribute('data-project-running', Boolean(sideProjectInterval));
+    }
+    sideProjectTimer?.addEventListener('click', () => {
+      if (sideProjectInterval) {
+        clearInterval(sideProjectInterval);
+        sideProjectInterval = undefined;
+        saveTracker();
+        renderSideProject();
+        return;
+      }
+      if (Number(sideProjectState.remaining ?? sideProjectTimer.dataset.seconds) <= 0) return;
+      sideProjectInterval = setInterval(() => {
+        sideProjectState.elapsed = Number(sideProjectState.elapsed ?? 0) + 1;
+        sideProjectState.remaining = Math.max(0, Number(sideProjectState.remaining ?? sideProjectTimer.dataset.seconds) - 1);
+        renderSideProject();
+        if (sideProjectState.elapsed % 5 === 0) saveTracker();
+        if (sideProjectState.remaining <= 0) {
+          clearInterval(sideProjectInterval);
+          sideProjectInterval = undefined;
+          saveTracker();
+          renderSideProject();
+        }
+      }, 1000);
+      renderSideProject();
+    });
+    renderSideProject();
+
+    function dateKey(date) {
+      return new Intl.DateTimeFormat('en-CA').format(date);
+    }
+
+    function formatShortDuration(seconds) {
+      const totalMinutes = Math.floor(Math.max(0, Number(seconds || 0)) / 60);
+      if (totalMinutes < 60) return `${totalMinutes}m`;
+      return `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}m`;
+    }
+
+    function getDayRecord(key) {
+      return historyState.dailyRecords[key] || { habits: {}, work: { timers: {}, counts: {} }, pomodoro: { completed: 0 }, sideProject: { elapsed: 0 } };
+    }
+
+    function getWeekDays() {
+      const today = new Date(`${boardToday}T12:00:00`);
+      const day = today.getDay() || 7;
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - day + 1);
+      return Array.from({ length: 7 }, (_, index) => {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + index);
+        return date;
+      });
+    }
+
+    function renderWeekView() {
+      const days = getWeekDays();
+      const panel = trackingBoard.querySelector('[data-tracking-view-panel="week"]');
+      const grid = panel?.querySelector('[data-history-grid]');
+      if (!panel || !grid) return;
+      panel.querySelector('[data-history-range]').textContent = `${dateKey(days[0])} — ${dateKey(days[6])}`;
+      let workTotal = 0;
+      let pomodoroTotal = 0;
+      let habitTotal = 0;
+      grid.innerHTML = days.map((date) => {
+        const key = dateKey(date);
+        const record = getDayRecord(key);
+        const workSeconds = Object.values(record.work?.timers || {}).reduce((sum, value) => sum + Number(value || 0), 0) + Number(record.sideProject?.elapsed || 0);
+        const completedHabits = Object.entries(record.habits || {}).reduce((sum, [id, value]) => {
+          const habit = habits.find((item) => item.id === id);
+          return sum + (habit && Number(value) >= habit.target ? 1 : 0);
+        }, 0);
+        const pomodoros = Number(record.pomodoro?.completed || 0);
+        workTotal += workSeconds;
+        pomodoroTotal += pomodoros;
+        habitTotal += completedHabits;
+        return `<article class="tracking-history-day"><strong>${date.toLocaleDateString('zh-CN', { weekday: 'short' })}</strong><small>${key.slice(5)}</small><span>${completedHabits} 个习惯</span><span>${formatShortDuration(workSeconds)} 工作</span><span>${pomodoros} 个番茄</span></article>`;
+      }).join('');
+      panel.querySelector('[data-history-summary]').innerHTML = `<span><b>${habitTotal}</b> 个习惯达成</span><span><b>${formatShortDuration(workTotal)}</b> 总工作</span><span><b>${pomodoroTotal}</b> 个番茄完成</span>`;
+    }
+
+    function renderMonthView() {
+      const today = new Date(`${boardToday}T12:00:00`);
+      const year = today.getFullYear();
+      const month = today.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const panel = trackingBoard.querySelector('[data-tracking-view-panel="month"]');
+      const grid = panel?.querySelector('[data-history-grid]');
+      if (!panel || !grid) return;
+      panel.querySelector('[data-history-range]').textContent = `${year} 年 ${month + 1} 月`;
+      let workTotal = 0;
+      let activeDays = 0;
+      grid.innerHTML = Array.from({ length: daysInMonth }, (_, index) => {
+        const date = new Date(year, month, index + 1, 12);
+        const record = getDayRecord(dateKey(date));
+        const workSeconds = Object.values(record.work?.timers || {}).reduce((sum, value) => sum + Number(value || 0), 0) + Number(record.sideProject?.elapsed || 0);
+        const habitCount = Object.keys(record.habits || {}).length;
+        workTotal += workSeconds;
+        if (workSeconds > 0 || habitCount > 0) activeDays += 1;
+        const intensity = Math.min(4, Math.ceil((workSeconds / 3600 + habitCount) / 2));
+        return `<article class="tracking-month-day" data-intensity="${intensity}"><strong>${index + 1}</strong><small>${formatShortDuration(workSeconds)}</small></article>`;
+      }).join('');
+      panel.querySelector('[data-history-summary]').innerHTML = `<span><b>${activeDays}</b> 个活跃日</span><span><b>${formatShortDuration(workTotal)}</b> 总工作</span><span><b>${daysInMonth}</b> 天记录范围</span>`;
+    }
+
+    function renderFocusView() {
+      const panel = trackingBoard.querySelector('[data-tracking-view-panel="focus"]');
+      const list = panel?.querySelector('[data-focus-list]');
+      if (!panel || !list) return;
+      const activeItems = [
+        ...workCards.filter((card) => card.dataset.workSeconds !== undefined).map((card) => ({ name: card.querySelector('.tracking-work-copy small')?.textContent || card.dataset.workId, value: card.querySelector('[data-work-time]')?.textContent || '00:00:00' })),
+        ...[...trackingBoard.querySelectorAll('[data-tea-time]')].map((time) => ({ name: time.parentElement.querySelector('small')?.textContent || 'Tea timer', value: time.textContent }))
+      ];
+      list.innerHTML = activeItems.map((item) => `<div class="tracking-focus-item"><span>${item.name}</span><strong>${item.value}</strong></div>`).join('');
+    }
+
+    const trackingViewButtons = [...trackingBoard.querySelectorAll('[data-tracking-view]')];
+    const trackingViewPanels = {
+      cards: trackingBoard.querySelector('.tracking-board-body'),
+      week: trackingBoard.querySelector('[data-tracking-view-panel="week"]'),
+      month: trackingBoard.querySelector('[data-tracking-view-panel="month"]'),
+      focus: trackingBoard.querySelector('[data-tracking-view-panel="focus"]')
+    };
+    function switchTrackingView(view) {
+      Object.entries(trackingViewPanels).forEach(([key, panel]) => { if (panel) panel.hidden = key !== view; });
+      trackingViewButtons.forEach((button) => button.classList.toggle('active', button.dataset.trackingView === view));
+      if (view === 'week') renderWeekView();
+      if (view === 'month') renderMonthView();
+      if (view === 'focus') renderFocusView();
+    }
+    trackingViewButtons.forEach((button) => button.addEventListener('click', () => switchTrackingView(button.dataset.trackingView)));
+
+  }
+</script>

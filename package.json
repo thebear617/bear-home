@@ -1,12 +1,13 @@
 {
   "name": "bear-home",
   "private": true,
-  "version": "0.19.2",
+  "version": "0.20.0",
   "type": "module",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "install-hooks": "sh scripts/install-hooks.sh"
   },
   "devDependencies": {
     "astro": "^5.0.0"

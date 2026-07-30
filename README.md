@@ -41,6 +41,18 @@ npm run dev
 # 打开 Astro 输出的本地地址
 ```
 
+### 追踪数据同步
+
+当前看板的数据实时保存在浏览器 localStorage。需要把本地数据发布到正式域名时，在 localhost 的看板右上角点击同步按钮；如果数据有变化，会更新 `public/data/tracker-snapshot.json`。随后提交并推送这个文件，周视图、月视图和专注视图就会使用最近一次发布的快照。
+
+首次使用时执行一次：
+
+```bash
+npm run install-hooks
+```
+
+Git hook 只校验快照格式以及快照是否已经提交，不会读取或修改浏览器数据。
+
 ## 部署
 
 ```bash
