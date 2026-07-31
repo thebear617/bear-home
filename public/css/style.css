@@ -3179,7 +3179,7 @@ a.pill:hover {
   top: 0;
   right: 0;
   height: 100%;
-  width: min(480px, 92vw);
+  width: min(700px, 94vw);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -3470,8 +3470,15 @@ a.pill:hover {
   letter-spacing: .05em;
 }
 
+.lol-drawer-aug-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .6rem .75rem;
+}
+
 .lol-drawer-aug-group {
-  margin-bottom: .7rem;
+  min-width: 0;
+  margin-bottom: 0;
 }
 
 .lol-drawer-aug-group:last-child {
@@ -4662,6 +4669,19 @@ a.pill:hover {
 
   .lol-drawer-content {
     padding: 0 .9rem 1.3rem;
+  }
+
+  .lol-drawer-aug-grid {
+    gap: .5rem .55rem;
+  }
+
+  .lol-drawer-aug-name em {
+    font-size: .68rem;
+    padding: .12rem .4rem;
+  }
+
+  .lol-drawer-aug-build {
+    font-size: .64rem;
   }
 
   .lol-drawer-hero {

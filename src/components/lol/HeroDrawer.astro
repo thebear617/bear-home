@@ -37,6 +37,7 @@ const heroTone = (roles) => {
             {augData && (
               <section class="lol-drawer-step lol-drawer-augs">
                 <h3>海克斯推荐 <span class="lol-drawer-augs-src">RESG</span></h3>
+                <div class="lol-drawer-aug-grid">
                 {['single', 'double', 'triple', 'quad'].map((t) => {
                   const group = augData[t];
                   if (!group || group.a.length === 0) return null;
@@ -61,6 +62,7 @@ const heroTone = (roles) => {
                     </div>
                   );
                 })}
+                </div>
               </section>
             )}
 
