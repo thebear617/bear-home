@@ -693,6 +693,54 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
     min-width: 0;
   }
 
+  /* 桌面端默认突出图标与名称；卡片悬停或聚焦后再展示辅助信息。 */
+  @media (hover: hover) and (min-width: 761px) {
+    .link-card .card-desc,
+    .link-card .card-domain,
+    .link-card .card-path,
+    .link-card .card-tags {
+      max-height: 0;
+      margin-top: 0;
+      margin-bottom: 0;
+      opacity: 0;
+      overflow: hidden;
+      pointer-events: none;
+      transform: translateY(4px);
+      transition: max-height .2s ease, margin .2s ease, opacity .16s ease, transform .2s ease;
+    }
+
+    .link-card:is(:hover, :focus-visible) .card-desc {
+      max-height: 3em;
+      margin-top: .4rem;
+      margin-bottom: .375rem;
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .link-card:is(:hover, :focus-visible) .card-domain,
+    .link-card:is(:hover, :focus-visible) .card-path {
+      max-height: 1.6em;
+      margin-bottom: .375rem;
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .link-card:is(:hover, :focus-visible) .card-tags {
+      max-height: 2em;
+      margin-top: .125rem;
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .link-card:focus-visible {
+      outline: 3px solid rgba(79, 70, 229, .35);
+      outline-offset: 2px;
+    }
+  }
+
   .card-title {
     font-size: 0.875rem;
     font-weight: 600;
