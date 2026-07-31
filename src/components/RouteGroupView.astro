@@ -110,7 +110,7 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
             item.url ? (
               <a href={item.url} target="_blank" rel="noopener" class="link-card" data-route-item data-category={category.id} data-tags={item.tags?.join('|') ?? ''} data-search-text={`${item.name} ${item.desc ?? ''} ${item.tags?.join(' ') ?? ''}`}>
                 <div class="card-favicon">
-                  <img src={`https://www.google.com/s2/favicons?domain=${new URL(item.url).hostname}&sz=64`} alt="" width="32" height="32" loading="lazy">
+                  <img src={item.icon || `https://www.google.com/s2/favicons?domain=${new URL(item.url).hostname}&sz=64`} alt="" width="32" height="32" loading="lazy">
                 </div>
                 <div class="card-content">
                   <h3 class="card-title">{item.name}</h3>
@@ -178,7 +178,7 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
               <td>
                 <div class="list-link-main">
                   <div class="list-favicon">
-                    {item.url ? <img src={`https://www.google.com/s2/favicons?domain=${new URL(item.url).hostname}&sz=64`} alt="" width="28" height="28" loading="lazy" /> : <span>📁</span>}
+                    {item.url ? <img src={item.icon || `https://www.google.com/s2/favicons?domain=${new URL(item.url).hostname}&sz=64`} alt="" width="28" height="28" loading="lazy" /> : <span></span>}
                   </div>
                   <div>
                     <strong>{item.name}</strong>
@@ -207,7 +207,7 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
         <a href={item.url} target="_blank" rel="noopener" class={`masonry-card masonry-${item.categoryId} masonry-${item.index % 3}`} data-route-item data-category={item.categoryId} data-tags={item.tags?.join('|') ?? ''} data-search-text={item.searchText}>
           <div class="masonry-cover">
             <span>{item.categoryIcon}</span>
-            <img src={`https://www.google.com/s2/favicons?domain=${new URL(item.url).hostname}&sz=64`} alt="" width="34" height="34" loading="lazy" />
+            <img src={item.icon || `https://www.google.com/s2/favicons?domain=${new URL(item.url).hostname}&sz=64`} alt="" width="34" height="34" loading="lazy" />
           </div>
           <div class="masonry-content">
             <h2>{item.name}</h2>
@@ -643,6 +643,7 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
 
   .link-card {
     display: flex;
+    flex-direction: column;
     gap: 0.75rem;
     padding: 0.875rem;
     border: 1px solid #f3f4f6;
@@ -651,6 +652,8 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
     color: inherit;
     transition: all 0.2s;
     background: #fafafa;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
   }
 
   .link-card:hover {
@@ -879,5 +882,38 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
   @media (max-width: 430px) {
     .masonry-grid { columns: 1; }
     .filter-btn span { display: none; }
+  }
+
+  /* 个人站点的透明插画沿用其他站点的图标容器，只提高插画的可读性。 */
+  [data-category="personal"] .card-favicon {
+    width: 56px;
+    height: 56px;
+  }
+
+  [data-category="personal"] .card-favicon img {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    object-fit: contain;
+  }
+
+  [data-category="personal"] .list-favicon {
+    width: 42px;
+    height: 42px;
+  }
+
+  [data-category="personal"] .list-favicon img {
+    width: 34px;
+    height: 34px;
+    border-radius: 5px;
+    object-fit: contain;
+  }
+
+  [data-category="personal"] .masonry-cover img {
+    width: 64px;
+    height: 64px;
+    padding: 6px;
+    border-radius: 9px;
+    object-fit: contain;
   }
 </style>
