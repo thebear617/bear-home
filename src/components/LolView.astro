@@ -1,27 +1,252 @@
 ---
+import { lolHeroes, lolRoles } from '../data/lol-heroes.js';
+import { lolNicknames, lolPinyin } from '../data/lol-nicknames.js';
 import { lolMageGuideData, lolAdcGuideData, lolAssassinGuideData } from '../data/lol.js';
 import MageGuide from './lol/MageGuide.astro';
 import AdcGuide from './lol/AdcGuide.astro';
 import AssassinGuide from './lol/AssassinGuide.astro';
+import HeroDrawer from './lol/HeroDrawer.astro';
+
+// 组装英雄的可搜索文本（官方名 + 英文id + 外号 + 拼音，供搜索框匹配）
+const heroSearchText = (hero) => [
+  hero.name,
+  hero.id,
+  ...(lolNicknames[hero.id] || []),
+  ...(lolPinyin[hero.id] || [])
+].join(' ');
+
+// role 筛选标签（顺序）
+const roleOrder = ['fighter', 'tank', 'mage', 'assassin', 'support', 'marksman'];
+const roleFilters = [
+  { id: 'all', name: '全部', count: lolHeroes.length },
+  ...roleOrder.map((r) => ({ id: r, name: lolRoles[r], count: lolHeroes.filter((h) => h.roles.includes(r)).length }))
+];
+const roleTag = (roles) => roles.map((r) => lolRoles[r]).join(' / ');
+// 英雄主色（按主 role 映射色调）
+const heroTone = (roles) => {
+  if (roles.includes('assassin')) return 'purple';
+  if (roles.includes('mage')) return 'red';
+  if (roles.includes('marksman')) return 'orange';
+  if (roles.includes('fighter')) return 'gold';
+  if (roles.includes('tank')) return 'cyan';
+  return 'blue';
+};
 ---
 <section class="lol-view">
-  <div class="lol-data-link"><a href="https://www.resg.top/" target="_blank" rel="noopener"><span class="lol-data-link-icon">📊</span><span class="lol-data-link-text">海克斯大乱斗数据站 RESG</span><span class="lol-data-link-arrow">↗</span></a></div>
-  <nav class="lol-guide-switcher" aria-label="英雄联盟攻略切换">
-    <button class="active" data-lol-guide="mage" type="button"><span>AP</span><strong>法师公式 3.0</strong></button>
-    <button data-lol-guide="adc" type="button"><span>ADC</span><strong>ADC 公式 4.0</strong></button>
-    <button data-lol-guide="assassin" type="button"><span>AP</span><strong>AP 刺客 3.0</strong></button>
+  <!-- 视图切换：英雄速查 / 公式详情 -->
+  <nav class="lol-view-switch" aria-label="视图切换">
+    <button class="active" data-lol-view="hub" type="button"><span class="lol-view-switch-ico">🧭</span>英雄速查</button>
+    <button data-lol-view="formula" type="button"><span class="lol-view-switch-ico">📐</span>公式详情</button>
   </nav>
-  <div data-lol-panel="mage"><MageGuide guide={lolMageGuideData} /></div>
-  <div data-lol-panel="adc" hidden><AdcGuide guide={lolAdcGuideData} /></div>
-  <div data-lol-panel="assassin" hidden><AssassinGuide guide={lolAssassinGuideData} /></div>
+
+  <!-- 视图一：英雄速查（画廊 + 抽屉） -->
+  <div class="lol-view-scope" data-view="hub">
+    <div class="lol-hub">
+      <header class="lol-hub-header">
+        <div class="lol-hub-title">
+          <span class="lol-hub-eyebrow">CHAMPION INDEX</span>
+          <h2>英雄出装速查</h2>
+          <p>全部 {lolHeroes.length} 位英雄 · 海克斯大乱斗实战数据</p>
+        </div>
+        <a class="lol-hub-source" href="https://www.resg.top/" target="_blank" rel="noopener">
+          <span class="lol-hub-source-ico">📊</span>
+          <span class="lol-hub-source-text">数据源 RESG</span>
+          <span class="lol-hub-source-arrow">↗</span>
+        </a>
+      </header>
+      <div class="lol-hub-toolbar">
+        <div class="lol-hub-search">
+          <span class="lol-hub-search-ico">🔍</span>
+          <input type="text" data-lol-search placeholder="搜索英雄（支持外号/拼音）…" aria-label="搜索英雄">
+        </div>
+        <div class="lol-hub-actions">
+          <!-- 筛选浮窗 -->
+          <div class="lol-hub-drop">
+            <button class="lol-hub-drop-btn" data-drop-toggle="filter" type="button" aria-haspopup="true" aria-expanded="false">
+              <span class="lol-hub-drop-ico">⚙</span>筛选
+              <span class="lol-hub-drop-value" data-filter-label>全部</span>
+              <span class="lol-hub-drop-arrow">▾</span>
+            </button>
+            <div class="lol-hub-drop-panel" data-drop-panel="filter" role="menu">
+              <div class="lol-hub-drop-title">按定位筛选</div>
+              {roleFilters.map((c) => (
+                <button class:list={['lol-hub-drop-option', { active: c.id === 'all' }]} data-hub-filter={c.id} type="button" role="menuitem">
+                  <span>{c.name}</span><span class="lol-hub-count">{c.count}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <!-- 排序浮窗 -->
+          <div class="lol-hub-drop">
+            <button class="lol-hub-drop-btn" data-drop-toggle="sort" type="button" aria-haspopup="true" aria-expanded="false">
+              <span class="lol-hub-drop-ico">⇅</span>排序
+              <span class="lol-hub-drop-value" data-sort-label>默认</span>
+              <span class="lol-hub-drop-arrow">▾</span>
+            </button>
+            <div class="lol-hub-drop-panel" data-drop-panel="sort" role="menu">
+              <div class="lol-hub-drop-title">排序方式</div>
+              <button class="lol-hub-drop-option active" data-lol-sort="default" type="button" role="menuitem"><span>默认</span></button>
+              <button class="lol-hub-drop-option" data-lol-sort="wr" type="button" role="menuitem"><span>胜率</span></button>
+              <button class="lol-hub-drop-option" data-lol-sort="hot" type="button" role="menuitem"><span>热度</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lol-hub-grid" data-lol-grid>
+        {lolHeroes.map((hero) => (
+          <article class:list={['lol-hero-card', `lol-hub-tone-${heroTone(hero.roles)}`]} data-hero-roles={hero.roles.join(' ')} data-hero-search={heroSearchText(hero)} data-hero-id={hero.id} data-hero-wr={hero.wr} data-hero-matches={hero.matches}>
+            <button class="lol-hero-card-btn" data-lol-open type="button" aria-label={`查看${hero.name}出装`}>
+              <span class="lol-hero-card-avatar"><img src={hero.icon} alt={hero.name} loading="lazy"></span>
+              <span class="lol-hero-card-info">
+                <strong>{hero.name}</strong>
+                <em>{roleTag(hero.roles)}</em>
+                <span class="lol-hero-card-wr">胜率 {Math.round(hero.wr * 100)}%</span>
+              </span>
+              <span class="lol-hero-card-arrow">↗</span>
+            </button>
+          </article>
+        ))}
+      </div>
+      <p class="lol-hub-tip">点击任意英雄卡，查看 RESG 实战海克斯推荐与出装</p>
+    </div>
+  </div>
+
+  <!-- 视图二：公式详情（原三 tab + 公式组件） -->
+  <div class="lol-view-scope" data-view="formula" hidden>
+    <nav class="lol-guide-switcher" aria-label="英雄联盟攻略切换">
+      <button class="active" data-lol-guide="mage" type="button"><span>AP</span><strong>法师公式 3.0</strong></button>
+      <button data-lol-guide="adc" type="button"><span>ADC</span><strong>ADC 公式 4.0</strong></button>
+      <button data-lol-guide="assassin" type="button"><span>AP</span><strong>AP 刺客 3.0</strong></button>
+    </nav>
+    <div data-lol-panel="mage"><MageGuide guide={lolMageGuideData} /></div>
+    <div data-lol-panel="adc" hidden><AdcGuide guide={lolAdcGuideData} /></div>
+    <div data-lol-panel="assassin" hidden><AssassinGuide guide={lolAssassinGuideData} /></div>
+  </div>
+
+  <HeroDrawer />
 </section>
 
 <script is:inline>
+  // 视图切换：英雄速查 / 公式详情
+  const viewBtns = [...document.querySelectorAll('[data-lol-view]')];
+  const viewScopes = [...document.querySelectorAll('[data-view]')];
+  const switchView = (view) => {
+    viewBtns.forEach((b) => b.classList.toggle('active', b.dataset.lolView === view));
+    viewScopes.forEach((s) => { s.hidden = s.dataset.view !== view; });
+  };
+  viewBtns.forEach((b) => b.addEventListener('click', () => switchView(b.dataset.lolView)));
+
+  // 公式详情内：三 tab 切换
   const lolButtons = [...document.querySelectorAll('[data-lol-guide]')];
   const lolPanels = [...document.querySelectorAll('[data-lol-panel]')];
-  lolButtons.forEach((button) => button.addEventListener('click', () => {
-    const target = button.dataset.lolGuide;
-    lolButtons.forEach((item) => item.classList.toggle('active', item === button));
+  const showPanel = (target) => {
+    lolButtons.forEach((item) => item.classList.toggle('active', item.dataset.lolGuide === target));
     lolPanels.forEach((panel) => { panel.hidden = panel.dataset.lolPanel !== target; });
+  };
+  lolButtons.forEach((button) => button.addEventListener('click', () => {
+    showPanel(button.dataset.lolGuide);
   }));
+
+  // 英雄画廊：定位筛选 + 搜索
+  const filters = [...document.querySelectorAll('[data-hub-filter]')];
+  const cards = [...document.querySelectorAll('[data-hero-roles]')];
+  const searchInput = document.querySelector('[data-lol-search]');
+  let activeRole = 'all';
+  let searchText = '';
+  const applyFilter = () => {
+    const q = searchText.trim().toLowerCase();
+    cards.forEach((card) => {
+      const rolesMatch = activeRole === 'all' || card.dataset.heroRoles.split(' ').includes(activeRole);
+      // 匹配官方名 / 英文id / 外号 / 拼音
+      const nameMatch = !q || (card.dataset.heroSearch || '').toLowerCase().includes(q);
+      card.hidden = !(rolesMatch && nameMatch);
+    });
+  };
+
+  // 排序：默认 / 胜率 / 热度
+  const sortBtns = [...document.querySelectorAll('[data-lol-sort]')];
+  const grid = document.querySelector('[data-lol-grid]');
+  let sortMode = 'default';
+  const applySort = (mode) => {
+    sortBtns.forEach((b) => b.classList.toggle('active', b.dataset.lolSort === mode));
+    let sorted = [...cards]; // cards 是初始 DOM 顺序快照
+    if (mode === 'wr') sorted.sort((a, b) => parseFloat(b.dataset.heroWr) - parseFloat(a.dataset.heroWr));
+    else if (mode === 'hot') sorted.sort((a, b) => parseInt(b.dataset.heroMatches) - parseInt(a.dataset.heroMatches));
+    // 按排序结果重新 append；default 用 cards 原顺序恢复
+    sorted.forEach((c) => grid.appendChild(c));
+  };
+  const sortLabel = document.querySelector('[data-sort-label]');
+  const filterLabel = document.querySelector('[data-filter-label]');
+  const sortOptionName = (v) => ({ default: '默认', wr: '胜率', hot: '热度' }[v] || '默认');
+  const filterOptionName = (id) => {
+    const f = filters.find((x) => x.dataset.hubFilter === id);
+    return f ? f.querySelector('span').innerText : '全部';
+  };
+
+  // 排序
+  sortBtns.forEach((b) => b.addEventListener('click', () => {
+    sortMode = b.dataset.lolSort;
+    applySort(sortMode);
+    sortBtns.forEach((x) => x.classList.toggle('active', x === b));
+    sortLabel.textContent = sortOptionName(sortMode);
+    closeDrops();
+  }));
+
+  // 筛选
+  filters.forEach((filter) => filter.addEventListener('click', () => {
+    filters.forEach((f) => f.classList.toggle('active', f === filter));
+    activeRole = filter.dataset.hubFilter;
+    applyFilter();
+    filterLabel.textContent = filterOptionName(activeRole);
+    closeDrops();
+  }));
+  searchInput?.addEventListener('input', () => { searchText = searchInput.value; applyFilter(); });
+
+  // 浮窗开关
+  const dropBtns = [...document.querySelectorAll('[data-drop-toggle]')];
+  const dropPanels = [...document.querySelectorAll('[data-drop-panel]')];
+  const closeDrops = (except) => {
+    dropBtns.forEach((b) => {
+      const panel = document.querySelector(`[data-drop-panel="${b.dataset.dropToggle}"]`);
+      if (b !== except) {
+        b.classList.remove('open');
+        b.setAttribute('aria-expanded', 'false');
+        panel?.classList.remove('open');
+      }
+    });
+  };
+  dropBtns.forEach((b) => b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = b.classList.contains('open');
+    closeDrops(b);
+    const panel = document.querySelector(`[data-drop-panel="${b.dataset.dropToggle}"]`);
+    const willOpen = !isOpen;
+    b.classList.toggle('open', willOpen);
+    b.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    panel?.classList.toggle('open', willOpen);
+  }));
+  document.addEventListener('click', () => closeDrops());
+
+  // 详情抽屉：打开 + 切换英雄内容
+  const drawer = document.querySelector('[data-lol-drawer]');
+  const drawerContents = [...document.querySelectorAll('[data-drawer-hero]')];
+  const openDrawer = (heroId) => {
+    if (!drawer) return;
+    drawerContents.forEach((c) => { c.hidden = c.dataset.drawerHero !== heroId; });
+    drawer.hidden = false;
+    document.body.classList.add('lol-drawer-open');
+    document.body.style.overflow = 'hidden';
+  };
+  const closeDrawer = () => {
+    if (!drawer) return;
+    drawer.hidden = true;
+    document.body.classList.remove('lol-drawer-open');
+    document.body.style.overflow = '';
+  };
+  document.querySelectorAll('[data-lol-open]').forEach((btn) => btn.addEventListener('click', () => {
+    const card = btn.closest('[data-hero-roles]');
+    openDrawer(card.dataset.heroId);
+  }));
+  document.querySelectorAll('[data-lol-drawer-close]').forEach((el) => el.addEventListener('click', closeDrawer));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
 </script>

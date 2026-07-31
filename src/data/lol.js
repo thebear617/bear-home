@@ -28,11 +28,11 @@ export const lolMageGuideData = {
           { name: '兰顿', icon: '/assets/lol/items/3143.png' }
         ] },
         { label: '英雄', type: 'champion', items: [
-          { name: '火男', icon: '/assets/lol/champions/Brand.png' },
-          { name: '炸弹人', icon: '/assets/lol/champions/Ziggs.png' },
-          { name: '蚂蚱', icon: '/assets/lol/champions/Malzahar.png' },
-          { name: '彗', icon: '/assets/lol/champions/Hwei.png' },
-          { name: '死歌', icon: '/assets/lol/champions/Karthus.png' }
+          { name: '火男', icon: '/assets/lol/champions/brand.png' },
+          { name: '炸弹人', icon: '/assets/lol/champions/ziggs.png' },
+          { name: '蚂蚱', icon: '/assets/lol/champions/malzahar.png' },
+          { name: '彗', icon: '/assets/lol/champions/hwei.png' },
+          { name: '死歌', icon: '/assets/lol/champions/karthus.png' }
         ] }
       ]
     },
@@ -59,11 +59,11 @@ export const lolMageGuideData = {
           { name: '四件后火炬', icon: '/assets/lol/items/2503.png' }
         ] },
         { label: '英雄', type: 'champion', items: [
-          { name: '阿萝拉', icon: '/assets/lol/champions/Aurora.png' },
-          { name: '妖姬', icon: '/assets/lol/champions/Leblanc.png' },
-          { name: '辛德拉', icon: '/assets/lol/champions/Syndra.png' },
-          { name: '佐伊', icon: '/assets/lol/champions/Zoe.png' },
-          { name: '梅尔', icon: '/assets/lol/champions/Mel.png' }
+          { name: '阿萝拉', icon: '/assets/lol/champions/aurora.png' },
+          { name: '妖姬', icon: '/assets/lol/champions/leblanc.png' },
+          { name: '辛德拉', icon: '/assets/lol/champions/syndra.png' },
+          { name: '佐伊', icon: '/assets/lol/champions/zoe.png' },
+          { name: '梅尔', icon: '/assets/lol/champions/mel.png' }
         ] }
       ]
     },
@@ -90,11 +90,11 @@ export const lolMageGuideData = {
           { name: '帽子', icon: '/assets/lol/items/3089.png' }
         ] },
         { label: '英雄', type: 'champion', items: [
-          { name: '安妮', icon: '/assets/lol/champions/Annie.png' },
-          { name: '妮蔻', icon: '/assets/lol/champions/Neeko.png' },
-          { name: '稻草人', icon: '/assets/lol/champions/Fiddlesticks.png' },
-          { name: '吸血鬼', icon: '/assets/lol/champions/Vladimir.png' },
-          { name: '冰女', icon: '/assets/lol/champions/Lissandra.png' }
+          { name: '安妮', icon: '/assets/lol/champions/annie.png' },
+          { name: '妮蔻', icon: '/assets/lol/champions/neeko.png' },
+          { name: '稻草人', icon: '/assets/lol/champions/fiddlesticks.png' },
+          { name: '吸血鬼', icon: '/assets/lol/champions/vladimir.png' },
+          { name: '冰女', icon: '/assets/lol/champions/lissandra.png' }
         ] }
       ]
     }
@@ -106,7 +106,7 @@ export const lolMageGuideData = {
   ],
   special: {
     label: '瑞兹特例',
-    champion: { name: '瑞兹', icon: '/assets/lol/champions/Ryze.png' },
+    champion: { name: '瑞兹', icon: '/assets/lol/champions/ryze.png' },
     items: [
       { name: '时光杖', icon: '/assets/lol/items/6657.png' },
       { name: '炽天使', icon: '/assets/lol/items/3040.png' },
@@ -147,8 +147,8 @@ export const lolAdcGuideData = {
         { name: '收集者', icon: '/assets/lol/items/6676.png' }
       ],
       champions: [
-        { name: '莎弥拉', icon: '/assets/lol/champions/Samira.png' },
-        { name: '卢锡安', icon: '/assets/lol/champions/Lucian.png' }
+        { name: '莎弥拉', icon: '/assets/lol/champions/samira.png' },
+        { name: '卢锡安', icon: '/assets/lol/champions/lucian.png' }
       ]
     },
     {
@@ -192,8 +192,8 @@ export const lolAdcGuideData = {
         { name: '界弓', icon: '/assets/lol/items/3302.png' }
       ],
       champions: [
-        { name: '芸阿娜', icon: '/assets/lol/champions/Yunara.png' },
-        { name: '大嘴', icon: '/assets/lol/champions/KogMaw.png' }
+        { name: '芸阿娜', icon: '/assets/lol/champions/yunara.png' },
+        { name: '大嘴', icon: '/assets/lol/champions/kogmaw.png' }
       ]
     }
   ],
@@ -267,21 +267,21 @@ export const lolAssassinGuideData = {
         { name: '中娅', icon: '/assets/lol/items/3157.png' }
       ] },
       { label: '英雄', type: 'champion', items: [
-        { name: '塞拉斯', icon: '/assets/lol/champions/Sylas.png' },
-        { name: '小鱼人', icon: '/assets/lol/champions/Fizz.png' },
-        { name: '阿卡丽', icon: '/assets/lol/champions/Akali.png' },
-        { name: '艾克', icon: '/assets/lol/champions/Ekko.png' },
-        { name: '寡妇', icon: '/assets/lol/champions/Evelynn.png' },
-        { name: '伊泽瑞尔', icon: '/assets/lol/champions/Ezreal.png' },
-        { name: '武器', icon: '/assets/lol/champions/Jax.png' },
-        { name: '卡莎', icon: '/assets/lol/champions/Kaisa.png' }
+        { name: '塞拉斯', icon: '/assets/lol/champions/sylas.png' },
+        { name: '小鱼人', icon: '/assets/lol/champions/fizz.png' },
+        { name: '阿卡丽', icon: '/assets/lol/champions/akali.png' },
+        { name: '艾克', icon: '/assets/lol/champions/ekko.png' },
+        { name: '寡妇', icon: '/assets/lol/champions/evelynn.png' },
+        { name: '伊泽瑞尔', icon: '/assets/lol/champions/ezreal.png' },
+        { name: '武器', icon: '/assets/lol/champions/jax.png' },
+        { name: '卡莎', icon: '/assets/lol/champions/kaisa.png' }
       ] }
     ]
   },
   customBuilds: [
     {
       id: 'diana',
-      champion: { name: '皎月', icon: '/assets/lol/champions/Diana.png' },
+      champion: { name: '皎月', icon: '/assets/lol/champions/diana.png' },
       note: '标准爆发公式',
       starter: [
         { name: '守护者法球', icon: '/assets/lol/items/3112.png' },
@@ -298,7 +298,7 @@ export const lolAssassinGuideData = {
     },
     {
       id: 'gwen',
-      champion: { name: '格温', icon: '/assets/lol/champions/Gwen.png' },
+      champion: { name: '格温', icon: '/assets/lol/champions/gwen.png' },
       note: '三级 E 后主 Q；守护者之刃出门，先当战士玩',
       starter: [
         { name: '守护者之刃', icon: '/assets/lol/items/3177.png' },
@@ -317,7 +317,7 @@ export const lolAssassinGuideData = {
     },
     {
       id: 'kassadin',
-      champion: { name: '卡萨丁', icon: '/assets/lol/champions/Kassadin.png' },
+      champion: { name: '卡萨丁', icon: '/assets/lol/champions/kassadin.png' },
       note: '三眼泪特例；有尖端时把鞋位换成泪甲',
       starter: [
         { name: '爆裂魔杖', icon: '/assets/lol/items/1026.png' },
@@ -334,7 +334,7 @@ export const lolAssassinGuideData = {
     },
     {
       id: 'lillia',
-      champion: { name: '莉莉娅', icon: '/assets/lol/champions/Lillia.png' },
+      champion: { name: '莉莉娅', icon: '/assets/lol/champions/lillia.png' },
       note: '不好活就出败魔、兰顿，生存装不寒碜',
       starter: [
         { name: '守护者法球', icon: '/assets/lol/items/3112.png' },
@@ -351,7 +351,7 @@ export const lolAssassinGuideData = {
     },
     {
       id: 'rumble',
-      champion: { name: '兰博', icon: '/assets/lol/champions/Rumble.png' },
+      champion: { name: '兰博', icon: '/assets/lol/champions/rumble.png' },
       note: '持续灼烧与法穿公式',
       starter: [
         { name: '守护者法球', icon: '/assets/lol/items/3112.png' },
@@ -368,7 +368,7 @@ export const lolAssassinGuideData = {
     },
     {
       id: 'udyr',
-      champion: { name: '乌迪尔', icon: '/assets/lol/champions/Udyr.png' },
+      champion: { name: '乌迪尔', icon: '/assets/lol/champions/udyr.png' },
       note: '影焰爆发版持续进场公式',
       starter: [
         { name: '守护者法球', icon: '/assets/lol/items/3112.png' },

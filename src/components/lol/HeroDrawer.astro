@@ -1,0 +1,75 @@
+---
+import { lolHeroes, lolRoles } from '../../data/lol-heroes.js';
+import { lolAugments, lolAugmentNames, lolItemNames } from '../../data/lol-augments.js';
+
+const augName = (id) => lolAugmentNames[id] || `海克斯${id}`;
+const itemName = (id) => lolItemNames[id] || `装备${id}`;
+const comboLabel = { single: '单海克斯', double: '双海克斯', triple: '三海克斯', quad: '四海克斯' };
+const heroTone = (roles) => {
+  if (roles.includes('assassin')) return 'purple';
+  if (roles.includes('mage')) return 'red';
+  if (roles.includes('marksman')) return 'orange';
+  if (roles.includes('fighter')) return 'gold';
+  if (roles.includes('tank')) return 'cyan';
+  return 'blue';
+};
+---
+<div class="lol-drawer" data-lol-drawer hidden role="dialog" aria-modal="true" aria-label="英雄出装详情">
+  <div class="lol-drawer-backdrop" data-lol-drawer-close></div>
+  <aside class="lol-drawer-panel">
+    <button class="lol-drawer-close" data-lol-drawer-close type="button" aria-label="关闭">✕</button>
+    {lolHeroes.map((hero) => {
+      const augData = lolAugments[hero.id];
+      const tone = heroTone(hero.roles);
+      const roleTag = hero.roles.map((r) => lolRoles[r]).join(' / ');
+      return (
+        <div class="lol-drawer-content" data-drawer-hero={hero.id} hidden>
+          <header class:list={['lol-drawer-head', `lol-hub-tone-${tone}`]}>
+            <img class="lol-drawer-hero" src={hero.icon} alt={hero.name} loading="lazy">
+            <div class="lol-drawer-headinfo">
+              <span class="lol-drawer-kicker">{roleTag}</span>
+              <h2>{hero.name}</h2>
+              <p>海克斯大乱斗 · 实战数据</p>
+            </div>
+          </header>
+
+          <div class="lol-drawer-body">
+            {augData && (
+              <section class="lol-drawer-step lol-drawer-augs">
+                <h3>海克斯推荐 <span class="lol-drawer-augs-src">RESG</span></h3>
+                {['single', 'double', 'triple', 'quad'].map((t) => {
+                  const group = augData[t];
+                  if (!group || group.a.length === 0) return null;
+                  return (
+                    <div class:list={['lol-drawer-aug-group', `lol-drawer-aug-${t}`]}>
+                      <span class="lol-drawer-aug-label">{comboLabel[t]}</span>
+                      <div class="lol-drawer-aug-list">
+                        {group.a.map((ids, idx) => (
+                          <div class="lol-drawer-aug-item">
+                            <div class="lol-drawer-aug-name">
+                              {ids.map((id) => <em key={id}>{augName(id)}</em>)}
+                              <strong>{Math.round(group.w[idx] * 100)}%</strong>
+                            </div>
+                            {group.i[idx] && group.i[idx].length > 0 && (
+                              <p class="lol-drawer-aug-build">
+                                {group.i[idx].map((iid) => itemName(iid)).join(' · ')}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </section>
+            )}
+
+            {!augData && (
+              <p class="lol-drawer-callout">该英雄暂无可展示的海克斯数据（场次不足）。</p>
+            )}
+          </div>
+        </div>
+      );
+    })}
+  </aside>
+</div>

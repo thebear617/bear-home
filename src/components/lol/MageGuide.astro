@@ -3,7 +3,8 @@ import ItemPicks from './ItemPicks.astro';
 const { guide } = Astro.props;
 ---
 <div class="lol-guide-panel lol-mage-guide">
-  <header class="lol-hero"><h1>{guide.title}</h1><p>{guide.subtitle}</p></header>
+  <header class="lol-hero lol-mage-hero"><h1>{guide.title}</h1><p>{guide.subtitle}</p></header>
+  <div class="lol-mage-grid">
   {guide.builds.map((build) => (
     <section class:list={['lol-build', `lol-tone-${build.tone}`]}>
       <div class="lol-build-heading"><h2>{build.title}</h2><span>{build.tagline}</span></div>
@@ -24,6 +25,7 @@ const { guide } = Astro.props;
       ))}
     </section>
   ))}
+  </div>
   <section class="lol-rules">
     <h2>快速规则</h2>
     <ul>{guide.quickRules.map((rule) => <li>{rule}</li>)}</ul>

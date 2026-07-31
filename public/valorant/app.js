@@ -244,7 +244,7 @@ const ValorantView = {
       <div v-if="loading" class="empty-state">加载中...</div>
       <div v-else class="valorant-workspace">
         <aside class="valorant-sidebar">
-          <a class="valorant-backlink" href="../">← 返回熊窝</a>
+          <a class="valorant-backlink" href="../index.html">← 返回熊窝</a>
           <div class="valorant-brand">
             <span class="valorant-brand-mark" aria-hidden="true">
               <svg class="valorant-brand-icon" viewBox="0 0 48 48" focusable="false">
