@@ -283,17 +283,27 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
     }
   });
 
+  const mobileViewQuery = window.matchMedia('(max-width: 719px)');
+
+  function setView(view) {
+    // 表格依赖横向列，在手机上只保留更适合浏览的分组与瀑布流视图。
+    const nextView = mobileViewQuery.matches && view === 'list' ? 'group' : view;
+    viewBtns.forEach((button) => button.classList.toggle('active', button.dataset.view === nextView));
+    viewPanels.forEach((panel) => {
+      panel.hidden = panel.dataset.viewPanel !== nextView;
+    });
+    filterRoutes();
+  }
+
   // 视图切换
   viewBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
-      const view = btn.dataset.view;
-      viewBtns.forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      viewPanels.forEach((panel) => {
-        panel.hidden = panel.dataset.viewPanel !== view;
-      });
-      filterRoutes();
+      setView(btn.dataset.view);
     });
+  });
+
+  mobileViewQuery.addEventListener('change', (event) => {
+    if (event.matches && document.querySelector('.view-btn.active')?.dataset.view === 'list') setView('group');
   });
 
   // 列表按添加时间切换正序／倒序
@@ -629,15 +639,132 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
     gap: 0.75rem;
   }
 
-  @media (max-width: 600px) {
+  /* 与全局侧栏折叠断点保持一致，折叠侧栏时即使用移动端链接布局。 */
+  @media (max-width: 719px) {
+    .route-hub {
+      padding: 0.75rem;
+    }
+
+    .hub-toolbar {
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .hub-search input {
+      min-height: 48px;
+      padding-right: 3.5rem;
+    }
+
+    .hub-actions {
+      gap: 0.5rem;
+    }
+
+    .view-switcher {
+      flex: 1;
+    }
+
+    .view-btn[data-view="list"] {
+      display: none;
+    }
+
+    .view-btn {
+      flex: 1;
+      justify-content: center;
+      min-height: 42px;
+    }
+
+    .filter-btn {
+      min-width: 48px;
+      min-height: 42px;
+      justify-content: center;
+      padding: 0.5rem;
+    }
+
+    .hub-grid {
+      gap: 0.875rem;
+    }
+
+    .hub-group {
+      padding: 0.875rem;
+      border-radius: 10px;
+    }
+
+    .group-header {
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.625rem;
+    }
+
+    .group-icon {
+      font-size: 1.1rem;
+    }
+
+    .group-title h2 {
+      font-size: 0.95rem;
+    }
+
+    .group-count {
+      margin-left: 0.25rem;
+      font-size: 0.7rem;
+    }
+
+    .group-view-all {
+      font-size: 0.75rem;
+    }
+
     .group-cards {
       grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
     }
-  }
 
-  @media (max-width: 400px) {
-    .group-cards {
-      grid-template-columns: 1fr;
+    .group-cards .link-card {
+      min-height: 152px;
+      aspect-ratio: auto;
+      gap: 0.5rem;
+      padding: 0.625rem;
+      border-radius: 7px;
+    }
+
+    .group-cards .card-favicon,
+    .group-cards [data-category="personal"] .card-favicon {
+      width: 38px;
+      height: 38px;
+    }
+
+    .group-cards .card-favicon img,
+    .group-cards [data-category="personal"] .card-favicon img {
+      width: 28px;
+      height: 28px;
+    }
+
+    .group-cards .card-title {
+      margin-bottom: 0.2rem;
+      font-size: 0.85rem;
+    }
+
+    .group-cards .card-desc {
+      display: -webkit-box;
+      margin: 0 0 0.25rem;
+      overflow: hidden;
+      color: #6b7280;
+      font-size: 0.7rem;
+      line-height: 1.35;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    .group-cards .card-domain,
+    .group-cards .card-path {
+      margin-bottom: 0.35rem;
+      font-size: 0.65rem;
+    }
+
+    .group-cards .card-tags {
+      gap: 0.2rem;
+    }
+
+    .group-cards .tag {
+      padding: 0.1rem 0.3rem;
+      font-size: 0.6rem;
     }
   }
 
@@ -918,17 +1045,24 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
   .masonry-content footer span { color: #7c86a0; font-size: 0.9rem; }
 
   @media (max-width: 760px) {
-    .route-hub { padding: 1rem; }
     .hub-toolbar, .hub-actions { align-items: stretch; }
     .hub-search { max-width: none; flex-basis: 100%; }
     .hub-actions { width: 100%; justify-content: space-between; }
     .view-btn { padding: 0.5rem; }
     .view-btn span { display: none; }
-    .masonry-grid { columns: 2 150px; gap: 0.85rem; }
+    .masonry-grid { columns: 2 140px; column-gap: 0.65rem; }
+    .masonry-card { margin-bottom: 0.65rem; }
+    .masonry-cover, .masonry-1 .masonry-cover, .masonry-2 .masonry-cover { height: 78px; padding: 0.625rem; }
+    .masonry-cover > span { font-size: 1.65rem; }
+    .masonry-cover img, .masonry-cover b { width: 28px; height: 28px; padding: 3px; }
+    .masonry-content { padding: 0.7rem; }
+    .masonry-content h2 { margin-bottom: 0.2rem; font-size: 0.8rem; }
+    .masonry-content p { margin-bottom: 0.3rem; font-size: 0.68rem; line-height: 1.4; }
+    .masonry-content small { margin-bottom: 0.4rem; font-size: 0.6rem; }
+    .masonry-content footer { margin-top: 0.45rem; padding-top: 0.45rem; }
   }
 
   @media (max-width: 430px) {
-    .masonry-grid { columns: 1; }
     .filter-btn span { display: none; }
   }
 
