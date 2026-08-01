@@ -23,7 +23,7 @@ function stripWikilinks(md) {
 
 function buildCallout(type, expand, title, contentHtml) {
   if (expand === '-') {
-    return '<details class="callout callout-' + type + '"><summary>' + title + '</summary><div class="callout-body">' + contentHtml + '</div></details>';
+    return '<details class="callout callout-' + type + '"><summary><span class="callout-summary-text">' + title + '</span></summary><div class="callout-body">' + contentHtml + '</div></details>';
   }
   return '<div class="callout callout-' + type + '"><div class="callout-title">' + title + '</div><div class="callout-body">' + contentHtml + '</div></div>';
 }
@@ -158,6 +158,13 @@ function valorantParseTeam(str) {
 // HTML 转义
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function valorantMapAsset(title) {
+  if (typeof valorantMapAssets === 'undefined' || !valorantMapAssets || !valorantMapAssets.maps) return null;
+  var asset = valorantMapAssets.maps[title];
+  if (!asset || !/^\.\.\/assets\/valorant\/tactical-maps\/[a-z0-9-]+\.png$/i.test(String(asset.src || ''))) return null;
+  return asset;
 }
 
 // 把"推荐阵容"一项渲染成卡片串
@@ -303,6 +310,10 @@ const ValorantView = {
             class="valorant-panel"
           >
             <div class="valorant-panel-heading"><span>SECTION {{ indexLabel(sections.indexOf(section)) }}</span><h2>{{ section.title }}</h2></div>
+            <figure v-if="section.id !== 'overview' && mapAsset(section.title)" class="valorant-map-reference">
+              <img :src="mapAsset(section.title).src" :alt="mapAsset(section.title).alt" loading="lazy">
+              <figcaption>地图总览 · 阅读战术时对照使用</figcaption>
+            </figure>
             <article v-if="section.id === 'overview'" class="valorant-blog-home">
               <header class="valorant-blog-meta"><span>无畏契约 · 战术资料库</span><span>阅读指南</span></header>
               <h3>把地图理解，整理成可以执行的回合决策</h3>
@@ -374,9 +385,12 @@ const ValorantView = {
         '微风岛屿': 'breeze',
         '森寒冬港': 'icebox',
         '裂变峡谷': 'fracture',
-        '深窟幽境': 'abyss'
+        '幽邃地窟': 'abyss'
       };
       return icons[title] ? '../assets/valorant/maps/' + icons[title] + '.png' : '';
+    },
+    mapAsset(title) {
+      return valorantMapAsset(title);
     },
     splitByHeading(html) {
       var sections = [];
@@ -480,7 +494,7 @@ const ValorantView = {
           '微风岛屿',
           '森寒冬港',
           '裂变峡谷',
-          '深窟幽境'
+          '幽邃地窟'
         ];
         this.sections.sort(function(a, b) {
           var aIndex = sectionOrder.indexOf(a.title);
@@ -495,7 +509,7 @@ const ValorantView = {
           }
           var subs = this.splitSubSections(sec.html);
           sec.subSections = subs;
-          if (subs.length > 0) {
+          if (sec.subSections.length > 0) {
             this.activeSub[sec.id] = subs[0].id;
           }
         }
