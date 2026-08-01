@@ -121,10 +121,14 @@ def main():
                 print(f"  头像失败 {alias}: {e}")
 
         st = champ_stats.get(cid, {})
+        # RESG: c.name=称号(如黑暗之女), c.description=英雄名(如安妮)
+        hero_name = c.get("description") or c.get("name", alias)
+        hero_title = c.get("name") if hero_name != c.get("name") else None
         hero_index.append({
             "id": alias,
             "resgId": cid,
-            "name": c.get("description") or c.get("name", alias),
+            "name": hero_name,
+            "title": hero_title,             # 称号(可空)，用于搜索匹配
             "roles": roles,
             "icon": head_rel,
             "wr": st.get("wr", 0),          # 平均胜率 0~1

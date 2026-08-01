@@ -7,9 +7,10 @@ import AdcGuide from './lol/AdcGuide.astro';
 import AssassinGuide from './lol/AssassinGuide.astro';
 import HeroDrawer from './lol/HeroDrawer.astro';
 
-// 组装英雄的可搜索文本（官方名 + 英文id + 外号 + 拼音，供搜索框匹配）
+// 组装英雄的可搜索文本（英雄名 + 称号 + 英文id + 外号 + 拼音，供搜索框匹配）
 const heroSearchText = (hero) => [
   hero.name,
+  hero.title,
   hero.id,
   ...(lolNicknames[hero.id] || []),
   ...(lolPinyin[hero.id] || [])

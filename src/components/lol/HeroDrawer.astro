@@ -29,7 +29,8 @@ const heroTone = (roles) => {
             <div class="lol-drawer-headinfo">
               <span class="lol-drawer-kicker">{roleTag}</span>
               <h2>{hero.name}</h2>
-              <p>海克斯大乱斗 · 实战数据</p>
+              {hero.title && <p class="lol-drawer-title">{hero.title} · 海克斯大乱斗实战数据</p>}
+              {!hero.title && <p>海克斯大乱斗 · 实战数据</p>}
             </div>
           </header>
 
