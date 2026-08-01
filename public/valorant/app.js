@@ -243,7 +243,21 @@ const ValorantView = {
     <div class="valorant-view">
       <div v-if="loading" class="empty-state">加载中...</div>
       <div v-else class="valorant-workspace">
-        <aside class="valorant-sidebar">
+        <button
+          class="valorant-sidebar-toggle"
+          type="button"
+          aria-label="打开板块导航"
+          aria-haspopup="true"
+          :aria-expanded="String(sidebarOpen)"
+          @click="sidebarOpen = true"
+        >☰</button>
+        <div
+          class="valorant-sidebar-backdrop"
+          :class="{ open: sidebarOpen }"
+          @click="sidebarOpen = false"
+        ></div>
+        <aside class="valorant-sidebar" :class="{ open: sidebarOpen }" aria-label="无畏契约板块导航">
+          <button class="valorant-sidebar-close" type="button" aria-label="关闭板块导航" @click="sidebarOpen = false">✕</button>
           <a class="valorant-backlink" href="../index.html">← 返回熊窝</a>
           <div class="valorant-brand">
             <span class="valorant-brand-mark" aria-hidden="true">
@@ -261,7 +275,7 @@ const ValorantView = {
               :key="s.id"
               class="valorant-nav-item"
               :class="{ active: activeSection === s.id }"
-              @click="selectSection(s.id)"
+              @click="selectSection(s.id); sidebarOpen = false"
             >
               <span class="valorant-nav-number">{{ indexLabel(i) }}</span>
               <span class="valorant-nav-icon" :class="{ 'has-map-image': mapIcon(s.title) }" aria-hidden="true">
@@ -338,7 +352,8 @@ const ValorantView = {
       loading: true,
       sections: [],
       activeSection: '',
-      activeSub: {}
+      activeSub: {},
+      sidebarOpen: false
     };
   },
   methods: {
@@ -494,6 +509,21 @@ const ValorantView = {
   },
   mounted() {
     this.loadContent();
+    const self = this;
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') self.sidebarOpen = false;
+    });
+  },
+  watch: {
+    sidebarOpen(open) {
+      if (open) {
+        document.body.classList.add('valorant-sidebar-lock');
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.classList.remove('valorant-sidebar-lock');
+        document.body.style.overflow = '';
+      }
+    }
   }
 };
 
