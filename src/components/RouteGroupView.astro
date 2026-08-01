@@ -1,6 +1,7 @@
 ---
 import { routeCategories } from '../data/site.js';
 
+const GROUP_LIMIT = 6;
 const totalLinks = routeCategories.reduce((sum, cat) => sum + cat.items.length, 0);
 const routeItems = routeCategories.flatMap((category) => category.items.map((item, index) => ({
   ...item,
@@ -103,12 +104,12 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
             <h2>{category.title}</h2>
             <span class="group-count">{category.items.length} 个链接</span>
           </div>
-          <a href="#" class="group-view-all" data-view-all={category.id}>查看全部 →</a>
+          <a href="#" class="group-view-all" data-view-all={category.id} aria-expanded="false" hidden={category.items.length <= GROUP_LIMIT}>查看全部 →</a>
         </div>
         <div class="group-cards">
-          {category.items.map((item) => (
+          {category.items.map((item, index) => (
             item.url ? (
-              <a href={item.url} target="_blank" rel="noopener" class="link-card" data-route-item data-category={category.id} data-tags={item.tags?.join('|') ?? ''} data-search-text={`${item.name} ${item.desc ?? ''} ${item.tags?.join(' ') ?? ''}`}>
+              <a href={item.url} target="_blank" rel="noopener" class="link-card" data-route-item data-category={category.id} data-tags={item.tags?.join('|') ?? ''} data-search-text={`${item.name} ${item.desc ?? ''} ${item.tags?.join(' ') ?? ''}`} hidden={category.items.length > GROUP_LIMIT && index >= GROUP_LIMIT}>
                 <div class="card-favicon">
                   <img src={item.icon || `https://www.google.com/s2/favicons?domain=${new URL(item.url).hostname}&sz=64`} alt="" width="32" height="32" loading="lazy">
                 </div>
@@ -126,7 +127,7 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
                 </div>
               </a>
             ) : (
-              <div class="link-card static" data-route-item data-category={category.id} data-tags={item.tags?.join('|') ?? ''} data-search-text={`${item.name} ${item.desc ?? ''} ${item.tags?.join(' ') ?? ''}`}>
+              <div class="link-card static" data-route-item data-category={category.id} data-tags={item.tags?.join('|') ?? ''} data-search-text={`${item.name} ${item.desc ?? ''} ${item.tags?.join(' ') ?? ''}`} hidden={category.items.length > GROUP_LIMIT && index >= GROUP_LIMIT}>
                 <div class="card-favicon">
                   <span class="folder-icon">📁</span>
                 </div>
@@ -244,19 +245,29 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
   const filterPanel = document.querySelector('[data-filter-panel]');
   let activeCategory = '';
   let activeTag = '';
+  const GROUP_LIMIT = 6;
+  const expandedGroups = new Set();
+
+  function itemIndexInGroup(item) {
+    const category = item.closest('[data-route-category]');
+    return [...category.querySelectorAll('[data-route-item]')].indexOf(item);
+  }
 
   // 搜索过滤
   function filterRoutes() {
     const query = routeSearch.value.trim().toLowerCase();
+    const hasFilter = Boolean(query || activeCategory || activeTag);
     let visibleCount = 0;
     routeCategories.forEach((category) => {
+      const isExpanded = expandedGroups.has(category.dataset.categoryId);
       let categoryCount = 0;
       category.querySelectorAll('[data-route-item]').forEach((item) => {
         const matchesQuery = !query || item.dataset.searchText.toLowerCase().includes(query);
         const matchesCategory = !activeCategory || item.dataset.category === activeCategory;
         const matchesTag = !activeTag || item.dataset.tags.split('|').includes(activeTag);
         const visible = matchesQuery && matchesCategory && matchesTag;
-        item.hidden = !visible;
+        const limited = !hasFilter && !isExpanded && itemIndexInGroup(item) >= GROUP_LIMIT;
+        item.hidden = !visible || limited;
         if (visible) categoryCount += 1;
       });
       category.querySelector('.group-count').textContent = `${categoryCount} 个链接`;
@@ -319,15 +330,24 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
       .forEach((row) => listBody.append(row));
   });
 
-  // 查看全部（预留）
+  // 查看全部：展开／收起分组中超出上限的条目
   document.querySelectorAll('[data-view-all]').forEach((link) => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const categoryId = link.dataset.viewAll;
       const category = document.querySelector(`[data-category-id="${categoryId}"]`);
-      if (category) {
-        category.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (!category) return;
+      const isExpanded = expandedGroups.has(categoryId);
+      if (isExpanded) {
+        expandedGroups.delete(categoryId);
+        link.textContent = '查看全部 →';
+        link.setAttribute('aria-expanded', 'false');
+      } else {
+        expandedGroups.add(categoryId);
+        link.textContent = '收起 ↑';
+        link.setAttribute('aria-expanded', 'true');
       }
+      filterRoutes();
     });
   });
 
@@ -386,6 +406,11 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
 
   /* .hub-grid 的 display:grid 会覆盖浏览器对 hidden 的默认样式。 */
   [data-view-panel][hidden] {
+    display: none !important;
+  }
+
+  /* .link-card 自带 display:flex，同样会覆盖 hidden，需显式隐藏。 */
+  [data-route-item][hidden] {
     display: none !important;
   }
 

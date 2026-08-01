@@ -28,7 +28,8 @@ export const routeCategories = [
     title: '常用链接',
     icon: '🔗',
     items: [
-      { name: 'LDXP 神秘小铺', desc: '买 ChatGPT / Claude 订阅，比官方便宜', url: 'https://pay.ldxp.cn/shop/T37M9N2N/', tags: ['AI', '订阅'], addedAt: '2026-07-15' },
+      { name: '链动小铺 1', desc: '买 ChatGPT / Claude 订阅，比官方便宜', url: 'https://pay.ldxp.cn/shop/JL7007', tags: ['AI', '订阅'], addedAt: '2026-08-02' },
+      { name: '链动小铺 2', desc: '买 ChatGPT / Claude 订阅，比官方便宜', url: 'https://pay.ldxp.cn/shop/T37M9N2N/', tags: ['AI', '订阅'], addedAt: '2026-07-15' },
       { name: 'Hero SMS 接码平台', desc: '接码平台，ChatGPT 电话验证登录时收验证码用', url: 'https://hero-sms.com/cn', tags: ['工具', '验证'], addedAt: '2026-07-16' },
       { name: 'OpenTheRank', desc: '查全球各家大模型官方订阅在各地区的价格', url: 'https://opentherank.com/zh/', tags: ['AI', '价格'], addedAt: '2026-07-17' },
       { name: 'OpenRouter Rankings', desc: '看全球所有大模型的实时用量 + 实时性能排行', url: 'https://openrouter.ai/rankings', tags: ['AI', '排行'], addedAt: '2026-07-17' },
