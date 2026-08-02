@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "snapshotAt": "2026-07-30T13:01:29.224Z",
-  "startedOn": "2026-07-30",
+  "snapshotAt": "2026-08-02T07:33:30.885Z",
+  "startedOn": "2026-08-01",
   "dailyRecords": {
-    "2026-07-30": {
+    "2026-08-01": {
       "habits": {
-        "water": 700,
+        "water": 1100,
         "coffee": 2,
         "exercise": 3,
         "reading": 0
@@ -22,9 +22,32 @@
       "pomodoro": {
         "completed": 4
       },
-      "countdowns": {
-        "pomodoro-work": 3090
+      "countdowns": {},
+      "sideProject": {
+        "elapsed": 0,
+        "remaining": 10800
+      }
+    },
+    "2026-08-02": {
+      "habits": {
+        "water": 1100,
+        "coffee": 2,
+        "exercise": 3,
+        "reading": 0
       },
+      "work": {
+        "timers": {
+          "inbox": 7730,
+          "development": 0
+        },
+        "counts": {
+          "blog-writing": 4
+        }
+      },
+      "pomodoro": {
+        "completed": 4
+      },
+      "countdowns": {},
       "sideProject": {
         "elapsed": 0,
         "remaining": 10800
@@ -42,7 +65,7 @@
         "target": 10000,
         "unit": "¥",
         "status": "active",
-        "startedAt": "2026-07-30",
+        "startedAt": "2026-08-01",
         "completedAt": null
       },
       {
@@ -54,7 +77,7 @@
         "target": 4350,
         "unit": "¥",
         "status": "active",
-        "startedAt": "2026-07-30",
+        "startedAt": "2026-08-01",
         "completedAt": null
       },
       {
@@ -66,7 +89,7 @@
         "target": 1184.88,
         "unit": "¥",
         "status": "active",
-        "startedAt": "2026-07-30",
+        "startedAt": "2026-08-01",
         "completedAt": null
       }
     ]
