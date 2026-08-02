@@ -1,13 +1,15 @@
 {
   "name": "bear-home",
   "private": true,
-  "version": "0.23.0",
+  "version": "0.23.1",
   "type": "module",
   "scripts": {
     "dev": "astro dev --port 4321",
     "build": "astro build",
     "preview": "astro preview",
-    "install-hooks": "sh scripts/install-hooks.sh"
+    "install-hooks": "sh scripts/install-hooks.sh",
+    "tracker:migrate": "node scripts/migrate-tracker-snapshot.mjs",
+    "tracker:validate": "node scripts/validate-tracker-snapshot.mjs"
   },
   "devDependencies": {
     "astro": "^5.0.0"

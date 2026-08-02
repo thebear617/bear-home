@@ -1,4 +1,6 @@
 ---
+import { trackerGoalDefinitions } from '../data/tracker-config.js';
+
 const habits = [
   { id: 'water', name: 'Water', icon: '💧', initial: 1100, target: 2200, tone: 'blue', ago: '6 minutes ago', step: 100 },
   { id: 'coffee', name: 'Coffee & Tea', icon: '☕', initial: 2, target: 4, tone: 'slate', ago: '6 minutes ago', step: 1 },
@@ -15,6 +17,7 @@ const teas = [
   { id: 'black-tea', name: 'Black tea', duration: 300, tone: 'orange', icon: '☕' },
   { id: 'herbal-tea', name: 'Herbal tea', duration: 600, tone: 'yellow', icon: '☕' },
 ];
+const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money');
 ---
 
 <section class="tracking-board" data-tracking-board aria-labelledby="tracking-board-title">
@@ -112,9 +115,9 @@ const teas = [
           <button class="tracking-card-close" type="button" aria-label="移除长期成就">×</button>
           <div class="tracking-achievement-heading"><strong>Personal finances</strong><small>Current overview</small></div>
           <div class="tracking-achievement-percent">—</div>
-          <div class="tracking-achievement-row"><span>💰</span><strong>0/13028</strong><small>Money to save</small></div>
-          <div class="tracking-achievement-row"><span>↩</span><strong>1000/4350</strong><small>Money owed to me</small></div>
-          <div class="tracking-achievement-row"><span>📤</span><strong>0/1184.88</strong><small>Money I owe</small></div>
+          {moneyGoals.map((goal) => (
+            <div class="tracking-achievement-row"><span>{goal.icon}</span><strong>{goal.current}/{goal.target}</strong><small>{goal.label}</small></div>
+          ))}
         </article>
       </section>
     </div>
@@ -194,6 +197,8 @@ const teas = [
 </section>
 
 <script>
+  import { normalizeLongTermGoals, trackerGoalDefinitions } from '../data/tracker-config.js';
+
   const trackingBoard = document.querySelector('[data-tracking-board]');
   const boardToday = new Intl.DateTimeFormat('en-CA').format(new Date());
     const trackerStorageKey = 'bear-home-tracker-v1';
@@ -214,18 +219,19 @@ const teas = [
       sideProject: { elapsed: 0, remaining: 10800 }
     };
     const defaultLongTerm = {
-      goals: [
-        { id: 'money-to-save', title: '我要攒的钱', type: 'money', icon: '💰', current: 0, target: 13028, unit: '¥', status: 'active', startedAt: boardToday, completedAt: null },
-        { id: 'money-owed-to-me', title: '别人还没还我的钱', type: 'money', icon: '↩', current: 1000, target: 4350, unit: '¥', status: 'active', startedAt: boardToday, completedAt: null },
-        { id: 'money-i-owe', title: '我要还别人的钱', type: 'money', icon: '📤', current: 0, target: 1184.88, unit: '¥', status: 'active', startedAt: boardToday, completedAt: null }
-      ]
+      goals: trackerGoalDefinitions.map((goal) => ({ ...goal, startedAt: boardToday, completedAt: null }))
     };
     let trackerState = {};
     try { trackerState = JSON.parse(localStorage.getItem(trackerStorageKey) || '{}'); } catch { trackerState = {}; }
     if (!trackerState.version || !trackerState.dailyRecords) {
       trackerState = { version: 1, startedOn: boardToday, dailyRecords: { [boardToday]: defaultDayRecord }, longTerm: defaultLongTerm };
     }
-    trackerState.longTerm = { ...defaultLongTerm, ...(trackerState.longTerm || {}), goals: trackerState.longTerm?.goals || defaultLongTerm.goals };
+    const storedLongTerm = trackerState.longTerm || {};
+    trackerState.longTerm = {
+      ...defaultLongTerm,
+      ...storedLongTerm,
+      goals: normalizeLongTermGoals(storedLongTerm.goals, trackerState.startedOn || boardToday),
+    };
     const storedToday = trackerState.dailyRecords[boardToday] || {};
     trackerState.dailyRecords[boardToday] = {
       ...defaultDayRecord,
@@ -245,11 +251,17 @@ const teas = [
 
     async function loadPublishedSnapshot() {
       try {
-        const response = await fetch(new URL('data/tracker-snapshot.json', document.baseURI));
+        const response = await fetch(new URL('/data/tracker-snapshot.json', document.baseURI));
         if (!response.ok) return;
         const snapshot = await response.json();
         if (snapshot?.schemaVersion === 1 && snapshot.dailyRecords && !isLocalDevelopment) {
-          historyState = snapshot;
+          historyState = {
+            ...snapshot,
+            longTerm: {
+              ...(snapshot.longTerm || {}),
+              goals: normalizeLongTermGoals(snapshot.longTerm?.goals, snapshot.startedOn),
+            },
+          };
           renderWeekView();
           renderMonthView();
           renderLongTermView();
@@ -258,6 +270,10 @@ const teas = [
     }
 
     async function syncTrackerSnapshot() {
+      trackerState.longTerm = {
+        ...(trackerState.longTerm || {}),
+        goals: normalizeLongTermGoals(trackerState.longTerm?.goals, trackerState.startedOn || boardToday),
+      };
       saveTracker();
       if (!isLocalDevelopment) {
         if (syncStatus) syncStatus.textContent = '请在 localhost 同步';

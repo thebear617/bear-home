@@ -1,8 +1,8 @@
 ---
 const weatherLocations = [
-  { name: '西安', city: 'Xi%27an' },
-  { name: '南宁', city: 'Nanning' },
-  { name: '威海', city: 'Weihai' }
+  { name: '西安', city: 'Xi%27an', latitude: 34.3416, longitude: 108.9398 },
+  { name: '南宁', city: 'Nanning', latitude: 22.817, longitude: 108.3669 },
+  { name: '威海', city: 'Weihai', latitude: 37.5131, longitude: 122.1204 }
 ];
 const musicPlaylists = [
   {
@@ -70,7 +70,7 @@ import SearchBox from './SearchBox.astro';
           <p class="dashboard-section-kicker">此刻</p>
           <h3 id="weather-title">抬头看看窗外，怎么样？</h3>
       </div>
-      <span class="dashboard-section-note">每 15 分钟更新</span>
+      <span class="dashboard-section-note">点击城市卡片查看未来 5 天</span>
     </div>
     <div class="weather-widget-grid">
       {weatherLocations.map((location) => (
@@ -85,11 +85,35 @@ import SearchBox from './SearchBox.astro';
               height="280"
             ></iframe>
           </div>
+          <button
+            class="weather-place-trigger"
+            type="button"
+            data-weather-trigger
+            data-weather-name={location.name}
+            data-weather-latitude={location.latitude}
+            data-weather-longitude={location.longitude}
+            aria-label={`查看${location.name}未来 5 天天气`}
+          ></button>
         </article>
       ))}
     </div>
-    <p class="weather-widget-caption">天气数据由 Open-Meteo 提供，当前显示西安、南宁和威海。</p>
+    <p class="weather-widget-caption">即时天气由 Open-Meteo 提供，点击城市卡片可查看未来 5 天预报。</p>
   </section>
+
+  <dialog class="weather-modal" data-weather-modal aria-labelledby="weather-modal-title">
+    <div class="weather-modal-card">
+      <div class="weather-modal-heading">
+        <div>
+          <p class="dashboard-section-kicker">未来 5 天</p>
+          <h3 id="weather-modal-title" data-weather-modal-title>天气预报</h3>
+        </div>
+        <button class="weather-modal-close" type="button" data-weather-modal-close aria-label="关闭天气预报">×</button>
+      </div>
+      <p class="weather-modal-status" data-weather-modal-status>正在加载天气预报…</p>
+      <div class="weather-forecast-list" data-weather-forecast-list></div>
+      <p class="weather-modal-source">预报数据由 Open-Meteo 提供</p>
+    </div>
+  </dialog>
 
   <div class="dashboard-widget-grid">
     <section class="dashboard-section dashboard-calendar-section" aria-labelledby="calendar-title">
@@ -183,6 +207,124 @@ import SearchBox from './SearchBox.astro';
     }).format(new Date());
     dateLabel.textContent = `${formattedDate}，从看看窗外开始。`;
   }
+
+  const weatherModal = document.querySelector('[data-weather-modal]');
+  const weatherModalTitle = document.querySelector('[data-weather-modal-title]');
+  const weatherModalStatus = document.querySelector('[data-weather-modal-status]');
+  const weatherForecastList = document.querySelector('[data-weather-forecast-list]');
+  const weatherCache = new Map();
+  const weatherCodeLabels = {
+    0: ['☀️', '晴'],
+    1: ['🌤️', '大部晴朗'],
+    2: ['⛅', '局部多云'],
+    3: ['☁️', '阴'],
+    45: ['🌫️', '雾'],
+    48: ['🌫️', '雾凇'],
+    51: ['🌦️', '小毛毛雨'],
+    53: ['🌦️', '毛毛雨'],
+    55: ['🌧️', '大毛毛雨'],
+    56: ['🌧️', '冻毛毛雨'],
+    57: ['🌧️', '强冻毛毛雨'],
+    61: ['🌦️', '小雨'],
+    63: ['🌧️', '中雨'],
+    65: ['🌧️', '大雨'],
+    66: ['🌧️', '冻雨'],
+    67: ['🌧️', '强冻雨'],
+    71: ['🌨️', '小雪'],
+    73: ['🌨️', '中雪'],
+    75: ['❄️', '大雪'],
+    77: ['🌨️', '雪粒'],
+    80: ['🌦️', '阵雨'],
+    81: ['🌧️', '中阵雨'],
+    82: ['⛈️', '强阵雨'],
+    85: ['🌨️', '阵雪'],
+    86: ['❄️', '强阵雪'],
+    95: ['⛈️', '雷雨'],
+    96: ['⛈️', '雷雨伴冰雹'],
+    99: ['⛈️', '强雷雨伴冰雹'],
+  };
+
+  function getWeatherCodeLabel(code) {
+    return weatherCodeLabels[code] || ['🌡️', '天气待确认'];
+  }
+
+  function formatWeatherValue(value, suffix = '') {
+    const number = Number(value);
+    return Number.isFinite(number) ? `${Math.round(number)}${suffix}` : '—';
+  }
+
+  function formatForecastDate(dateString, index) {
+    const date = new Date(`${dateString}T12:00:00`);
+    const label = new Intl.DateTimeFormat('zh-CN', { month: 'short', day: 'numeric', weekday: 'short' }).format(date);
+    return index === 0 ? `今天 · ${label}` : label;
+  }
+
+  function renderWeatherForecast(location, payload) {
+    const daily = payload?.daily;
+    if (!daily?.time?.length) throw new Error('没有可用的预报数据');
+
+    weatherForecastList.innerHTML = daily.time.slice(0, 5).map((date, index) => {
+      const [icon, label] = getWeatherCodeLabel(Number(daily.weather_code?.[index]));
+      return `
+        <article class="weather-forecast-day">
+          <div class="weather-forecast-date"><strong>${formatForecastDate(date, index)}</strong><small>${label}</small></div>
+          <div class="weather-forecast-icon" aria-hidden="true">${icon}</div>
+          <div class="weather-forecast-temperature"><strong>${formatWeatherValue(daily.temperature_2m_max?.[index], '°')}</strong><span>${formatWeatherValue(daily.temperature_2m_min?.[index], '°')}</span></div>
+          <div class="weather-forecast-details"><span>降雨 ${formatWeatherValue(daily.precipitation_probability_max?.[index], '%')}</span><span>风速 ${formatWeatherValue(daily.wind_speed_10m_max?.[index], ' km/h')}</span></div>
+        </article>
+      `;
+    }).join('');
+    weatherModalStatus.textContent = `${location.name} · 未来 5 天预报`;
+  }
+
+  async function openWeatherForecast(trigger) {
+    const location = {
+      name: trigger.dataset.weatherName,
+      latitude: trigger.dataset.weatherLatitude,
+      longitude: trigger.dataset.weatherLongitude,
+    };
+    const cacheKey = `${location.latitude},${location.longitude}`;
+    weatherModalTitle.textContent = `${location.name}天气预报`;
+    weatherModalStatus.textContent = '正在加载天气预报…';
+    weatherForecastList.innerHTML = '';
+    if (!weatherModal.open) weatherModal.showModal();
+
+    const cached = weatherCache.get(cacheKey);
+    if (cached && Date.now() - cached.updatedAt < 15 * 60 * 1000) {
+      renderWeatherForecast(location, cached.payload);
+      return;
+    }
+
+    const forecastUrl = new URL('https://api.open-meteo.com/v1/forecast');
+    forecastUrl.search = new URLSearchParams({
+      latitude: location.latitude,
+      longitude: location.longitude,
+      daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max',
+      forecast_days: '5',
+      timezone: 'Asia/Shanghai',
+      temperature_unit: 'celsius',
+      wind_speed_unit: 'kmh',
+    });
+
+    try {
+      const response = await fetch(forecastUrl);
+      if (!response.ok) throw new Error(`天气接口返回 ${response.status}`);
+      const payload = await response.json();
+      weatherCache.set(cacheKey, { payload, updatedAt: Date.now() });
+      renderWeatherForecast(location, payload);
+    } catch (error) {
+      console.error('[weather-forecast]', error);
+      weatherModalStatus.textContent = '天气预报加载失败，请稍后重试。';
+    }
+  }
+
+  document.querySelectorAll('[data-weather-trigger]').forEach((trigger) => {
+    trigger.addEventListener('click', () => openWeatherForecast(trigger));
+  });
+  document.querySelector('[data-weather-modal-close]')?.addEventListener('click', () => weatherModal.close());
+  weatherModal?.addEventListener('click', (event) => {
+    if (event.target === weatherModal) weatherModal.close();
+  });
 
   const playlistCards = [...document.querySelectorAll('[data-playlist-card]')];
   const musicLibrary = document.querySelector('[data-music-library]');

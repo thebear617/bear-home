@@ -59,10 +59,11 @@
       {
         "id": "money-to-save",
         "title": "我要攒的钱",
+        "label": "Money to save",
         "type": "money",
         "icon": "💰",
         "current": 0,
-        "target": 10000,
+        "target": 13028,
         "unit": "¥",
         "status": "active",
         "startedAt": "2026-08-01",
@@ -71,6 +72,7 @@
       {
         "id": "money-owed-to-me",
         "title": "别人还没还我的钱",
+        "label": "Money owed to me",
         "type": "money",
         "icon": "↩",
         "current": 1000,
@@ -83,6 +85,7 @@
       {
         "id": "money-i-owe",
         "title": "我要还别人的钱",
+        "label": "Money I owe",
         "type": "money",
         "icon": "📤",
         "current": 0,

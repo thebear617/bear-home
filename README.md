@@ -1,93 +1,191 @@
 # 熊窝 · 个人主页
 
-线上：`https://me.thebear617.cn/`（GitHub Pages 仓库 `thebear617/bear-home`，自定义域名）
+线上地址：<https://me.thebear617.cn/>
+
+仓库：<https://github.com/thebear617/bear-home>（GitHub Pages + 自定义域名）
 
 ## 技术栈
 
 | 层面 | 选型 |
 |------|------|
-| 框架 | **Astro**（静态构建） + Vue 3（目前仅无畏契约页面保留运行时） |
-| 样式 | 暖色调设计 token（米黄 `#f7f3ee` + 深棕 `#2f2924` 侧栏），同 home/、cats/ |
-| 构建 | Astro 输出 `dist/`，GitHub Pages 部署构建产物 |
+| 框架 | **Astro**（静态构建） |
+| 客户端交互 | Astro 组件内的原生浏览器 JavaScript；当前活动页面不依赖 Vue |
+| 样式 | 暖色调设计 token：米黄背景 `#f4ecdf`、深棕侧栏 `#2f2924` |
+| 构建 | Astro 输出 `dist/`，由 GitHub Actions 部署到 GitHub Pages |
 
-## 架构
+## 页面结构
 
-```
+当前站点有两组入口，侧栏由 [src/components/SiteSidebar.astro](src/components/SiteSidebar.astro) 统一维护。
+
+| URL | 页面 | Astro 入口 |
+|-----|------|------------|
+| `/` | 路由表 | `src/pages/index.astro` |
+| `/routes/` | 路由表 | `src/pages/routes/index.astro` |
+| `/dashboard/` | 生活仪表盘 | `src/pages/dashboard/index.astro` |
+
+根路径和 `/routes/` 当前渲染同一个路由表。侧栏导航使用显式的 `index.html` 相对链接，以兼容本地静态路由和 GitHub Pages 子路径环境。
+
+## 目录结构
+
+```text
 personal/
-├── astro.config.mjs            # Astro 静态构建配置
-├── package.json                # 构建脚本与依赖
-├── .githooks/pre-push          # 推送前校验追踪快照（见下「追踪数据同步」）
-├── scripts/install-hooks.sh    # 把 core.hooksPath 指向 .githooks
+├── astro.config.mjs             # Astro 配置与追踪快照同步接口
+├── package.json                 # npm 脚本与依赖
+├── .githooks/pre-push           # 推送前校验追踪快照
+├── scripts/
+│   ├── install-hooks.sh         # 启用仓库内 Git hooks
+│   ├── migrate-tracker-snapshot.mjs # 按当前目标配置迁移旧快照
+│   └── validate-tracker-snapshot.mjs # 校验快照结构和目标配置
 ├── src/
-│   ├── layouts/SiteLayout.astro        # 通用布局（侧栏 + 主区）
+│   ├── layouts/SiteLayout.astro       # 通用布局：侧栏 + 主区
 │   ├── pages/
-│   │   ├── index.astro                 # 🏠 生活仪表盘
-│   │   ├── routes/index.astro          # 🗺️ 路由表
-│   │   ├── valorant/index.astro        # 🎯 无畏契约
-│   │   └── lol/index.astro             # ⚔️ 英雄联盟
+│   │   ├── index.astro                # 根路径路由表
+│   │   ├── routes/index.astro         # /routes/ 路由表
+│   │   └── dashboard/index.astro      # /dashboard/ 生活仪表盘
 │   ├── components/
-│   │   ├── SiteSidebar.astro           # 侧栏（4 个 Tab 入口）
-│   │   ├── LifeDashboard.astro         # 生活仪表盘（搜索/天气/日历/番茄钟/GitHub 卡片）
-│   │   ├── TrackingBoard.astro         # 追踪看板（习惯/工作/番茄/长期目标，仪表盘内嵌）
-│   │   ├── RouteTable.astro            # 路由表（列表视图）
-│   │   ├── RouteGroupView.astro        # 路由表（分组 / 瀑布流视图）
-│   │   ├── SearchBox.astro             # 多引擎搜索
-│   │   ├── GithubProfileCard.astro     # GitHub 主页卡片
-│   │   ├── LolView.astro               # 英雄联盟（英雄速查画廊 + 公式详情双视图）
-│   │   └── lol/{MageGuide,AdcGuide,AssassinGuide,ItemPicks,HeroDrawer}.astro
+│   │   ├── SiteSidebar.astro          # 侧栏导航与移动端抽屉
+│   │   ├── RouteTable.astro            # 路由表组件入口
+│   │   ├── RouteGroupView.astro       # 分组 / 列表 / 瀑布流视图
+│   │   ├── LifeDashboard.astro        # 天气、日历、音乐、GitHub 等模块
+│   │   ├── TrackingBoard.astro         # 习惯、工作、番茄钟、长期目标
+│   │   ├── SearchBox.astro             # Google / 百度 / Bing 搜索
+│   │   └── GithubProfileCard.astro     # GitHub 主页卡片
 │   └── data/
-│       ├── site.js                     # routeCategories 路由表数据
-│       ├── lol.js                      # 英雄联盟公式详情（手工教学数据）
-│       ├── lol-heroes.js               # 全英雄索引（脚本生成，RESG 驱动）
-│       ├── lol-augments.js             # 海克斯推荐（脚本生成，RESG 驱动）
-│       └── lol-nicknames.js            # 外号 + 拼音（脚本生成）
+│       ├── site.js               # routeCategories 路由数据
+│       └── tracker-config.js     # 追踪目标的唯一配置源
 ├── public/
-│   ├── css/style.css
-│   ├── js/vendor/                      # 无畏契约过渡页用的 Vue / marked 运行时
-│   ├── data/tracker-snapshot.json      # 追踪看板发布的快照
-│   ├── valorant/                       # 无畏契约数据与交互脚本
-│   └── assets/
-└── dist/                               # Astro 构建产物（不提交）
+│   ├── CNAME                    # me.thebear617.cn
+│   ├── css/style.css            # 全站样式
+│   ├── data/tracker-snapshot.json # 已发布的追踪数据快照
+│   └── assets/routes/           # 路由表图标
+└── dist/                        # 构建产物，不提交
 ```
 
-> 注：原「每日日历追踪 / 支出记录」Tab（Obsidian 日记 → `diary-data.js` / `expense-data.js` 的自动编译链路）已于 2026-07-11 迁移至 home 站点（`js/expense-data.js` + `js/diary-data.js` + 「每日追踪」Tab），personal 侧相关文件与组件已移除。
+当前仓库还保留少量游戏板块迁移前的历史脚本和运行时资源，例如 `scripts/fetch-lol-*.py`、`scripts/gen-nicknames.py` 和 `public/js/vendor/vue.global.js`；它们不属于当前活动页面，也不参与现有页面路由。
 
-> 原「个人开发时间线」已迁移至 DevNotes 的「开发时间线」，personal 侧旧 Tab、数据和同步脚本均已移除。时间线 hook 与同步工具由 `devnotes/scripts/` 统一维护。
+## 路由表
 
-> 原「会员订阅」Tab 已迁移至 home 站 `/membership/` 页面，personal 侧组件与数据已移除。
+路由数据维护在 [src/data/site.js](src/data/site.js) 的 `routeCategories` 中。每条链接通常包含：
+
+- `name`：显示名称；
+- `desc`：描述；
+- `url` 或 `path`：外部链接或本地路径；
+- `tags`：筛选标签；
+- `addedAt`：添加日期，格式为 `YYYY-MM-DD`；
+- `icon`：可选的本地图标。
+
+[RouteGroupView.astro](src/components/RouteGroupView.astro) 提供：
+
+- 分组视图：每组默认显示最多 6 条，可展开全部；
+- 列表视图：按添加时间正序 / 倒序排列；
+- 瀑布流视图；
+- 链接名称、描述、分类和标签搜索；
+- `⌘ K` / `Ctrl K` 聚焦搜索框；
+- 分类和标签筛选；
+- 手机端自动避免使用横向列表视图。
+
+## 生活仪表盘
+
+[LifeDashboard.astro](src/components/LifeDashboard.astro) 当前包含：
+
+- 西安、南宁、威海天气；
+- 点击城市天气卡片查看未来 5 天的天气、温度、降雨概率和最大风速；
+- 随时间变化的渐变天空；
+- 可翻月日历；
+- GitHub 主页及常用仓库；
+- 网易云歌单：桌面端嵌入播放器，手机端跳转网易云歌单页面；
+- 内嵌追踪看板。
+
+即时天气、渐变天空和日历使用外部 widget iframe；5 日预报通过 Open-Meteo API 按城市坐标请求，并在当前页面缓存 15 分钟；歌单和封面数据直接维护在 `LifeDashboard.astro`。
+
+## 追踪数据同步
+
+[TrackingBoard.astro](src/components/TrackingBoard.astro) 的实时数据保存在浏览器 `localStorage`，键名为 `bear-home-tracker-v1`。看板包含：
+
+- 习惯：饮水、咖啡 / 茶、运动、阅读；
+- 工作计时和工作次数；
+- 番茄钟、休息计时和茶计时；
+- Side Project 计时；
+- 周视图、月视图和长期目标视图；
+- 长期金钱目标。
+
+需要发布本地数据时：
+
+1. 在 `localhost` 启动站点；
+2. 打开生活仪表盘，点击追踪看板右上角的同步按钮；同步前会按 `tracker-config.js` 规范化已知目标，自动修正旧 localStorage 中的目标金额；
+3. Astro 开发服务器的 `/__tracker_sync` 接口会校验并写入 `public/data/tracker-snapshot.json`；
+4. 检查快照后提交并推送。
+
+快照至少包含 `schemaVersion`、`snapshotAt`、`startedOn`、`dailyRecords` 和 `longTerm`。正式站点的周视图、月视图和长期目标视图读取已发布的快照；本地开发时优先使用当前浏览器的本地状态。
+
+首次使用仓库时启用 Git hook：
+
+```bash
+npm run install-hooks
+```
+
+`.githooks/pre-push` 会阻止以下情况推送：
+
+- 快照文件不存在或尚未被 Git 跟踪；
+- 快照 JSON 结构无效；
+- 快照中已知目标的 `target` 与 `src/data/tracker-config.js` 不一致；
+- 快照存在未提交的修改。
+
+Hook 只校验文件，不会读取或修改浏览器中的 `localStorage`。
+
+### 修改长期目标
+
+长期目标配置以 `src/data/tracker-config.js` 为准。修改已知目标的 `target` 时，运行一次迁移脚本：
+
+```bash
+npm run tracker:migrate
+npm run tracker:validate
+```
+
+迁移只更新已知目标的配置字段，会保留快照中的当前金额、状态、开始时间和完成时间。`tracker:validate` 同时由本地 `pre-push` hook 和 GitHub Actions 执行，防止旧快照漏更新。
 
 ## 本地运行
 
 ```bash
 npm install
 npm run dev
-# 打开 Astro 输出的本地地址
 ```
 
-## 追踪数据同步
-
-追踪看板（`TrackingBoard.astro`，内嵌在生活仪表盘）的数据实时保存在浏览器 localStorage。需要把本地数据发布到正式域名时，在 localhost 看板右上角点击同步按钮；如果数据有变化，会更新 `public/data/tracker-snapshot.json`。随后提交并推送这个文件，周视图、月视图和专注视图就会使用最近一次发布的快照。
-
-首次使用时执行一次，把 Git hooks 指向仓库内的 `.githooks/`：
+开发服务器固定使用 `4321` 端口。需要检查生产构建时运行：
 
 ```bash
-npm run install-hooks
+npm run build
 ```
-
-`.githooks/pre-push` 会在 `git push` 时校验 `tracker-snapshot.json`：
-- 文件存在且已 `git add` 进版本库；
-- 结构有效（含 `schemaVersion` / `snapshotAt` / `startedOn` / `dailyRecords`）；
-- 已提交（工作区与 HEAD 无差异）。
-
-任一项不通过都会阻止推送。Hook 不会读取或修改浏览器数据。
 
 ## 部署
 
+推送 `main` 后，GitHub Actions 会执行：
+
+1. Node.js 22 + `npm ci`；
+2. `npm run tracker:validate`；
+3. `npm run build`；
+4. 上传 `dist/`；
+5. 部署到 GitHub Pages。
+
+常规发布流程：
+
 ```bash
-git add . && git commit -m "chore: 更新" && git push origin main
+git diff --check
+git add <变更文件>
+git commit -m "feat: 描述变更"
+git push origin main
 ```
 
-推送后由 GitHub Pages 发布 `dist/` 构建产物（仓库已配置 Astro 构建动作）。
+## 已迁出的功能
+
+以下功能已经不属于当前 personal 站点：
+
+- 每日日历追踪和支出记录：已迁移至 home；
+- 个人开发时间线：已迁移至 DevNotes；
+- 会员订阅：已迁移至 home 的 `/membership/`；
+- 游戏相关页面和数据：已从当前 personal 页面路由与构建范围移除。
+
+因此，后续维护应以当前 `src/pages/`、`src/components/`、`src/data/site.js` 和 `public/` 为准，不要根据历史游戏板块文件名推断现有页面结构。
 
 ## 新机器初始化
 
@@ -95,61 +193,14 @@ git add . && git commit -m "chore: 更新" && git push origin main
 git clone https://github.com/thebear617/bear-home.git
 cd bear-home
 npm install
-npm run install-hooks   # 一次性，启用 pre-push 校验
+npm run install-hooks
 ```
-
-## 英雄联盟数据更新
-
-> 英雄联盟板块（`/lol/`）的英雄速查数据来自 **RESG**（`https://www.resg.top/`）的公开 API，是**静态数据快照**，需要定期手动刷新。RESG API 基址 `https://api.resg.top`，CORS 开放，服务端可直连。
-
-**数据文件**（均在 `src/data/`，由脚本自动生成，勿手改）：
-
-| 文件 | 内容 | 生成脚本 |
-|------|------|---------|
-| `lol-heroes.js` | 全 173 英雄索引（中文名 / 定位 role / 头像 / 胜率 / 热度） | `fetch-lol-all.py` |
-| `lol-augments.js` | 每英雄海克斯推荐（单/双/三/四 Top5 + 胜率 + 出装） | `fetch-lol-all.py` |
-| `lol-nicknames.js` | 英雄外号表 + 拼音（搜索用） | `gen-nicknames.py` |
-| `lol.js` | 手工维护的公式详情视图数据（法师/ADC/刺客教学） | 手改 |
-
-> 注：`lol-heroes.js` / `lol-augments.js` / `lol-nicknames.js` 是**由脚本生成的产物**，修改需通过脚本重新生成，不要直接手改。`lol.js` 是手工维护的公式教学数据，可手改。
-
-**手动更新流程**（游戏新版本数据变化，或想刷新海克斯胜率时）：
-
-```bash
-cd personal
-
-# 1. （可选）如果游戏已更新大版本，先改脚本里的版本号：
-#    在 scripts/fetch-lol-all.py 顶部把 VERSION 改成 RESG 当前版本（默认 16.14）
-
-# 2. 重新拉取全部英雄数据（头像已存在会自动跳过）
-python3 scripts/fetch-lol-all.py
-
-# 3. 重新生成外号 + 拼音（基于最新英雄名）
-python3 scripts/gen-nicknames.py
-
-# 4. 构建
-npm run build
-
-# 5. 提交并推送（GitHub Actions 自动部署 dist/）
-git add src/data && git commit -m "feat(lol): 更新英雄数据" && git push origin main
-```
-
-**脚本可选参数**：
-
-- `fetch-lol-all.py --no-heads`：跳过重新下载头像（默认会自动补下载缺失头像）
-- `fetch-lol-all.py --heros brand,kassadin`：只更新指定英雄（调试用）
-- 手动改外号请编辑 `scripts/gen-nicknames.py` 里的 `NICK` 字典，再重跑第 3 步
-
-**常用数据源**：
-
-- 英雄列表 / 定位 / 头像：`https://www.resg.top/c/zh_cn/v1/champion-summary.json`
-- 海克斯组合胜率：`/api/synergy?championId={id}&version={V}&top=15`
-- 英雄总体胜率 / 热度：`/api/champions/stats?version={V}`
-- 海克斯 / 装备名称：`/api/augments`、`/api/items`
 
 ## 添加内容
 
-- **路由表**：在 `src/data/site.js` 的 `routeCategories` 中添加条目，`addedAt` 一律使用添加当天的日期（格式 `YYYY-MM-DD`）。
-- **英雄联盟**：页面入口 `/lol/`，由 `src/components/LolView.astro`（英雄速查，RESG 数据驱动）与 `lol/` 下三个公式组件（公式详情，手工数据 `lol.js`）渲染。全英雄数据更新见上「英雄联盟数据更新」。
-- **无畏契约**：页面入口 `/valorant/`，数据与交互脚本位于 `public/valorant/`，运行时依赖 `public/js/vendor/` 下的 Vue / marked。
-- **追踪看板**：习惯 / 工作 / 番茄 / 长期目标等数据在浏览器 localStorage 维护，发布流程见上「追踪数据同步」。
+- **路由表**：修改 `src/data/site.js` 的 `routeCategories`，新增条目的 `addedAt` 使用添加当天日期。
+- **生活仪表盘**：修改 `src/components/LifeDashboard.astro`；外部 widget、歌单和 GitHub 卡片均在组件中维护。
+- **追踪看板**：修改 `src/components/TrackingBoard.astro`；发布数据遵循上面的快照同步流程。
+- **长期目标**：修改 `src/data/tracker-config.js`，然后运行 `npm run tracker:migrate` 和 `npm run tracker:validate`。
+- **全站样式**：修改 `public/css/style.css`。
+- **版本记录**：变更说明写入 `CHANGELOG.md`，但不要把历史游戏板块重新写回当前目录结构。

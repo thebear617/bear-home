@@ -1,6 +1,9 @@
 #!/bin/sh
 set -eu
 
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
 snapshot="public/data/tracker-snapshot.json"
 
 if [ ! -f "$snapshot" ]; then
@@ -13,17 +16,10 @@ if ! git ls-files --error-unmatch -- "$snapshot" >/dev/null 2>&1; then
   exit 1
 fi
 
-node --input-type=module -e '
-import fs from "node:fs";
-const path = process.argv[1];
-const snapshot = JSON.parse(fs.readFileSync(path, "utf8"));
-if (snapshot.schemaVersion !== 1 || !snapshot.snapshotAt || !snapshot.startedOn || !snapshot.dailyRecords || typeof snapshot.dailyRecords !== "object") {
-  throw new Error("快照结构不完整");
-}
-' "$snapshot" || {
-  echo "错误：追踪快照格式无效，请重新同步。" >&2
+if ! node scripts/validate-tracker-snapshot.mjs; then
+  echo "错误：追踪快照校验失败，请运行 npm run tracker:migrate 后重新 git add/commit。" >&2
   exit 1
-}
+fi
 
 if ! git diff --quiet HEAD -- "$snapshot"; then
   echo "错误：追踪快照尚未提交，请先 git add/commit $snapshot。" >&2

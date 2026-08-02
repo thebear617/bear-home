@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { normalizeLongTermState } from './src/data/tracker-config.js';
 
 const trackerSnapshotPath = fileURLToPath(new URL('./public/data/tracker-snapshot.json', import.meta.url));
 
@@ -29,7 +30,7 @@ function trackerSyncPlugin() {
               snapshotAt: payload.snapshotAt || new Date().toISOString(),
               startedOn: payload.startedOn,
               dailyRecords: payload.dailyRecords,
-              longTerm: payload.longTerm || { goals: [] }
+              longTerm: normalizeLongTermState(payload.longTerm, payload.startedOn)
             };
             let currentSnapshot = null;
             if (existsSync(trackerSnapshotPath)) {
