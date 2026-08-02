@@ -61,7 +61,8 @@ function trackerSyncPlugin() {
 export default defineConfig({
   output: 'static',
   vite: {
-    plugins: [trackerSyncPlugin()]
+    plugins: [trackerSyncPlugin()],
+    server: { strictPort: true }
   },
   build: {
     format: 'directory'

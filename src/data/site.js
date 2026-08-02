@@ -6,10 +6,10 @@ export const routeCategories = [
     items: [
       { name: '猫猫', desc: '猫协档案与疫苗绝育追踪', url: 'https://cat.thebear617.cn/', tags: ['宠物', '管理'], addedAt: '2026-07-20', icon: '/assets/routes/猫猫手册.png' },
       { name: '租房对账表', desc: '租房看房清单', url: 'http://rent.thebear617.cn/', tags: ['生活', '工具'], addedAt: '2026-07-22', icon: '/assets/routes/猪窝.png' },
-      { name: '猪窝', desc: '个人家庭管理工具', url: 'https://thebear617.github.io/pig-home/', tags: ['生活', '管理'], addedAt: '2026-07-31', icon: '/assets/routes/租房对账表.png' },
+      { name: '猪窝', desc: '个人家庭管理工具', url: 'https://pig.thebear617.cn/', tags: ['生活', '管理'], addedAt: '2026-07-31', icon: '/assets/routes/租房对账表.png' },
       { name: '科研笔记总站', desc: '按研究板块组织的科研笔记', url: 'https://rea.thebear617.cn/', tags: ['科研', '笔记'], addedAt: '2026-07-31', icon: '/assets/routes/科研笔记.png' },
-      { name: '开发笔记', desc: '开发知识库', url: 'https://thebear617.github.io/devnotes/', tags: ['开发', '笔记'], addedAt: '2026-07-31', icon: '/assets/routes/开发笔记.png' },
-      { name: '常识笔记', desc: '个人常识资料库', url: 'https://thebear617.github.io/lifenotes/', tags: ['生活', '笔记'], addedAt: '2026-07-31', icon: '/assets/routes/常识笔记.png' },
+      { name: '开发笔记', desc: '开发知识库', url: 'https://dev.thebear617.cn/', tags: ['开发', '笔记'], addedAt: '2026-07-31', icon: '/assets/routes/开发笔记.png' },
+      { name: '常识笔记', desc: '个人常识资料库', url: 'https://life.thebear617.cn/', tags: ['生活', '笔记'], addedAt: '2026-07-31', icon: '/assets/routes/常识笔记.png' },
     ]
   },
   {

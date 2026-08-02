@@ -4,7 +4,7 @@
   "version": "0.22.0",
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "astro dev --port 4321",
     "build": "astro build",
     "preview": "astro preview",
     "install-hooks": "sh scripts/install-hooks.sh"
