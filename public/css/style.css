@@ -5,7 +5,7 @@
 }
 
 :root {
-  --bg: #f7f3ee;
+  --bg: #f4ecdf;
   --surface: #ffffff;
   --surface-soft: #fbfaf8;
   --text: #171717;
@@ -28,16 +28,22 @@
 
 html {
   scroll-behavior: smooth;
-  height: 100%;
+  min-height: 100%;
 }
 
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(circle at 15% 10%, rgba(255, 255, 255, .72), transparent 22rem),
+    radial-gradient(circle at 85% 80%, rgba(190, 151, 96, .12), transparent 28rem),
+    repeating-linear-gradient(0deg, rgba(94, 65, 32, .025) 0 1px, transparent 1px 5px),
+    var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  height: 100%;
+  min-height: 100%;
+  background-repeat: no-repeat, no-repeat, repeat, repeat;
+  background-size: 100% 100%, 100% 100%, auto, auto;
 }
 
 button, input {
@@ -122,6 +128,7 @@ button {
   width: 100%;
   padding: .7rem .75rem;
   border: none;
+  border: none;
   border-radius: 8px;
   background: transparent;
   color: rgba(255, 255, 255, .72);
@@ -149,6 +156,7 @@ button {
   text-align: center;
   flex-shrink: 0;
 }
+
 
 /* ─── Main area ─── */
 
@@ -194,7 +202,7 @@ button {
 }
 
 .app-shell.routes-shell {
-  max-width: 85%;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 0;
 }
@@ -5595,4 +5603,55 @@ details.callout > summary:hover {
 
 @media (max-width: 760px) {
   .tracking-history-view[data-tracking-view-panel="week"] .tracking-week-summary { grid-template-columns: 1fr; }
+}
+
+/* ─── Dashboard warm-paper surfaces ─── */
+.life-dashboard .dashboard-section {
+  border-color: #e5d9c7;
+  background: rgba(250, 246, 239, .92);
+  box-shadow: 0 2px 7px rgba(84, 52, 25, .07);
+}
+
+.life-dashboard .weather-widget-frame,
+.life-dashboard .calendar-widget-frame,
+.life-dashboard .pomodoro-widget-frame,
+.life-dashboard .music-widget-frame,
+.life-dashboard .github-profile-card,
+.life-dashboard .playlist-card {
+  border-color: #eadfce;
+  background: #fffdf8;
+}
+
+.life-dashboard .github-repo-list,
+.life-dashboard .github-repo-list li + li {
+  border-color: #eee4d6;
+}
+
+.life-dashboard .github-repo-list a:hover {
+  background: #faf4e9;
+}
+
+.life-dashboard .playlist-pagination button,
+.life-dashboard .music-player-actions button {
+  border-color: #e4d4bc;
+  background: #fffaf0;
+}
+
+.life-dashboard .tracking-board {
+  border-color: #dfd0bb;
+  background: #fbf6ed;
+  box-shadow: 0 4px 12px rgba(84, 52, 25, .09);
+}
+
+.life-dashboard .tracking-board-toolbar {
+  border-bottom-color: #e4d5c1;
+  background: linear-gradient(#fffaf0, #f4eadb);
+  box-shadow: inset 0 -1px 0 #e4d5c1, inset 0 1px 0 rgba(255,255,255,.95);
+}
+
+.life-dashboard .tracking-board-body {
+  background:
+    linear-gradient(90deg, rgba(117, 81, 43, .025) 1px, transparent 1px),
+    #fffaf2;
+  background-size: 18px 18px;
 }
