@@ -6,6 +6,36 @@ import { normalizeLongTermState } from './src/data/tracker-config.js';
 
 const trackerSnapshotPath = fileURLToPath(new URL('./public/data/tracker-snapshot.json', import.meta.url));
 
+function earliestDateKey(...values) {
+  return values
+    .filter((value) => /^\d{4}-\d{2}-\d{2}$/.test(value || ''))
+    .sort()[0] || values.find(Boolean);
+}
+
+function mergeDailyRecords(currentRecords, incomingRecords) {
+  return {
+    ...(currentRecords && typeof currentRecords === 'object' ? currentRecords : {}),
+    ...(incomingRecords && typeof incomingRecords === 'object' ? incomingRecords : {}),
+  };
+}
+
+function mergeLongTermGoals(currentGoals, incomingGoals) {
+  const merged = new Map();
+  for (const goal of Array.isArray(currentGoals) ? currentGoals : []) {
+    if (goal?.id) merged.set(goal.id, goal);
+  }
+  for (const goal of Array.isArray(incomingGoals) ? incomingGoals : []) {
+    if (!goal?.id) continue;
+    const previous = merged.get(goal.id);
+    merged.set(goal.id, {
+      ...previous,
+      ...goal,
+      startedAt: earliestDateKey(previous?.startedAt, goal.startedAt),
+    });
+  }
+  return [...merged.values()];
+}
+
 function trackerSyncPlugin() {
   return {
     name: 'tracker-sync',
@@ -25,17 +55,23 @@ function trackerSyncPlugin() {
               throw new Error('invalid tracker snapshot');
             }
 
-            const nextSnapshot = {
-              schemaVersion: 1,
-              snapshotAt: payload.snapshotAt || new Date().toISOString(),
-              startedOn: payload.startedOn,
-              dailyRecords: payload.dailyRecords,
-              longTerm: normalizeLongTermState(payload.longTerm, payload.startedOn)
-            };
             let currentSnapshot = null;
             if (existsSync(trackerSnapshotPath)) {
               try { currentSnapshot = JSON.parse(readFileSync(trackerSnapshotPath, 'utf8')); } catch { currentSnapshot = null; }
             }
+
+            const mergedStartedOn = earliestDateKey(currentSnapshot?.startedOn, payload.startedOn);
+            const nextSnapshot = {
+              schemaVersion: 1,
+              snapshotAt: payload.snapshotAt || new Date().toISOString(),
+              startedOn: mergedStartedOn,
+              dailyRecords: mergeDailyRecords(currentSnapshot?.dailyRecords, payload.dailyRecords),
+              longTerm: normalizeLongTermState({
+                ...(currentSnapshot?.longTerm || {}),
+                ...(payload.longTerm || {}),
+                goals: mergeLongTermGoals(currentSnapshot?.longTerm?.goals, payload.longTerm?.goals),
+              }, mergedStartedOn)
+            };
 
             const currentData = JSON.stringify({ dailyRecords: currentSnapshot?.dailyRecords || {}, longTerm: currentSnapshot?.longTerm || { goals: [] } });
             const nextData = JSON.stringify({ dailyRecords: nextSnapshot.dailyRecords, longTerm: nextSnapshot.longTerm });

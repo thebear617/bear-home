@@ -113,10 +113,28 @@ personal/
 
 1. 在 `localhost` 启动站点；
 2. 打开生活仪表盘，点击追踪看板右上角的同步按钮；同步前会按 `tracker-config.js` 规范化已知目标，自动修正旧 localStorage 中的目标金额；
-3. Astro 开发服务器的 `/__tracker_sync` 接口会校验并写入 `public/data/tracker-snapshot.json`；
+3. Astro 开发服务器的 `/__tracker_sync` 接口会校验并按日期合并写入 `public/data/tracker-snapshot.json`；缺失的旧日期不会被本地状态覆盖，同一天才由最新本地记录更新；
 4. 检查快照后提交并推送。
 
-快照至少包含 `schemaVersion`、`snapshotAt`、`startedOn`、`dailyRecords` 和 `longTerm`。正式站点的周视图、月视图和长期目标视图读取已发布的快照；本地开发时优先使用当前浏览器的本地状态。
+快照至少包含 `schemaVersion`、`snapshotAt`、`startedOn`、`dailyRecords` 和 `longTerm`。正式站点的周视图、月视图和长期目标视图读取已发布的快照；本地开发时优先使用当前浏览器的本地状态，并在本地记录缺少历史日期时只补齐快照中的缺失日期，不覆盖已有本地记录。
+
+每日记录按 `Asia/Shanghai` 的日期键保存。新的一天只会创建一条全新的空记录（习惯、工作计时、次数和番茄钟从 0 开始），旧日期仍保留给周视图和月视图使用。页面打开期间跨过午夜，或页面从后台重新回到前台时，会先保存当前记录，再自动切换到新日期。快照同步仍然是手动操作，不会因为日期切换自动改写发布文件。
+
+### 本地测试数据链路
+
+本地开发时可以用查询参数模拟日期和正式站的快照分支。先运行 `npm run dev`，再使用一个尚未写入过的测试日期：
+
+```text
+/dashboard/?tracker-date=2030-01-01
+```
+
+这个地址会为 `2030-01-01` 创建一条全 0 的本地记录。修改第一个视图后点击同步按钮，再把日期改成 `2030-01-02`，可以确认新日期从 0 开始、旧日期仍在历史视图中。使用下面的地址可以让本地周视图、月视图和长期目标视图强制读取快照：
+
+```text
+/dashboard/?tracker-source=snapshot
+```
+
+`tracker-date` 和 `tracker-source=snapshot` 只在 `localhost` / `127.0.0.1` 生效，不会改变正式站行为；快照分支测试时，第一个当前看板仍然保持本地可编辑状态。
 
 首次使用仓库时启用 Git hook：
 
