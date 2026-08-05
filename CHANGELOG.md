@@ -1,5 +1,16 @@
 # 熊窝 personal 更新日志
 
+## v0.24.1 — 2026-08-05
+
+feat(routes): 路由表图标全面本地化，移除 Google favicon API 依赖
+
+- feat: 为路由表 16 个 URL 条目新增本地图标，统一存于 `public/assets/routes/`（256×256 PNG）
+- feat: 图标内容做透明边裁剪并铺满画布，避免不同站点 favicon 显示尺寸不一致
+- fix: 移除路由卡片/列表/瀑布流对 `www.google.com/s2/favicons` 的运行时依赖，国内访问不再破图
+- fix: 无图标条目回退显示分类 emoji，而非外部 API
+- chore: 新增 `scripts/download-route-icons.py` 与 `normalize-route-icons.py` 维护脚本
+- chore: 「猫猫」站点域名更新为 `cat.xdubear.cn`
+
 ## v0.23.1 — 2026-08-02
 
 fix: 天气预报弹窗与追踪快照一致性

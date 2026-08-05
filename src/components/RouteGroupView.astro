@@ -111,7 +111,7 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
             item.url ? (
               <a href={item.url} target="_blank" rel="noopener" class="link-card" data-route-item data-category={category.id} data-tags={item.tags?.join('|') ?? ''} data-search-text={`${item.name} ${item.desc ?? ''} ${item.tags?.join(' ') ?? ''}`} hidden={category.items.length > GROUP_LIMIT && index >= GROUP_LIMIT}>
                 <div class="card-favicon">
-                  <img src={item.icon || `https://www.google.com/s2/favicons?domain=${new URL(item.url).hostname}&sz=64`} alt="" width="32" height="32" loading="lazy">
+                  {item.icon ? <img src={item.icon} alt="" width="32" height="32" loading="lazy"> : <span class="folder-icon">{category.icon}</span>}
                 </div>
                 <div class="card-content">
                   <h3 class="card-title">{item.name}</h3>
@@ -179,7 +179,7 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
               <td>
                 <div class="list-link-main">
                   <div class="list-favicon">
-                    {item.url ? <img src={item.icon || `https://www.google.com/s2/favicons?domain=${new URL(item.url).hostname}&sz=64`} alt="" width="28" height="28" loading="lazy" /> : <span></span>}
+                    {item.url ? (item.icon ? <img src={item.icon} alt="" width="28" height="28" loading="lazy" /> : <span class="folder-icon">{item.categoryIcon}</span>) : <span></span>}
                   </div>
                   <div>
                     <strong>{item.name}</strong>
@@ -208,7 +208,7 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
         <a href={item.url} target="_blank" rel="noopener" class={`masonry-card masonry-${item.categoryId} masonry-${item.index % 3}`} data-route-item data-category={item.categoryId} data-tags={item.tags?.join('|') ?? ''} data-search-text={item.searchText}>
           <div class="masonry-cover">
             <span>{item.categoryIcon}</span>
-            <img src={item.icon || `https://www.google.com/s2/favicons?domain=${new URL(item.url).hostname}&sz=64`} alt="" width="34" height="34" loading="lazy" />
+            {item.icon ? <img src={item.icon} alt="" width="34" height="34" loading="lazy" /> : <span class="folder-icon">{item.categoryIcon}</span>}
           </div>
           <div class="masonry-content">
             <h2>{item.name}</h2>
