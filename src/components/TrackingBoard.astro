@@ -16,7 +16,8 @@ const goodHabitPages = [
     id: 'good-2',
     label: 'GOOD HABITS',
     habits: [
-      { id: 'blog-writing', name: 'Blog writing', icon: '✍️', initial: 0, mode: 'target', unit: '', target: 5, tone: 'orange', ago: '--', step: 1 },
+      { id: 'term-explanation', name: 'Term walkthrough', icon: '🔤', initial: 0, mode: 'target', unit: '', target: 20, tone: 'orange', ago: '--', step: 1 },
+      { id: 'reading-pages', name: 'Read 100 pages', icon: '📚', initial: 0, mode: 'target', unit: '', target: 100, tone: 'purple', ago: '--', step: 1 },
     ],
   },
 ];
@@ -311,7 +312,8 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
     { id: 'contact-friends', name: 'Contact friends', mode: 'target', target: 3, tone: 'slate' },
     { id: 'outdoor-activity', name: 'Outdoor activity', mode: 'target', target: 30, tone: 'purple' },
     { id: 'fruit-vegetables', name: 'Fruit & vegetables', mode: 'target', target: 2, tone: 'amber' },
-    { id: 'blog-writing', name: 'Blog writing', mode: 'target', target: 5, tone: 'orange' },
+    { id: 'term-explanation', name: 'Term walkthrough', mode: 'target', target: 20, tone: 'orange' },
+    { id: 'reading-pages', name: 'Read 100 pages', mode: 'target', target: 100, tone: 'purple' },
     { id: 'phone-pickups', name: 'Phone pickups', mode: 'counter', target: null, tone: 'slate' },
     { id: 'phone-screen-time', name: 'Phone screen time', mode: 'counter', target: null, tone: 'purple' },
     { id: 'no-phone-before-bed', name: 'No phone before bed', mode: 'binary', target: 1, tone: 'slate' },
@@ -349,7 +351,8 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
           'contact-friends': 0,
           'outdoor-activity': 0,
           'fruit-vegetables': 0,
-          'blog-writing': 0,
+          'term-explanation': 0,
+          'reading-pages': 0,
           'phone-pickups': 0,
           'phone-screen-time': 0,
           'no-phone-before-bed': 0,
@@ -358,7 +361,7 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
           'tidy-desk': 0,
           'drink-milk': 0,
         },
-        work: { timers: { inbox: 0, development: 0 }, counts: { 'blog-writing': 0 } },
+        work: { timers: { inbox: 0, development: 0 }, counts: {} },
         pomodoro: { completed: 0 },
         countdowns: {},
         sideProject: { elapsed: 0, remaining: 10800 }
@@ -382,10 +385,6 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
         countdowns: { ...emptyRecord.countdowns, ...(source.countdowns || {}) },
         sideProject: { ...emptyRecord.sideProject, ...(source.sideProject || {}) },
       };
-      if (!Object.prototype.hasOwnProperty.call(sourceHabits, 'blog-writing')) {
-        const legacyBlogWriting = Math.max(0, Number(normalized.work.counts?.['blog-writing'] || 0));
-        if (legacyBlogWriting > 0) normalized.habits['blog-writing'] = legacyBlogWriting;
-      }
       return normalized;
     }
     const defaultLongTerm = {
