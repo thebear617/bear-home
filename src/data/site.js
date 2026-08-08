@@ -49,10 +49,11 @@ export const routeCategories = [
   },
   {
     id: 'entertainment',
-    title: '娱乐',
-    icon: '🎮',
+    title: '购物娱乐',
+    icon: '🛍️',
     items: [
       { name: 'Bilibili', desc: 'B 站 - 国内最大的弹幕视频网站', url: 'https://www.bilibili.com/', tags: ['视频', '娱乐'], addedAt: '2026-07-30', icon: '/assets/routes/Bilibili.png' },
+      { name: '京东', desc: '京东商城，综合电商购物平台', url: 'https://www.jd.com/', tags: ['购物', '电商'], addedAt: '2026-08-08', icon: '/assets/routes/京东.png' },
     ]
   },
   {
