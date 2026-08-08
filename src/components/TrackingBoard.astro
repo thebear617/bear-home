@@ -1,21 +1,54 @@
 ---
 import { trackerGoalDefinitions } from '../data/tracker-config.js';
 
-const habits = [
-  { id: 'water', name: 'Water', icon: '💧', initial: 0, target: 2200, tone: 'blue', ago: '--', step: 100 },
-  { id: 'coffee', name: 'Coffee & Tea', icon: '☕', initial: 0, target: 4, tone: 'slate', ago: '--', step: 1 },
-  { id: 'exercise', name: 'Exercise', icon: '💪', initial: 0, target: 6, tone: 'purple', ago: '--', step: 1 },
-  { id: 'reading', name: 'Read 10 pages', icon: '📖', initial: 0, target: 10, tone: 'amber', ago: '--', step: 1 },
+const goodHabitPages = [
+  {
+    id: 'good-1',
+    label: 'GOOD HABITS',
+    habits: [
+      { id: 'water', name: 'Water', icon: '💧', initial: 0, mode: 'target', unit: 'ml', target: 2000, tone: 'blue', ago: '--', step: 100 },
+      { id: 'contact-friends', name: 'Contact friends', icon: '🤝', initial: 0, mode: 'target', unit: '人', target: 3, tone: 'slate', ago: '--', step: 1 },
+      { id: 'outdoor-activity', name: 'Outdoor activity', icon: '🚶', initial: 0, mode: 'target', unit: 'min', target: 30, tone: 'purple', ago: '--', step: 5 },
+      { id: 'fruit-vegetables', name: 'Fruit & vegetables', icon: '🥗', initial: 0, mode: 'target', unit: '份', target: 2, tone: 'amber', ago: '--', step: 1 },
+    ],
+  },
+  {
+    id: 'good-2',
+    label: 'GOOD HABITS',
+    habits: [
+      { id: 'blog-writing', name: 'Blog writing', icon: '✍️', initial: 0, mode: 'target', unit: '', target: 5, tone: 'orange', ago: '--', step: 1 },
+    ],
+  },
 ];
+const habits = goodHabitPages.flatMap((page) => page.habits.map((habit) => ({ ...habit, pageId: page.id, pageLabel: page.label })));
+const binaryHabitPages = [
+  {
+    id: 'binary-1',
+    label: 'BINARY HABITS',
+    habits: [
+      { id: 'no-phone-before-bed', name: 'No phone before bed', icon: '📵', initial: 0, mode: 'binary', unit: '', target: 1, tone: 'slate', ago: '--', step: 1 },
+      { id: 'bedtime-before-2330', name: 'In bed by 23:30', icon: '🛏️', initial: 0, mode: 'binary', unit: '', target: 1, tone: 'purple', ago: '--', step: 1 },
+      { id: 'meditation', name: 'Meditate 10 min', icon: '🧘', initial: 0, mode: 'binary', unit: '', target: 1, tone: 'purple', ago: '--', step: 1 },
+      { id: 'tidy-desk', name: 'Tidy desk', icon: '🧹', initial: 0, mode: 'binary', unit: '', target: 1, tone: 'amber', ago: '--', step: 1 },
+    ],
+  },
+  {
+    id: 'binary-2',
+    label: 'BINARY HABITS',
+    habits: [
+      { id: 'drink-milk', name: 'Drink milk', icon: '🥛', initial: 0, mode: 'binary', unit: '', target: 1, tone: 'blue', ago: '--', step: 1 },
+    ],
+  },
+];
+const binaryHabits = binaryHabitPages.flatMap((page) => page.habits.map((habit) => ({ ...habit, pageId: page.id, pageLabel: page.label })));
+const badHabits = [
+  { id: 'phone-pickups', name: 'Phone pickups', icon: '📱', initial: 0, mode: 'counter', unit: '次', target: null, tone: 'slate', ago: 'CUMULATIVE', step: 1 },
+  { id: 'phone-screen-time', name: 'Phone screen time', icon: '⏱️', initial: 0, mode: 'counter', unit: 'min', target: null, tone: 'purple', ago: 'CUMULATIVE', step: 5 },
+];
+const allHabits = [...habits, ...binaryHabits, ...badHabits];
 const work = [
   { id: 'inbox', name: 'Inbox', value: '00:00:00', subtitle: '工作总计', ago: '', icon: '🔵', tone: 'blue', large: true, seconds: 0, targetSeconds: 10800 },
-  { id: 'blog-writing', name: 'Blog writing', value: '0 / 5', icon: '✍️', tone: 'blue', compact: true, count: 0, targetCount: 5 },
   { id: 'development', name: 'Development', value: '00:00:00', subtitle: '今日累计', ago: '', icon: '🔵', tone: 'blue', tall: true, seconds: 0, targetSeconds: 10800 },
-];
-const teas = [
-  { id: 'green-tea', name: 'Green tea', duration: 180, tone: 'green', icon: '🍵' },
-  { id: 'black-tea', name: 'Black tea', duration: 300, tone: 'orange', icon: '☕' },
-  { id: 'herbal-tea', name: 'Herbal tea', duration: 600, tone: 'yellow', icon: '☕' },
 ];
 const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money');
 ---
@@ -42,16 +75,23 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
 
   <div class="tracking-board-body">
     <section class="tracking-board-section tracking-habits" aria-labelledby="tracking-board-title">
-      <h2 id="tracking-board-title">HABITS</h2>
-      <div class="tracking-habit-grid">
+      <div class="tracking-good-heading">
+        <h2 id="tracking-board-title">GOOD HABITS</h2>
+        <div class="tracking-good-pager" aria-label="好习惯分页">
+          <button type="button" data-good-page-nav="previous" aria-label="上一组好习惯">←</button>
+          <div><small data-good-page-indicator>1 / 2</small></div>
+          <button type="button" data-good-page-nav="next" aria-label="下一组好习惯">→</button>
+        </div>
+      </div>
+      <div class="tracking-habit-grid" data-habit-grid>
         {habits.map((habit) => (
-          <article class:list={['tracking-habit-card', `tracking-tone-${habit.tone}`]} data-board-habit data-habit-id={habit.id} data-habit-target={habit.target} data-habit-initial={habit.initial} data-habit-step={habit.step}>
+          <article class:list={['tracking-habit-card', `tracking-tone-${habit.tone}`]} data-board-habit data-habit-group="good" data-habit-page={habit.pageId} data-habit-page-label={habit.pageLabel} data-habit-id={habit.id} data-habit-mode={habit.mode} data-habit-unit={habit.unit} data-habit-target={habit.target ?? undefined} data-habit-initial={habit.initial} data-habit-step={habit.step}>
             <span class="tracking-card-edit" aria-hidden="true">↗</span>
             <button class="tracking-card-close" type="button" aria-label={`移除${habit.name}`}>×</button>
             <span class="tracking-habit-fill" aria-hidden="true"></span>
             <span class="tracking-habit-icon" aria-hidden="true">{habit.icon}</span>
             <div class="tracking-habit-copy">
-              <strong><b data-board-habit-count>{habit.initial}</b>/{habit.target}</strong>
+              <strong><b data-board-habit-count>{habit.initial}</b>{habit.mode === 'counter' ? <span>{habit.unit}</span> : <span>/{habit.target}{habit.unit}</span>}</strong>
               <small>{habit.name}</small>
               <em>{habit.ago}</em>
             </div>
@@ -64,22 +104,42 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
       </div>
     </section>
 
-    <section class="tracking-board-section tracking-pomodoro" aria-labelledby="tracking-pomodoro-title">
-      <h2 id="tracking-pomodoro-title">🍅 POMODORO</h2>
-      <div class="tracking-pomodoro-grid">
-        <article class="tracking-pomodoro-card" data-pomodoro-card><span class="tracking-pomodoro-icon" aria-hidden="true">🌟</span><div class="tracking-pomodoro-copy"><strong data-pomodoro-count>0 / 6</strong><small>Today</small><em>--</em></div><div class="tracking-card-actions"><button type="button" data-pomodoro-decrease aria-label="减少番茄钟完成数">−</button><button type="button" data-pomodoro-increase aria-label="增加番茄钟完成数">＋</button></div></article>
-        <article class="tracking-timer-card"><span class="tracking-timer-icon" aria-hidden="true">🟠</span><div><strong>52:00</strong><small>52 Minutes</small></div><button type="button" data-board-timer data-countdown-id="pomodoro-work" data-seconds="3120" aria-label="开始工作计时">▶</button></article>
-        <article class="tracking-timer-card"><span class="tracking-timer-icon" aria-hidden="true">🍩</span><div><strong>05:00</strong><small>5 mins break</small></div><button type="button" data-board-timer data-countdown-id="pomodoro-short-break" data-seconds="300" aria-label="开始短休息计时">▶</button></article>
-        <article class="tracking-timer-card"><span class="tracking-timer-icon" aria-hidden="true">🍔</span><div><strong>25:00</strong><small>25 mins break</small></div><button type="button" data-board-timer data-countdown-id="pomodoro-long-break" data-seconds="1500" aria-label="开始长休息计时">▶</button></article>
+    <section class="tracking-board-section tracking-binary-habits" aria-labelledby="tracking-binary-habits-title">
+      <div class="tracking-binary-heading">
+        <h2 id="tracking-binary-habits-title">BINARY HABITS</h2>
+        <div class="tracking-binary-pager" aria-label="二值习惯分页">
+          <button type="button" data-binary-page-nav="previous" aria-label="上一组二值习惯">←</button>
+          <div><small data-binary-page-indicator>1 / 2</small></div>
+          <button type="button" data-binary-page-nav="next" aria-label="下一组二值习惯">→</button>
+        </div>
+      </div>
+      <div class="tracking-habit-grid tracking-binary-habits-grid">
+        {binaryHabits.map((habit) => (
+          <article class:list={['tracking-habit-card', `tracking-tone-${habit.tone}`]} data-board-habit data-habit-group="binary" data-habit-page={habit.pageId} data-habit-page-label={habit.pageLabel} data-habit-id={habit.id} data-habit-mode={habit.mode} data-habit-unit={habit.unit} data-habit-target={habit.target ?? undefined} data-habit-initial={habit.initial} data-habit-step={habit.step}>
+            <span class="tracking-card-edit" aria-hidden="true">↗</span>
+            <button class="tracking-card-close" type="button" aria-label={`移除${habit.name}`}>×</button>
+            <span class="tracking-habit-fill" aria-hidden="true"></span>
+            <span class="tracking-habit-icon" aria-hidden="true">{habit.icon}</span>
+            <div class="tracking-habit-copy">
+              <strong><b data-board-habit-count>{habit.initial}</b><span>/{habit.target}</span></strong>
+              <small>{habit.name}</small>
+              <em>{habit.ago}</em>
+            </div>
+            <div class="tracking-card-actions">
+              <button type="button" data-board-habit-decrease aria-label={`减少${habit.name}`}>−</button>
+              <button type="button" data-board-habit-increase aria-label={`增加${habit.name}`}>＋</button>
+            </div>
+          </article>
+        ))}
       </div>
     </section>
 
     <div class="tracking-board-main-grid">
-      <section class="tracking-board-section tracking-work" aria-labelledby="tracking-work-title">
-        <h2 id="tracking-work-title">WORK</h2>
-        <div class="tracking-work-grid">
+      <section class="tracking-board-section tracking-work-side-project" aria-labelledby="tracking-work-side-project-title">
+        <h2 id="tracking-work-side-project-title">WORK &amp; SIDE PROJECT</h2>
+        <div class="tracking-work-side-project-grid">
           {work.map((item) => (
-              <article class:list={['tracking-work-card', `tracking-tone-${item.tone}`, { 'tracking-work-large': item.large, 'tracking-work-tall': item.tall, 'tracking-work-compact': item.compact }]} data-work-card data-work-id={item.id} data-work-seconds={item.seconds} data-work-target={item.targetSeconds} data-work-count={item.count} data-work-count-target={item.targetCount}>
+            <article class:list={['tracking-work-card', `tracking-tone-${item.tone}`, { 'tracking-work-large': item.large, 'tracking-work-tall': item.tall, 'tracking-work-compact': item.compact }]} data-work-card data-work-id={item.id} data-work-seconds={item.seconds} data-work-target={item.targetSeconds} data-work-count={item.count} data-work-count-target={item.targetCount}>
               <span class="tracking-card-edit" aria-hidden="true">↗</span>
               <button class="tracking-card-close" type="button" aria-label={`移除${item.name}`}>×</button>
               <span class="tracking-work-icon" aria-hidden="true">{item.icon}</span>
@@ -95,18 +155,14 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
               {item.compact && <div class="tracking-card-actions"><button type="button" data-work-decrease aria-label={`减少${item.name}`}>−</button><button type="button" data-work-increase aria-label={`增加${item.name}`}>＋</button></div>}
             </article>
           ))}
+          <article class="tracking-project-card" data-side-project>
+            <span class="tracking-card-edit" aria-hidden="true">↗</span>
+            <button class="tracking-card-close" type="button" aria-label="移除项目">×</button>
+            <div class="tracking-project-copy"><strong data-project-time>00:00:00</strong><small>Project #1</small></div>
+            <div class="tracking-project-orb" aria-hidden="true">🌙</div>
+            <button class="tracking-project-timer" type="button" data-project-timer data-seconds="10800">03:00:00</button>
+          </article>
         </div>
-      </section>
-
-      <section class="tracking-board-section tracking-side-project" aria-labelledby="tracking-side-title">
-        <h2 id="tracking-side-title">SIDE PROJECT</h2>
-        <article class="tracking-project-card" data-side-project>
-          <span class="tracking-card-edit" aria-hidden="true">↗</span>
-          <button class="tracking-card-close" type="button" aria-label="移除项目">×</button>
-          <div class="tracking-project-copy"><strong data-project-time>00:00:00</strong><small>Project #1</small></div>
-          <div class="tracking-project-orb" aria-hidden="true">🌙</div>
-          <button class="tracking-project-timer" type="button" data-project-timer data-seconds="10800">03:00:00</button>
-        </article>
       </section>
 
       <section class="tracking-board-section tracking-achievements" aria-labelledby="tracking-achievements-title">
@@ -122,14 +178,25 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
       </section>
     </div>
 
-    <section class="tracking-board-section tracking-tea" aria-labelledby="tracking-tea-title">
-      <h2 id="tracking-tea-title">TEA TIMERS</h2>
-      <div class="tracking-tea-grid">
-        {teas.map((tea) => (
-          <article class:list={['tracking-tea-card', `tracking-tone-${tea.tone}`]}>
-            <span class="tracking-tea-icon" aria-hidden="true">{tea.icon}</span>
-            <div><strong data-tea-time data-seconds={tea.duration}>{Math.floor(tea.duration / 60).toString().padStart(2, '0')}:00</strong><small>{tea.name}</small></div>
-            <button type="button" data-board-timer data-countdown-id={tea.id} data-seconds={tea.duration} aria-label={`开始${tea.name}计时`}>▶</button>
+    <section class="tracking-board-section tracking-counters" aria-labelledby="tracking-counters-title">
+      <h2 id="tracking-counters-title">COUNTERS</h2>
+      <div class="tracking-counter-grid">
+        <article class="tracking-pomodoro-card" data-pomodoro-card><span class="tracking-pomodoro-icon" aria-hidden="true">🍅</span><div class="tracking-pomodoro-copy"><strong data-pomodoro-count>0</strong><small>Pomodoros today</small><em>CUMULATIVE</em></div><div class="tracking-card-actions"><button type="button" data-pomodoro-decrease aria-label="减少番茄钟数量">−</button><button type="button" data-pomodoro-increase aria-label="增加番茄钟数量">＋</button></div></article>
+        {badHabits.map((habit) => (
+          <article class:list={['tracking-habit-card', `tracking-tone-${habit.tone}`]} data-board-habit data-habit-group="bad" data-habit-id={habit.id} data-habit-mode={habit.mode} data-habit-unit={habit.unit} data-habit-target={habit.target ?? undefined} data-habit-initial={habit.initial} data-habit-step={habit.step}>
+            <span class="tracking-card-edit" aria-hidden="true">↗</span>
+            <button class="tracking-card-close" type="button" aria-label={`移除${habit.name}`}>×</button>
+            <span class="tracking-habit-fill" aria-hidden="true"></span>
+            <span class="tracking-habit-icon" aria-hidden="true">{habit.icon}</span>
+            <div class="tracking-habit-copy">
+              <strong><b data-board-habit-count>{habit.initial}</b><span>{habit.unit}</span></strong>
+              <small>{habit.name}</small>
+              <em>{habit.ago}</em>
+            </div>
+            <div class="tracking-card-actions">
+              <button type="button" data-board-habit-decrease aria-label={`减少${habit.name}`}>−</button>
+              <button type="button" data-board-habit-increase aria-label={`增加${habit.name}`}>＋</button>
+            </div>
           </article>
         ))}
       </div>
@@ -148,7 +215,7 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
       <section class="tracking-week-panel tracking-week-notes"><h3>📖 LAYOUT NOTES</h3><ul><li>每天的卡片显示习惯、工作与番茄钟。</li><li>星标代表本周投入最高的一天。</li><li>连续天数帮助你安排下一周节奏。</li></ul></section>
     </div>
     <div class="tracking-week-footer">
-      <section class="tracking-week-footer-panel tracking-week-habit-legend"><h3>HABIT LEGEND <small>(Completion %)</small></h3><div>{habits.map((habit) => <span><i>{habit.icon}</i>{habit.name.replace('Read 10 pages', 'Read')}</span>)}<small class="tracking-week-legend-average">Average across<br />all 4 habits</small></div></section>
+      <section class="tracking-week-footer-panel tracking-week-habit-legend"><h3>HABIT LEGEND <small>(Target completion %)</small></h3><div>{allHabits.map((habit) => <span><i>{habit.icon}</i>{habit.name}</span>)}<small class="tracking-week-legend-average">Average across<br />target habits only</small></div></section>
       <section class="tracking-week-footer-panel tracking-week-navigation"><h3>WEEK NAVIGATION</h3><div><button type="button" data-week-nav="previous" aria-label="上一周">←</button><b data-week-control-label></b><button type="button" data-week-nav="next" aria-label="下一周">→</button></div></section>
       <button class="tracking-week-export" type="button" data-week-export>⇧ <span>EXPORT WEEKLY REPORT</span></button>
     </div>
@@ -167,7 +234,7 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
       </section>
       <div class="tracking-month-side-panels">
         <section class="tracking-month-panel tracking-work-type-panel"><h3>WORK TYPE SUMMARY <small>(HOURS)</small></h3><div data-month-breakdown></div></section>
-        <section class="tracking-month-panel tracking-habit-type-panel"><h3>HABIT TYPE SUMMARY <small>(COMPLETION RATE)</small></h3><div data-month-habit-breakdown></div></section>
+        <section class="tracking-month-panel tracking-habit-type-panel"><h3>HABIT TYPE SUMMARY <small>(AVG COMPLETION / ACTIVE DAYS)</small></h3><div data-month-habit-breakdown></div></section>
       </div>
     </div>
     <div class="tracking-month-insight-grid">
@@ -182,7 +249,7 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
       </section>
       <section class="tracking-month-control-panel tracking-month-habit-filter-panel">
         <h3>HABIT FILTER</h3>
-        <div class="tracking-month-filter">{habits.map((habit) => <label><input type="checkbox" checked data-month-habit-filter={habit.id} /><span><i>{habit.icon}</i>{habit.name.replace('Read 10 pages', 'Read')}</span></label>)}</div>
+        <div class="tracking-month-filter">{allHabits.map((habit) => <label><input type="checkbox" checked data-month-habit-filter={habit.id} /><span><i>{habit.icon}</i>{habit.name}</span></label>)}</div>
       </section>
       <section class="tracking-month-control-panel tracking-month-view-options">
         <h3>VIEW OPTIONS</h3>
@@ -211,7 +278,6 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
     <div class="tracking-goal-controls">
       <section class="tracking-goal-control-panel tracking-goal-legend"><h3>HABIT LEGEND <small>(Projects &amp; Money Goals)</small></h3><div><span><i class="is-active">●</i>Active</span><span><i class="is-paused">Ⅱ</i>Paused</span><span><i class="is-completed">✓</i>Completed</span><span><i class="is-archived">▣</i>Archived</span></div></section>
       <section class="tracking-goal-control-panel tracking-goal-status-filter"><h3>GOAL STATUS FILTER</h3><div><button type="button" class="active" data-goal-filter="all">ALL</button><button type="button" data-goal-filter="active">ACTIVE</button><button type="button" data-goal-filter="paused">PAUSED</button><button type="button" data-goal-filter="completed">COMPLETED</button><button type="button" data-goal-filter="archived">ARCHIVED</button></div></section>
-      <section class="tracking-goal-control-panel tracking-goal-navigation"><h3>WEEK NAVIGATION</h3><div><button type="button" data-goal-week-nav="previous" aria-label="上一周">←</button><b data-goal-week-label></b><button type="button" data-goal-week-nav="next" aria-label="下一周">→</button></div></section>
       <button class="tracking-goal-export" type="button" data-goal-export>⇧ <span>EXPORT GOALS REPORT</span></button>
     </div>
   </section>
@@ -241,17 +307,35 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
   }
   let boardToday = currentTrackerDate();
   const habitDefinitions = [
-    { id: 'water', name: 'Water', target: 2200, tone: 'blue' },
-    { id: 'coffee', name: 'Coffee & Tea', target: 4, tone: 'slate' },
-    { id: 'exercise', name: 'Exercise', target: 6, tone: 'purple' },
-    { id: 'reading', name: 'Read 10 pages', target: 10, tone: 'amber' }
+    { id: 'water', name: 'Water', mode: 'target', target: 2000, tone: 'blue' },
+    { id: 'contact-friends', name: 'Contact friends', mode: 'target', target: 3, tone: 'slate' },
+    { id: 'outdoor-activity', name: 'Outdoor activity', mode: 'target', target: 30, tone: 'purple' },
+    { id: 'fruit-vegetables', name: 'Fruit & vegetables', mode: 'target', target: 2, tone: 'amber' },
+    { id: 'blog-writing', name: 'Blog writing', mode: 'target', target: 5, tone: 'orange' },
+    { id: 'phone-pickups', name: 'Phone pickups', mode: 'counter', target: null, tone: 'slate' },
+    { id: 'phone-screen-time', name: 'Phone screen time', mode: 'counter', target: null, tone: 'purple' },
+    { id: 'no-phone-before-bed', name: 'No phone before bed', mode: 'binary', target: 1, tone: 'slate' },
+    { id: 'bedtime-before-2330', name: 'In bed by 23:30', mode: 'binary', target: 1, tone: 'purple' },
+    { id: 'meditation', name: 'Meditate 10 min', mode: 'binary', target: 1, tone: 'purple' },
+    { id: 'tidy-desk', name: 'Tidy desk', mode: 'binary', target: 1, tone: 'amber' },
+    { id: 'drink-milk', name: 'Drink milk', mode: 'binary', target: 1, tone: 'blue' },
   ];
+  const targetHabits = habitDefinitions.filter((habit) => habit.mode !== 'counter' && Number.isFinite(Number(habit.target)));
+  function habitValue(record, habit) {
+    return Math.max(0, Number(record?.habits?.[habit.id] || 0));
+  }
+  function habitIsComplete(record, habit) {
+    return habit.mode !== 'counter' && habitValue(record, habit) >= Number(habit.target);
+  }
+  function habitProgress(record, habit) {
+    if (habit.mode === 'counter') return 0;
+    return Math.min(1, habitValue(record, habit) / Number(habit.target));
+  }
 
   if (trackingBoard) {
     let selectedWeekOffset = 0;
     let selectedMonthOffset = 0;
     let selectedMonthView = 'calendar';
-    let selectedGoalWeekOffset = 0;
     const selectedMonthHabitIds = new Set(habitDefinitions.map((habit) => habit.id));
     let selectedGoalFilter = 'all';
     function earliestTrackerDate(...values) {
@@ -259,7 +343,21 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
     }
     function createEmptyDayRecord() {
       return {
-        habits: { water: 0, coffee: 0, exercise: 0, reading: 0 },
+        // Unknown/legacy habit keys are intentionally preserved by normalizeDayRecord.
+        habits: {
+          water: 0,
+          'contact-friends': 0,
+          'outdoor-activity': 0,
+          'fruit-vegetables': 0,
+          'blog-writing': 0,
+          'phone-pickups': 0,
+          'phone-screen-time': 0,
+          'no-phone-before-bed': 0,
+          'bedtime-before-2330': 0,
+          meditation: 0,
+          'tidy-desk': 0,
+          'drink-milk': 0,
+        },
         work: { timers: { inbox: 0, development: 0 }, counts: { 'blog-writing': 0 } },
         pomodoro: { completed: 0 },
         countdowns: {},
@@ -269,10 +367,11 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
     function normalizeDayRecord(record) {
       const emptyRecord = createEmptyDayRecord();
       const source = record && typeof record === 'object' ? record : {};
-      return {
+      const sourceHabits = source.habits && typeof source.habits === 'object' ? source.habits : {};
+      const normalized = {
         ...emptyRecord,
         ...source,
-        habits: { ...emptyRecord.habits, ...(source.habits || {}) },
+        habits: { ...emptyRecord.habits, ...sourceHabits },
         work: {
           ...emptyRecord.work,
           ...(source.work || {}),
@@ -283,6 +382,11 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
         countdowns: { ...emptyRecord.countdowns, ...(source.countdowns || {}) },
         sideProject: { ...emptyRecord.sideProject, ...(source.sideProject || {}) },
       };
+      if (!Object.prototype.hasOwnProperty.call(sourceHabits, 'blog-writing')) {
+        const legacyBlogWriting = Math.max(0, Number(normalized.work.counts?.['blog-writing'] || 0));
+        if (legacyBlogWriting > 0) normalized.habits['blog-writing'] = legacyBlogWriting;
+      }
+      return normalized;
     }
     const defaultLongTerm = {
       goals: trackerGoalDefinitions.map((goal) => ({ ...goal, startedAt: boardToday, completedAt: null }))
@@ -299,6 +403,9 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
       ...storedLongTerm,
       goals: normalizeLongTermGoals(storedLongTerm.goals, trackerState.startedOn || boardToday),
     };
+    Object.entries(trackerState.dailyRecords).forEach(([key, record]) => {
+      trackerState.dailyRecords[key] = normalizeDayRecord(record);
+    });
     trackerState.dailyRecords[boardToday] = normalizeDayRecord(trackerState.dailyRecords[boardToday]);
     const todayRecord = trackerState.dailyRecords[boardToday];
     function saveTracker() { localStorage.setItem(trackerStorageKey, JSON.stringify(trackerState)); }
@@ -329,6 +436,7 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
           } else {
             historyState = {
               ...snapshot,
+              dailyRecords: Object.fromEntries(Object.entries(snapshot.dailyRecords).map(([key, record]) => [key, normalizeDayRecord(record)])),
               longTerm: {
                 ...(snapshot.longTerm || {}),
                 goals: normalizeLongTermGoals(snapshot.longTerm?.goals, snapshot.startedOn),
@@ -374,16 +482,82 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
     loadPublishedSnapshot();
     const todayCounts = todayRecord.habits;
     const habitCards = [...trackingBoard.querySelectorAll('[data-board-habit]')];
+    const goodCards = [...trackingBoard.querySelectorAll('[data-board-habit][data-habit-group="good"]')];
+    const goodGrid = trackingBoard.querySelector('[data-habit-grid]');
+    const goodPageIds = [...new Set(goodCards.map((card) => card.dataset.habitPage))];
+    let selectedGoodPageIndex = 0;
+
+    function renderGoodPage() {
+      const pageId = goodPageIds[selectedGoodPageIndex];
+      goodCards.forEach((card) => { card.hidden = card.dataset.habitPage !== pageId; });
+      const pageIndicator = trackingBoard.querySelector('[data-good-page-indicator]');
+      const previous = trackingBoard.querySelector('[data-good-page-nav="previous"]');
+      const next = trackingBoard.querySelector('[data-good-page-nav="next"]');
+      if (pageIndicator) pageIndicator.textContent = `${selectedGoodPageIndex + 1} / ${goodPageIds.length}`;
+      if (previous) previous.disabled = selectedGoodPageIndex === 0;
+      if (next) next.disabled = selectedGoodPageIndex === goodPageIds.length - 1;
+    }
+
+    function moveGoodPage(direction) {
+      selectedGoodPageIndex = Math.max(0, Math.min(goodPageIds.length - 1, selectedGoodPageIndex + direction));
+      renderGoodPage();
+    }
+
+    trackingBoard.querySelector('[data-good-page-nav="previous"]')?.addEventListener('click', () => moveGoodPage(-1));
+    trackingBoard.querySelector('[data-good-page-nav="next"]')?.addEventListener('click', () => moveGoodPage(1));
+    let goodTouchStartX = null;
+    goodGrid?.addEventListener('touchstart', (event) => { goodTouchStartX = event.changedTouches[0]?.clientX ?? null; }, { passive: true });
+    goodGrid?.addEventListener('touchend', (event) => {
+      if (goodTouchStartX === null) return;
+      const distance = (event.changedTouches[0]?.clientX ?? goodTouchStartX) - goodTouchStartX;
+      goodTouchStartX = null;
+      if (Math.abs(distance) < 45) return;
+      moveGoodPage(distance < 0 ? 1 : -1);
+    }, { passive: true });
+
+    const binaryCards = [...trackingBoard.querySelectorAll('[data-board-habit][data-habit-group="binary"]')];
+    const binaryGrid = trackingBoard.querySelector('.tracking-binary-habits-grid');
+    const binaryPageIds = [...new Set(binaryCards.map((card) => card.dataset.habitPage))];
+    let selectedBinaryPageIndex = 0;
+
+    function renderBinaryPage() {
+      const pageId = binaryPageIds[selectedBinaryPageIndex];
+      binaryCards.forEach((card) => { card.hidden = card.dataset.habitPage !== pageId; });
+      const pageIndicator = trackingBoard.querySelector('[data-binary-page-indicator]');
+      const previous = trackingBoard.querySelector('[data-binary-page-nav="previous"]');
+      const next = trackingBoard.querySelector('[data-binary-page-nav="next"]');
+      if (pageIndicator) pageIndicator.textContent = `${selectedBinaryPageIndex + 1} / ${binaryPageIds.length}`;
+      if (previous) previous.disabled = selectedBinaryPageIndex === 0;
+      if (next) next.disabled = selectedBinaryPageIndex === binaryPageIds.length - 1;
+    }
+
+    function moveBinaryPage(direction) {
+      selectedBinaryPageIndex = Math.max(0, Math.min(binaryPageIds.length - 1, selectedBinaryPageIndex + direction));
+      renderBinaryPage();
+    }
+
+    trackingBoard.querySelector('[data-binary-page-nav="previous"]')?.addEventListener('click', () => moveBinaryPage(-1));
+    trackingBoard.querySelector('[data-binary-page-nav="next"]')?.addEventListener('click', () => moveBinaryPage(1));
+    let binaryTouchStartX = null;
+    binaryGrid?.addEventListener('touchstart', (event) => { binaryTouchStartX = event.changedTouches[0]?.clientX ?? null; }, { passive: true });
+    binaryGrid?.addEventListener('touchend', (event) => {
+      if (binaryTouchStartX === null) return;
+      const distance = (event.changedTouches[0]?.clientX ?? binaryTouchStartX) - binaryTouchStartX;
+      binaryTouchStartX = null;
+      if (Math.abs(distance) < 45) return;
+      moveBinaryPage(distance < 0 ? 1 : -1);
+    }, { passive: true });
 
     function renderBoardHabits() {
       habitCards.forEach((card) => {
         const count = Math.max(0, Number(todayCounts[card.dataset.habitId] ?? card.dataset.habitInitial ?? 0));
         const target = Number(card.dataset.habitTarget);
-        const percentage = Math.min(100, (count / target) * 100);
+        const hasTarget = Number.isFinite(target) && target > 0;
+        const percentage = hasTarget ? Math.min(100, (count / target) * 100) : 0;
         card.querySelector('[data-board-habit-count]').textContent = String(count);
         card.style.setProperty('--habit-fill', `${percentage}%`);
         card.style.setProperty('--habit-percent', String(percentage));
-        card.toggleAttribute('data-habit-done', count >= Number(card.dataset.habitTarget));
+        card.toggleAttribute('data-habit-done', hasTarget && count >= target);
       });
     }
     function saveBoardHabits() {
@@ -392,9 +566,12 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
     habitCards.forEach((card) => {
       const id = card.dataset.habitId;
       const step = Number(card.dataset.habitStep || 1);
+      const isBinary = card.dataset.habitMode === 'binary';
       card.querySelector('[data-board-habit-decrease]').addEventListener('click', () => { todayCounts[id] = Math.max(0, Number(todayCounts[id] ?? card.dataset.habitInitial ?? 0) - step); saveBoardHabits(); renderBoardHabits(); });
-      card.querySelector('[data-board-habit-increase]').addEventListener('click', () => { todayCounts[id] = Number(todayCounts[id] ?? card.dataset.habitInitial ?? 0) + step; saveBoardHabits(); renderBoardHabits(); });
+      card.querySelector('[data-board-habit-increase]').addEventListener('click', () => { const nextValue = Number(todayCounts[id] ?? card.dataset.habitInitial ?? 0) + step; todayCounts[id] = isBinary ? Math.min(1, nextValue) : nextValue; saveBoardHabits(); renderBoardHabits(); });
     });
+    renderGoodPage();
+    renderBinaryPage();
     renderBoardHabits();
 
     const workState = todayRecord.work;
@@ -417,7 +594,9 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
     function renderWorkSummary() {
       const sessionClock = trackingBoard.querySelector('[data-work-session-clock]');
       const totalClock = trackingBoard.querySelector('[data-work-total-clock]');
-      const totalSeconds = Object.values(workState.timers || {}).reduce((sum, seconds) => sum + Math.max(0, Number(seconds || 0)), 0);
+      const workSeconds = Object.values(workState.timers || {}).reduce((sum, seconds) => sum + Math.max(0, Number(seconds || 0)), 0);
+      const sideProjectSeconds = Math.max(0, Number(todayRecord.sideProject?.elapsed || 0));
+      const totalSeconds = workSeconds + sideProjectSeconds;
       if (sessionClock) sessionClock.textContent = formatWorkTime(activeWorkId ? sessionSeconds : 0);
       if (totalClock) totalClock.textContent = formatWorkTime(totalSeconds);
     }
@@ -494,63 +673,19 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
     const pomodoroCard = trackingBoard.querySelector('[data-pomodoro-card]');
     const pomodoroCount = pomodoroCard?.querySelector('[data-pomodoro-count]');
     function renderPomodoroCount() {
-      if (pomodoroCount) pomodoroCount.textContent = `${Math.max(0, Number(pomodoroState.completed ?? 4))} / 6`;
+      if (pomodoroCount) pomodoroCount.textContent = String(Math.max(0, Number(pomodoroState.completed ?? 0)));
     }
     pomodoroCard?.querySelector('[data-pomodoro-decrease]')?.addEventListener('click', () => {
-      pomodoroState.completed = Math.max(0, Number(pomodoroState.completed ?? 4) - 1);
+      pomodoroState.completed = Math.max(0, Number(pomodoroState.completed ?? 0) - 1);
       saveTracker();
       renderPomodoroCount();
     });
     pomodoroCard?.querySelector('[data-pomodoro-increase]')?.addEventListener('click', () => {
-      pomodoroState.completed = Math.min(6, Number(pomodoroState.completed ?? 4) + 1);
+      pomodoroState.completed = Number(pomodoroState.completed ?? 0) + 1;
       saveTracker();
       renderPomodoroCount();
     });
     renderPomodoroCount();
-
-    const countdownState = todayRecord.countdowns;
-    const countdownIntervals = new Map();
-    function formatCountdown(totalSeconds) {
-      const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-      const seconds = (totalSeconds % 60).toString().padStart(2, '0');
-      return `${minutes}:${seconds}`;
-    }
-    function renderCountdown(button, remaining) {
-      const timerCard = button.closest('.tracking-timer-card');
-      const teaCard = button.closest('.tracking-tea-card');
-      if (timerCard) timerCard.querySelector('strong').textContent = formatCountdown(remaining);
-      if (teaCard) teaCard.querySelector('[data-tea-time]').textContent = formatCountdown(remaining);
-      button.textContent = countdownIntervals.has(button.dataset.countdownId) ? 'Ⅱ' : '▶';
-    }
-    trackingBoard.querySelectorAll('[data-board-timer]').forEach((button) => {
-      const id = button.dataset.countdownId;
-      let remaining = Math.max(0, Number(countdownState[id] ?? button.dataset.seconds ?? 0));
-      renderCountdown(button, remaining);
-      button.addEventListener('click', () => {
-        if (countdownIntervals.has(id)) {
-          clearInterval(countdownIntervals.get(id));
-          countdownIntervals.delete(id);
-          countdownState[id] = remaining;
-          saveTracker();
-          renderCountdown(button, remaining);
-          return;
-        }
-        if (remaining <= 0) remaining = Number(button.dataset.seconds || 0);
-        countdownIntervals.set(id, setInterval(() => {
-          remaining = Math.max(0, remaining - 1);
-          countdownState[id] = remaining;
-          renderCountdown(button, remaining);
-          if (remaining % 5 === 0) saveTracker();
-          if (remaining <= 0) {
-            clearInterval(countdownIntervals.get(id));
-            countdownIntervals.delete(id);
-            saveTracker();
-            renderCountdown(button, remaining);
-          }
-        }, 1000));
-        renderCountdown(button, remaining);
-      });
-    });
 
     const sideProjectState = todayRecord.sideProject;
     const sideProject = trackingBoard.querySelector('[data-side-project]');
@@ -564,6 +699,7 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
       sideProjectTimer.textContent = formatWorkTime(remaining);
       sideProject.style.setProperty('--project-fill', `${Math.min(100, (elapsed / 10800) * 100)}%`);
       sideProject.toggleAttribute('data-project-running', Boolean(sideProjectInterval));
+      renderWorkSummary();
     }
     sideProjectTimer?.addEventListener('click', () => {
       if (sideProjectInterval) {
@@ -605,10 +741,11 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
       const key = dateKey(date);
       const record = getDayRecord(key);
       const workSeconds = Object.values(record.work?.timers || {}).reduce((sum, value) => sum + Number(value || 0), 0) + Number(record.sideProject?.elapsed || 0);
-      const completedHabits = habitDefinitions.reduce((sum, habit) => sum + (Number(record.habits?.[habit.id] || 0) >= habit.target ? 1 : 0), 0);
+      const completedHabits = targetHabits.reduce((sum, habit) => sum + (habitIsComplete(record, habit) ? 1 : 0), 0);
       const habitCount = habitDefinitions.reduce((sum, habit) => sum + (Number(record.habits?.[habit.id] || 0) > 0 ? 1 : 0), 0);
-      const habitPercentage = Math.round((habitDefinitions.reduce((sum, habit) => sum + Math.min(1, Number(record.habits?.[habit.id] || 0) / habit.target), 0) / habitDefinitions.length) * 100);
+      const habitPercentage = targetHabits.length ? Math.round((targetHabits.reduce((sum, habit) => sum + habitProgress(record, habit), 0) / targetHabits.length) * 100) : 0;
       const pomodoros = Number(record.pomodoro?.completed || 0);
+      const isFuture = key > boardToday;
       return {
         date,
         key,
@@ -619,24 +756,26 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
         habitCount,
         habitPercentage,
         isActive: workSeconds > 0 || pomodoros > 0 || habitCount > 0,
+        isFuture,
       };
     }
 
     function summarizeDays(days) {
       const dayStats = days.map(getDayStats);
-      const workTotal = dayStats.reduce((sum, day) => sum + day.workSeconds, 0);
-      const pomodoroTotal = dayStats.reduce((sum, day) => sum + day.pomodoros, 0);
-      const habitTotal = dayStats.reduce((sum, day) => sum + day.completedHabits, 0);
-      const activeDays = dayStats.filter((day) => day.isActive).length;
-      const habitRate = Math.round(dayStats.reduce((sum, day) => sum + day.habitPercentage, 0) / Math.max(days.length, 1));
-      const bestDay = [...dayStats].filter((day) => day.isActive).sort((a, b) => (b.workSeconds + b.completedHabits * 900 + b.pomodoros * 1500) - (a.workSeconds + a.completedHabits * 900 + a.pomodoros * 1500))[0];
-      const busiestDay = [...dayStats].filter((day) => day.workSeconds > 0).sort((a, b) => b.workSeconds - a.workSeconds)[0];
+      const elapsedDays = dayStats.filter((day) => !day.isFuture);
+      const workTotal = elapsedDays.reduce((sum, day) => sum + day.workSeconds, 0);
+      const pomodoroTotal = elapsedDays.reduce((sum, day) => sum + day.pomodoros, 0);
+      const habitTotal = elapsedDays.reduce((sum, day) => sum + day.completedHabits, 0);
+      const activeDays = elapsedDays.filter((day) => day.isActive).length;
+      const habitRate = Math.round(elapsedDays.reduce((sum, day) => sum + day.habitPercentage, 0) / Math.max(elapsedDays.length, 1));
+      const bestDay = [...elapsedDays].filter((day) => day.isActive).sort((a, b) => (b.workSeconds + b.completedHabits * 900 + b.pomodoros * 1500) - (a.workSeconds + a.completedHabits * 900 + a.pomodoros * 1500))[0];
+      const busiestDay = [...elapsedDays].filter((day) => day.workSeconds > 0).sort((a, b) => b.workSeconds - a.workSeconds)[0];
       const latestDayIndex = dayStats.reduce((latestIndex, day, index) => day.key <= boardToday ? index : latestIndex, -1);
       let currentStreak = 0;
       for (let index = latestDayIndex; index >= 0 && dayStats[index].isActive; index -= 1) currentStreak += 1;
       let streak = 0;
       dayStats.forEach((day) => { day.streak = day.isActive ? streak + 1 : 0; streak = day.streak; });
-      return { dayStats, workTotal, pomodoroTotal, habitTotal, activeDays, habitRate, bestDay, busiestDay, currentStreak };
+      return { dayStats, elapsedDays, workTotal, pomodoroTotal, habitTotal, activeDays, habitRate, bestDay, busiestDay, currentStreak };
     }
 
     function formatSignedDuration(value) {
@@ -675,10 +814,10 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
         const isBest = day.key === bestDay?.key && day.isActive;
         const isToday = day.key === boardToday;
         const isStreakDay = day.isActive && !isBest;
-        const state = isBest ? 'best' : day.isActive ? 'active' : 'rest';
-        const statusIcon = isBest ? '★' : isStreakDay ? '●' : '○';
-        const statusText = isBest ? 'BEST DAY' : day.isActive ? `STREAK +${day.streak}` : 'NO RECORD';
-        const note = isBest ? 'Best day!' : day.isActive ? (day.completedHabits ? 'Steady progress' : 'Work recorded') : 'Rest day';
+        const state = day.isFuture ? 'future' : isBest ? 'best' : day.isActive ? 'active' : 'rest';
+        const statusIcon = day.isFuture ? '·' : isBest ? '★' : isStreakDay ? '●' : '○';
+        const statusText = day.isFuture ? 'UPCOMING' : isBest ? 'BEST DAY' : day.isActive ? `STREAK +${day.streak}` : 'NO RECORD';
+        const note = day.isFuture ? 'Not started' : isBest ? 'Best day!' : day.isActive ? (day.completedHabits ? 'Steady progress' : 'Work recorded') : 'Rest day';
         return `<article class="tracking-week-day-card is-${state}${isToday ? ' is-today' : ''}" style="--day-percent:${day.habitPercentage}%"><header><div><strong>${day.date.toLocaleDateString('en-US', { weekday: 'long' })}</strong><small>${day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</small></div><b aria-label="${statusText}">${statusIcon}</b></header><div class="tracking-week-progress"><span><b>${day.habitPercentage}%</b></span></div><div class="tracking-week-metrics"><span>◷ <b>${formatWorkTime(day.workSeconds)}</b></span><span>🍅 <b>${day.pomodoros}</b></span></div><div class="tracking-week-note"><small>${note}</small><em>${statusText}</em></div></article>`;
       }).join('');
       const summary = panel.querySelector('[data-history-summary]');
@@ -692,7 +831,9 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
       const nextButton = panel.querySelector('[data-week-nav="next"]');
       if (nextButton) nextButton.disabled = selectedWeekOffset >= 0;
       const insights = panel.querySelector('[data-week-insights]');
-      if (insights) insights.innerHTML = `<article><strong>★</strong><small>BEST DAY</small><b>${bestDay ? bestDay.date.toLocaleDateString('zh-CN', { weekday: 'long' }) : '—'}</b><span>${bestDay ? formatShortDuration(bestDay.workSeconds) : '暂无数据'}</span></article><article><strong>◷</strong><small>MOST ACTIVE</small><b>${activeDays} days</b><span>${formatShortDuration(workTotal)} 工作</span></article><article><strong>⚠</strong><small>NEEDS ATTENTION</small><b>${activeDays < 7 ? '休息日' : '保持节奏'}</b><span>${activeDays < 7 ? `${7 - activeDays} 天没有记录` : '本周每天都有活动'}</span></article>`;
+      const elapsedDays = summaryData.elapsedDays.length;
+      const restDays = Math.max(0, elapsedDays - activeDays);
+      if (insights) insights.innerHTML = `<article><strong>★</strong><small>BEST DAY</small><b>${bestDay ? bestDay.date.toLocaleDateString('zh-CN', { weekday: 'long' }) : '—'}</b><span>${bestDay ? formatShortDuration(bestDay.workSeconds) : '暂无数据'}</span></article><article><strong>◷</strong><small>MOST ACTIVE</small><b>${activeDays} days</b><span>${formatShortDuration(workTotal)} 工作</span></article><article><strong>⚠</strong><small>NEEDS ATTENTION</small><b>${restDays > 0 ? '休息日' : '保持节奏'}</b><span>${restDays > 0 ? `${restDays} 天没有记录` : '已记录的每天都有活动'}</span></article>`;
       const trend = panel.querySelector('[data-week-habit-trend]');
       if (trend) {
         const chartWidth = 180;
@@ -724,7 +865,7 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
         const record = getDayRecord(dateKey(date));
         const workSeconds = Object.values(record.work?.timers || {}).reduce((sum, value) => sum + Number(value || 0), 0) + Number(record.sideProject?.elapsed || 0);
         const habitCount = selectedHabits.reduce((sum, habit) => sum + (Number(record.habits?.[habit.id] || 0) > 0 ? 1 : 0), 0);
-        const completedHabits = selectedHabits.reduce((sum, habit) => sum + (Number(record.habits?.[habit.id] || 0) >= habit.target ? 1 : 0), 0);
+        const completedHabits = selectedHabits.filter((habit) => habit.mode !== 'counter').reduce((sum, habit) => sum + (habitIsComplete(record, habit) ? 1 : 0), 0);
         const pomodoros = Number(record.pomodoro?.completed || 0);
         workTotal += workSeconds;
         habitTotal += completedHabits;
@@ -753,6 +894,7 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
       const activeDays = currentAggregate.activeDays;
       const categoryTotals = {};
       const habitTotal = currentAggregate.habitTotal;
+      const targetSelectedHabits = selectedHabits.filter((habit) => habit.mode !== 'counter');
       const pomodoroTotal = currentAggregate.pomodoroTotal;
       const habitStats = Object.fromEntries(selectedHabits.map((habit) => [habit.id, { ...habit, active: 0, completed: 0, progress: 0, percentage: 0 }]));
       const dayStats = [];
@@ -765,8 +907,8 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
         const completedHabits = selectedHabits.reduce((sum, habit) => {
           const numericValue = Number(record.habits?.[habit.id] || 0);
           if (numericValue > 0) habitStats[habit.id].active += 1;
-          habitStats[habit.id].progress += Math.min(1, numericValue / habit.target);
-          if (numericValue >= habit.target) { habitStats[habit.id].completed += 1; return sum + 1; }
+          if (habit.mode !== 'counter') habitStats[habit.id].progress += habitProgress(record, habit);
+          if (habitIsComplete(record, habit)) { habitStats[habit.id].completed += 1; return sum + 1; }
           return sum;
         }, 0);
         const pomodoros = Number(record.pomodoro?.completed || 0);
@@ -794,7 +936,7 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
       }).join('');
       grid.classList.toggle('is-heatmap', selectedMonthView === 'heatmap');
       grid.innerHTML = calendarCells;
-      panel.querySelector('[data-history-summary]').innerHTML = `<article><span>⏱️</span><div><small>TOTAL WORK HOURS</small><b>${formatShortDuration(workTotal)}</b><em>${formatSignedDuration(workTotal - previousAggregate.workTotal)}</em></div></article><article><span>💪</span><div><small>ACTIVE DAYS</small><b>${activeDays} / ${daysInMonth}</b><em>${formatSignedNumber(activeDays - previousAggregate.activeDays)} · ${Math.round((activeDays / daysInMonth) * 100)}% of month</em></div></article><article><span>📖</span><div><small>TOTAL HABIT COMPLETIONS</small><b>${habitTotal}</b><em>${formatSignedNumber(habitTotal - previousAggregate.habitTotal)} · ${selectedHabits.length} habits selected</em></div></article><article><span>🍅</span><div><small>AVG POMODOROS / DAY</small><b>${activeDays ? (pomodoroTotal / activeDays).toFixed(1) : '0.0'}</b><em>${formatSignedNumber(pomodoroTotal - previousAggregate.pomodoroTotal)} · 最佳日：${bestDay ? bestDay.date.getDate() : '—'} 日</em></div></article>`;
+      panel.querySelector('[data-history-summary]').innerHTML = `<article><span>⏱️</span><div><small>TOTAL WORK HOURS</small><b>${formatShortDuration(workTotal)}</b><em>${formatSignedDuration(workTotal - previousAggregate.workTotal)}</em></div></article><article><span>💪</span><div><small>ACTIVE DAYS</small><b>${activeDays} / ${daysInMonth}</b><em>${formatSignedNumber(activeDays - previousAggregate.activeDays)} · ${Math.round((activeDays / daysInMonth) * 100)}% of month</em></div></article><article><span>📖</span><div><small>TOTAL HABIT COMPLETIONS</small><b>${habitTotal}</b><em>${formatSignedNumber(habitTotal - previousAggregate.habitTotal)} · ${targetSelectedHabits.length} target habits selected</em></div></article><article><span>🍅</span><div><small>AVG POMODOROS / DAY</small><b>${activeDays ? (pomodoroTotal / activeDays).toFixed(1) : '0.0'}</b><em>${formatSignedNumber(pomodoroTotal - previousAggregate.pomodoroTotal)} · 最佳日：${bestDay ? bestDay.date.getDate() : '—'} 日</em></div></article>`;
       const breakdown = panel.querySelector('[data-month-breakdown]');
       if (breakdown) {
         const workCategories = [...work.filter((item) => item.seconds !== undefined), { id: 'side-project', name: 'Side project', icon: '🌙' }];
@@ -806,15 +948,16 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
       const habitBreakdown = panel.querySelector('[data-month-habit-breakdown]');
       if (habitBreakdown) habitBreakdown.innerHTML = selectedHabits.map((habit) => {
         const stats = habitStats[habit.id];
-        const rate = stats.active ? Math.round((stats.progress / stats.active) * 100) : 0;
-        return `<div class="tracking-month-habit-row"><span>${habit.icon}</span><strong>${habit.name}</strong><i>${Array.from({ length: 12 }, (_, index) => `<b class="${index < Math.round(rate / 100 * 12) ? `tracking-habit-block-${habit.tone}` : ''}"></b>`).join('')}</i><em>${rate}%</em></div>`;
+        const rate = habit.mode === 'counter' ? Math.round((stats.active / daysInMonth) * 100) : stats.active ? Math.round((stats.progress / stats.active) * 100) : 0;
+        const rateLabel = habit.mode === 'counter' ? `${stats.active} active days` : `${rate}% avg`;
+        return `<div class="tracking-month-habit-row"><span>${habit.icon}</span><strong>${habit.name}</strong><i>${Array.from({ length: 12 }, (_, index) => `<b class="${index < Math.round(rate / 100 * 12) ? `tracking-habit-block-${habit.tone}` : ''}"></b>`).join('')}</i><em>${rateLabel}</em></div>`;
       }).join('') || '<div class="tracking-empty-state">请选择至少一个习惯</div>';
       const insights = panel.querySelector('[data-month-insights]');
       if (insights) insights.innerHTML = `<article><strong>★</strong><small>BEST DAY</small><b>${bestDay ? bestDay.date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }) : '—'}</b><span>${bestDay ? `${formatShortDuration(bestDay.workSeconds)} 工作` : '暂无数据'}</span></article><article><strong>◷</strong><small>BUSIEST DAY</small><b>${busiestDay ? busiestDay.date.toLocaleDateString('zh-CN', { weekday: 'long' }) : '—'}</b><span>${busiestDay ? formatShortDuration(busiestDay.workSeconds) : '暂无数据'}</span></article><article><strong>✓</strong><small>CONSISTENCY</small><b>${Math.round((activeDays / daysInMonth) * 100)}%</b><span>${activeDays} 个活跃日</span></article>`;
       const pomodoroSummary = panel.querySelector('[data-month-pomodoro-summary]');
       if (pomodoroSummary) pomodoroSummary.innerHTML = `<p><span>完成番茄钟</span><b>${pomodoroTotal}</b></p><p><span>平均每天</span><b>${activeDays ? (pomodoroTotal / activeDays).toFixed(1) : '0.0'}</b></p><p><span>最长工作日</span><b>${busiestDay ? busiestDay.date.getDate() + ' 日' : '—'}</b></p>`;
       const legend = panel.querySelector('[data-month-legend]');
-      if (legend) legend.innerHTML = `<span><i class="tracking-month-legend-scale"></i>工作时长</span>${selectedHabits.map((habit) => `<span><i class="tracking-month-habit-dot tracking-dot-${habit.tone}"></i>${habit.name.replace('Read 10 pages', 'Read')}</span>`).join('')}`;
+      if (legend) legend.innerHTML = `<span><i class="tracking-month-legend-scale"></i>工作时长</span>${selectedHabits.map((habit) => `<span><i class="tracking-month-habit-dot tracking-dot-${habit.tone}"></i>${habit.name}</span>`).join('')}`;
       const nextButton = panel.querySelector('[data-month-nav="next"]');
       if (nextButton) nextButton.disabled = selectedMonthOffset >= 0;
     }
@@ -872,11 +1015,6 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
         const pausedMoneyGoals = moneyGoalsList.filter((goal) => goal.status === 'paused').length;
         moneySummary.innerHTML = `${moneyRows || '<div class="tracking-empty-state">No money goals yet</div>'}<div class="tracking-money-summary-row tracking-money-summary-status"><span>✓</span><strong>${activeMoneyGoals}</strong><small>Active money goals · tracked separately</small></div><div class="tracking-money-summary-row tracking-money-summary-status"><span>Ⅱ</span><strong>${pausedMoneyGoals}</strong><small>Paused money goals</small></div>`;
       }
-      const goalWeekDays = getWeekDays(selectedGoalWeekOffset);
-      const goalWeekLabel = panel.querySelector('[data-goal-week-label]');
-      if (goalWeekLabel) goalWeekLabel.textContent = `${dateKey(goalWeekDays[0])} — ${dateKey(goalWeekDays[6])}`;
-      const goalNextButton = panel.querySelector('[data-goal-week-nav="next"]');
-      if (goalNextButton) goalNextButton.disabled = selectedGoalWeekOffset >= 0;
       panel.querySelectorAll('[data-goal-status]').forEach((goal) => { goal.hidden = selectedGoalFilter !== 'all' && goal.dataset.goalStatus !== selectedGoalFilter; });
     }
 
@@ -918,11 +1056,6 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
       const headingRange = trackingBoard.querySelector('[data-tracking-view-heading-range]');
       if (headingRange) headingRange.textContent = `${dateKey(days[0])} — ${dateKey(days[6])}`;
     }));
-    trackingBoard.querySelectorAll('[data-goal-week-nav]').forEach((button) => button.addEventListener('click', () => {
-      if (button.dataset.goalWeekNav === 'previous') selectedGoalWeekOffset -= 1;
-      if (button.dataset.goalWeekNav === 'next') selectedGoalWeekOffset = Math.min(0, selectedGoalWeekOffset + 1);
-      renderLongTermView();
-    }));
     trackingBoard.querySelectorAll('[data-month-nav]').forEach((button) => button.addEventListener('click', () => {
       if (button.dataset.monthNav === 'previous') selectedMonthOffset -= 1;
       if (button.dataset.monthNav === 'next') selectedMonthOffset = Math.min(0, selectedMonthOffset + 1);
@@ -949,10 +1082,10 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
         const record = getDayRecord(dateKey(date));
         const workSeconds = Object.values(record.work?.timers || {}).reduce((sum, value) => sum + Number(value || 0), 0) + Number(record.sideProject?.elapsed || 0);
         const pomodoros = Number(record.pomodoro?.completed || 0);
-        const completed = habitDefinitions.filter((habit) => Number(record.habits?.[habit.id] || 0) >= habit.target).length;
+        const completed = targetHabits.filter((habit) => habitIsComplete(record, habit)).length;
         workTotal += workSeconds;
         pomodoroTotal += pomodoros;
-        lines.push(`- ${dateKey(date)}：${formatWorkTime(workSeconds)} 工作，${pomodoros} 个番茄钟，${completed}/${habitDefinitions.length} 个习惯达成`);
+        lines.push(`- ${dateKey(date)}：${formatWorkTime(workSeconds)} 工作，${pomodoros} 个番茄钟，${completed}/${targetHabits.length} 个目标习惯达成`);
       });
       lines.push(``, `总工作时长：${formatWorkTime(workTotal)}`, `番茄钟：${pomodoroTotal}`);
       const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
@@ -975,6 +1108,7 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
       const month = monthDate.getMonth();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const selectedHabits = habitDefinitions.filter((habit) => selectedMonthHabitIds.has(habit.id));
+      const targetSelectedHabits = selectedHabits.filter((habit) => habit.mode !== 'counter');
       const lines = [`# 熊窝 · 月度报告`, ``, `月份：${year}-${String(month + 1).padStart(2, '0')}`, ``];
       let workTotal = 0;
       let pomodoroTotal = 0;
@@ -983,8 +1117,8 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
         const stats = getDayStats(date);
         workTotal += stats.workSeconds;
         pomodoroTotal += stats.pomodoros;
-        const completedHabits = selectedHabits.filter((habit) => Number(stats.record.habits?.[habit.id] || 0) >= habit.target).length;
-        lines.push(`- ${stats.key}：${formatWorkTime(stats.workSeconds)} 工作，${stats.pomodoros} 个番茄钟，${completedHabits}/${selectedHabits.length} 个习惯达成`);
+        const completedHabits = targetSelectedHabits.filter((habit) => habitIsComplete(stats.record, habit)).length;
+        lines.push(`- ${stats.key}：${formatWorkTime(stats.workSeconds)} 工作，${stats.pomodoros} 个番茄钟，${completedHabits}/${targetSelectedHabits.length} 个目标习惯达成`);
       }
       lines.push(``, `总工作时长：${formatWorkTime(workTotal)}`, `番茄钟：${pomodoroTotal}`);
       const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
