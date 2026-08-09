@@ -8,7 +8,7 @@
 
 | 层面 | 选型 |
 |------|------|
-| 框架 | **Astro**（静态构建） |
+| 框架 | **Astro 7**（静态构建） |
 | 客户端交互 | Astro 组件内的原生浏览器 JavaScript；当前活动页面不依赖 Vue |
 | 样式 | 暖色调设计 token：米黄背景 `#f4ecdf`、深棕侧栏 `#2f2924` |
 | 构建 | Astro 输出 `dist/`，由 GitHub Actions 部署到 GitHub Pages |

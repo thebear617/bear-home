@@ -7,6 +7,8 @@ feat(routes): 路由表「娱乐」分组更名为「购物娱乐」，新增京
 - feat: `entertainment` 分组 `title` 由「娱乐」改为「购物娱乐」，`id` 保持不变，分组图标改为 🛍️
 - feat: 分组内 Bilibili 之后新增「京东」条目（`https://www.jd.com/`），tags 为 购物/电商
 - feat: 新增京东本地图标 `public/assets/routes/京东.png`（favicon 来源，已归一化为 256×256 PNG）
+- chore: Astro 从 5.x 升级至 7.2.0，并同步更新 npm 锁文件
+- chore: 保持纯静态页面构建，不引入内容集合迁移
 
 ## v0.24.1 — 2026-08-05
 
