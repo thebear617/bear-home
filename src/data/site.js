@@ -32,6 +32,7 @@ export const routeCategories = [
       { name: 'Hero SMS 接码平台', desc: '接码平台，ChatGPT 电话验证登录时收验证码用', url: 'https://hero-sms.com/cn', tags: ['工具', '验证'], addedAt: '2026-07-16', icon: '/assets/routes/HeroSMS.png' },
       { name: 'OpenTheRank', desc: '查全球各家大模型官方订阅在各地区的价格', url: 'https://opentherank.com/zh/', tags: ['AI', '价格'], addedAt: '2026-07-17', icon: '/assets/routes/OpenTheRank.png' },
       { name: 'OpenRouter Rankings', desc: '看全球所有大模型的实时用量 + 实时性能排行', url: 'https://openrouter.ai/rankings', tags: ['AI', '排行'], addedAt: '2026-07-17', icon: '/assets/routes/OpenRouter.png' },
+      { name: 'Codex Resets', desc: '追踪 OpenAI Codex 额度重置公告，上次重置时间与历史记录', url: 'https://codex-resets.com/', tags: ['AI', '状态'], addedAt: '2026-08-09', icon: '/assets/routes/CodexResets.png' },
       { name: '鲜枣课堂', desc: '大量优质领域科普 PPT，可直接在线浏览', url: 'http://www.xzclass.com/?page_id=1', tags: ['学习', '科普'], addedAt: '2026-07-18', icon: '/assets/routes/鲜枣课堂.png' },
       { name: 'JavaGuide', desc: 'GitHub 156K+ Star 的 Java 面试与后端知识体系', url: 'https://javaguide.cn/', tags: ['学习', '开发'], addedAt: '2026-07-18', icon: '/assets/routes/JavaGuide.png' },
     ]
