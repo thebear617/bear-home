@@ -125,6 +125,7 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
                     </div>
                   )}
                 </div>
+                {item.desc && <span class="card-desc-pop" aria-hidden="true">{item.desc}</span>}
               </a>
             ) : (
               <div class="link-card static" data-route-item data-category={category.id} data-tags={item.tags?.join('|') ?? ''} data-search-text={`${item.name} ${item.desc ?? ''} ${item.tags?.join(' ') ?? ''}`} hidden={category.items.length > GROUP_LIMIT && index >= GROUP_LIMIT}>
@@ -143,6 +144,7 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
                     </div>
                   )}
                 </div>
+                {item.desc && <span class="card-desc-pop" aria-hidden="true">{item.desc}</span>}
               </div>
             )
           ))}
@@ -183,7 +185,7 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
                   </div>
                   <div>
                     <strong>{item.name}</strong>
-                    <span>{item.desc}</span>
+                    <span class="list-desc" title={item.desc}>{item.desc}</span>
                     <small>{item.host}</small>
                   </div>
                 </div>
@@ -212,7 +214,7 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
           </div>
           <div class="masonry-content">
             <h2>{item.name}</h2>
-            <p>{item.desc}</p>
+            <p class="masonry-desc" title={item.desc}>{item.desc}</p>
             <small>{item.host}</small>
             <div class="card-tags">{item.tags?.map((tag) => <span class="tag">{tag}</span>)}</div>
             <footer><time>{item.displayDate}</time><span aria-hidden="true">↗</span></footer>
@@ -223,7 +225,7 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
           <div class="masonry-cover"><span>{item.categoryIcon}</span><b>本地</b></div>
           <div class="masonry-content">
             <h2>{item.name}</h2>
-            <p>{item.desc}</p>
+            <p class="masonry-desc" title={item.desc}>{item.desc}</p>
             <small>{item.host}</small>
             <div class="card-tags">{item.tags?.map((tag) => <span class="tag">{tag}</span>)}</div>
             <footer><time>{item.displayDate}</time><span aria-hidden="true">⌂</span></footer>
@@ -394,6 +396,26 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
 
   document.addEventListener('click', (event) => {
     if (!filterPanel?.contains(event.target) && !filterButton?.contains(event.target)) filterPanel.hidden = true;
+  });
+
+  // desc 默认两行截断：仅当描述确实被截断时，才允许悬停/聚焦浮层展示全文。
+  const refreshDescClamp = (card) => {
+    const desc = card.querySelector('.card-desc');
+    if (!desc) return;
+    card.classList.toggle('is-clamped', desc.scrollHeight > desc.clientHeight + 1);
+  };
+  document.querySelectorAll('.link-card').forEach((card) => {
+    card.addEventListener('pointerenter', () => refreshDescClamp(card));
+    card.addEventListener('focus', () => refreshDescClamp(card));
+  });
+  window.addEventListener('resize', () => {
+    document.querySelectorAll('.link-card').forEach(refreshDescClamp);
+  });
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.link-card').forEach(refreshDescClamp);
+  });
+  document.fonts?.ready.then(() => {
+    document.querySelectorAll('.link-card').forEach(refreshDescClamp);
   });
 </script>
 
@@ -1308,7 +1330,6 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
   .tag:nth-child(3n) { border-color: #e6c4b1; color: #9a563c; background: #f7e4db; }
 
   @media (hover: hover) and (min-width: 761px) {
-    .route-hub .link-card .card-desc,
     .route-hub .link-card .card-domain,
     .route-hub .link-card .card-path,
     .route-hub .link-card .card-tags {
@@ -1319,9 +1340,54 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
       pointer-events: auto;
       transform: none;
     }
-    .route-hub .link-card .card-desc { margin-bottom: .28rem; }
+    /* desc 保持两行 line-clamp 截断：overflow 必须为 hidden，clamp 才生效。 */
+    .route-hub .link-card .card-desc {
+      max-height: none;
+      margin-top: 0;
+      margin-bottom: .28rem;
+      opacity: 1;
+      overflow: hidden;
+      pointer-events: auto;
+      transform: none;
+    }
     .route-hub .link-card .card-domain,
     .route-hub .link-card .card-path { margin-bottom: .3rem; }
+  }
+
+  /* desc 悬停浮层：绝对定位、不撑开布局；同色背景 + 圆角 + 阴影，宽度与卡片一致。 */
+  .route-hub .link-card { position: relative; }
+
+  .card-desc-pop {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 40;
+    padding: .5rem .7rem;
+    border: 1px solid #e0cba9;
+    border-radius: 8px;
+    background: #fffaf0;
+    color: #785c42;
+    font-size: .72rem;
+    line-height: 1.55;
+    box-shadow: 0 10px 22px rgba(83, 47, 17, .18), inset 0 1px rgba(255,255,255,.9);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    transition: opacity .18s ease, transform .18s ease, visibility 0s linear .18s;
+    pointer-events: none;
+  }
+
+  /* 描述未被截断时无需浮层。 */
+  .link-card:not(.is-clamped) .card-desc-pop { display: none; }
+
+  .link-card:is(:hover, :focus-visible) { z-index: 30; }
+
+  .link-card:is(:hover, :focus-visible) .card-desc-pop {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity .18s ease, transform .18s ease, visibility 0s;
   }
 
   .hub-list-panel { border-color: #dec7a3; border-radius: 10px; background: rgba(255,251,241,.8); }
@@ -1590,5 +1656,41 @@ const routeItems = routeCategories.flatMap((category) => category.items.map((ite
     .group-cards .card-desc { margin-bottom: .25rem; font-size: .7rem; }
     .group-cards .card-domain, .group-cards .card-path { margin-bottom: .35rem; font-size: .65rem; }
     .group-cards .tag { padding: .1rem .3rem; font-size: .6rem; }
+  }
+
+  /* 路由描述：默认两行，悬停／聚焦时显示完整内容。放在所有主题覆盖之后，确保规则最终生效。 */
+  .route-hub .link-card {
+    overflow: visible;
+  }
+
+  .route-hub .link-card .card-desc {
+    display: -webkit-box;
+    max-height: 2.8em;
+    margin: 0 0 .375rem;
+    overflow: hidden;
+    line-height: 1.4;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .route-hub .list-link-main .list-desc {
+    display: -webkit-box;
+    max-height: 2.8em;
+    overflow: hidden;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .route-hub .masonry-content .masonry-desc {
+    display: -webkit-box;
+    max-height: 2.8em;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .route-hub .link-card.is-clamped:is(:hover, :focus-visible) .card-desc-pop {
+    display: block;
   }
 </style>

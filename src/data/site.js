@@ -46,6 +46,7 @@ export const routeCategories = [
       { name: '西电学生邮箱', desc: '西安电子科技大学学生邮箱登录入口', url: 'https://mail.stu.xidian.edu.cn/coremail/index.jsp?nodetect=true', tags: ['校园', '邮箱'], addedAt: '2026-07-29', icon: '/assets/routes/西电学生邮箱.png' },
       { name: '西电智课平台', desc: '西安电子科技大学智课平台', url: 'https://xdspoc.xidian.edu.cn/', tags: ['校园', '课程'], addedAt: '2026-07-29', icon: '/assets/routes/西电智课平台.png' },
       { name: '西电信息网络技术中心', desc: '西电信息网络技术中心官网,网络问题可在该网站查找', url: 'https://xxzx.xidian.edu.cn/', tags: ['校园', '网络'], addedAt: '2026-07-30', icon: '/assets/routes/西电信息网络技术中心.png' },
+      { name: '阿里云学生服务中心', desc: '阿里云高校学生权益中心，学生专享云资源与优惠；现在有 300 元代金券，于 26 年 8 月 19 日领取，效期截止 27 年 8 月 19 日', url: 'https://university.aliyun.com/buycenter/', tags: ['校园', '云'], addedAt: '2026-08-19', icon: '/assets/routes/阿里云.png' },
     ]
   },
   {
