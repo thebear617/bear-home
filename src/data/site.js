@@ -55,6 +55,7 @@ export const routeCategories = [
     icon: '🛍️',
     items: [
       { name: 'Bilibili', desc: 'B 站 - 国内最大的弹幕视频网站', url: 'https://www.bilibili.com/', tags: ['视频', '娱乐'], addedAt: '2026-07-30', icon: '/assets/routes/Bilibili.png' },
+      { name: '学习白噪音', desc: 'B 站学习白噪音视频，专注时播放', url: 'https://www.bilibili.com/video/BV1SLgY6qELc/', tags: ['学习', '专注'], addedAt: '2026-08-20', icon: '/assets/routes/Bilibili.png' },
       { name: '京东', desc: '京东商城，综合电商购物平台', url: 'https://www.jd.com/', tags: ['购物', '电商'], addedAt: '2026-08-08', icon: '/assets/routes/京东.png' },
     ]
   },
