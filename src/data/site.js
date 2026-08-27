@@ -50,6 +50,14 @@ export const routeCategories = [
     ]
   },
   {
+    id: 'research',
+    title: '科研学习',
+    icon: '🔬',
+    items: [
+      { name: 'AI Paper Notes', desc: 'AI 顶会论文中文速读速查，23000+ 篇覆盖 12 会议 55 领域', url: 'https://papernotes.org/', tags: ['科研', '论文'], addedAt: '2026-08-27', icon: '/assets/routes/PaperNotes.png' },
+    ]
+  },
+  {
     id: 'entertainment',
     title: '购物娱乐',
     icon: '🛍️',
