@@ -4,18 +4,19 @@ const { title = '熊窝', active = 'routes', hideSidebar = false } = Astro.props
 ---
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
+  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="/favicon.png">
-  <title>{title}</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <title>{title}</title>
   <link rel="stylesheet" href="/css/style.css">
+    {active === 'todo-board' && <link rel="stylesheet" href="/css/todo-board.css">}
 </head>
 <body class="sidebar-collapsed">
   <div class:list={['layout', { 'home-layout': hideSidebar, 'capsule-layout': !hideSidebar }]}>
     {!hideSidebar && <FloatingNav active={active} />}
     <div class="main-area">
-      <main class:list={['app-shell', { 'home-shell': active === 'home', 'dashboard-shell': active === 'dashboard', 'routes-shell': active === 'routes' }]}>
+      <main class:list={['app-shell', { 'home-shell': active === 'home', 'dashboard-shell': active === 'dashboard', 'routes-shell': active === 'routes', 'todo-shell': active === 'todo-board' }]}>
         <slot />
       </main>
     </div>

@@ -15,13 +15,14 @@
 
 ## 页面结构
 
-当前站点有两组入口，侧栏由 [src/components/SiteSidebar.astro](src/components/SiteSidebar.astro) 统一维护。
+当前站点的页面入口由 [src/components/SiteSidebar.astro](src/components/SiteSidebar.astro) 统一维护。
 
 | URL | 页面 | Astro 入口 |
 |-----|------|------------|
 | `/` | 路由表 | `src/pages/index.astro` |
 | `/routes/` | 路由表 | `src/pages/routes/index.astro` |
 | `/dashboard/` | 生活仪表盘 | `src/pages/dashboard/index.astro` |
+| `/todo-board/` | 任务看板 | `src/pages/todo-board/index.astro` |
 
 根路径和 `/routes/` 当前渲染同一个路由表。侧栏导航使用显式的 `index.html` 相对链接，以兼容本地静态路由和 GitHub Pages 子路径环境。
 
@@ -41,7 +42,8 @@ personal/
 │   ├── pages/
 │   │   ├── index.astro                # 根路径路由表
 │   │   ├── routes/index.astro         # /routes/ 路由表
-│   │   └── dashboard/index.astro      # /dashboard/ 生活仪表盘
+│   │   ├── dashboard/index.astro      # /dashboard/ 生活仪表盘
+│   │   └── todo-board/index.astro     # /todo-board/ 任务看板
 │   ├── components/
 │   │   ├── SiteSidebar.astro          # 侧栏导航与移动端抽屉
 │   │   ├── RouteTable.astro            # 路由表组件入口
@@ -52,10 +54,13 @@ personal/
 │   │   └── GithubProfileCard.astro     # GitHub 主页卡片
 │   └── data/
 │       ├── site.js               # routeCategories 路由数据
-│       └── tracker-config.js     # 追踪目标的唯一配置源
+│       ├── tracker-config.js     # 追踪目标的唯一配置源
+│       ├── todo-data.ts          # 活跃任务看板数据
+│       └── archived-todo-data.ts  # 已完成任务归档
 ├── public/
 │   ├── CNAME                    # me.thebear617.cn
 │   ├── css/style.css            # 全站样式
+│   ├── css/todo-board.css        # 任务看板样式
 │   ├── data/tracker-snapshot.json # 已发布的追踪数据快照
 │   └── assets/routes/           # 路由表图标
 └── dist/                        # 构建产物，不提交
@@ -97,6 +102,10 @@ personal/
 - 内嵌追踪看板。
 
 即时天气、渐变天空和日历使用外部 widget iframe；5 日预报通过 Open-Meteo API 按城市坐标请求，并在当前页面缓存 15 分钟；歌单和封面数据直接维护在 `LifeDashboard.astro`。
+
+## 任务看板
+
+任务看板位于 `/todo-board/`，独立于生活仪表盘，包含汇总、编程、科研和生活四个视图，以及待办、进行中、已完成、历史归档和年度完成热力图。任务数据维护在 `src/data/todo-data.ts`，完成任务后移入 `src/data/archived-todo-data.ts`。
 
 ## 追踪数据同步
 
@@ -219,6 +228,7 @@ npm run install-hooks
 - **路由表**：修改 `src/data/site.js` 的 `routeCategories`，新增条目的 `addedAt` 使用添加当天日期。
 - **生活仪表盘**：修改 `src/components/LifeDashboard.astro`；外部 widget、歌单和 GitHub 卡片均在组件中维护。
 - **追踪看板**：修改 `src/components/TrackingBoard.astro`；发布数据遵循上面的快照同步流程。
+- **任务看板**：修改 `src/data/todo-data.ts`；完成任务移入 `src/data/archived-todo-data.ts`。
 - **长期目标**：修改 `src/data/tracker-config.js`，然后运行 `npm run tracker:migrate` 和 `npm run tracker:validate`。
 - **全站样式**：修改 `public/css/style.css`。
 - **版本记录**：变更说明写入 `CHANGELOG.md`，但不要把历史游戏板块重新写回当前目录结构。

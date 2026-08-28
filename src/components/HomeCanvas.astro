@@ -26,6 +26,7 @@ const dateValue = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai' }
 const calendarDay = today.getDate();
 const calendarMonth = new Intl.DateTimeFormat('zh-CN', { month: 'long' }).format(today);
 const calendarWeekday = new Intl.DateTimeFormat('zh-CN', { weekday: 'short' }).format(today);
+const taskBoardHref = homeRootHref + 'todo-board/';
 ---
 
 <section class="home-canvas" aria-labelledby="home-focus-title">
@@ -73,7 +74,7 @@ const calendarWeekday = new Intl.DateTimeFormat('zh-CN', { weekday: 'short' }).f
     <h2 id="home-focus-title">今天也慢慢过</h2>
     <time datetime={dateValue}>{dateLabel}</time>
     <p class="home-focus-copy">专注一件事，慢慢靠近目标。</p>
-    <a class="home-focus-action" href={dashboardHref}>打开今日看板 <span aria-hidden="true">↗</span></a>
+    <a class="home-focus-action" href={taskBoardHref}>打开任务看板 <span aria-hidden="true">↗</span></a>
   </article>
 
   {routeClusters.map((category, index) => (
