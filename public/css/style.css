@@ -93,24 +93,63 @@ button {
   display: none;
 }
 
+.sidebar-collapse {
+  display: none;
+}
+
 .sidebar-brand {
-  padding: 1.6rem 1.2rem 1.2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, .12);
+  position: relative;
+  padding: 2.625rem 1.2rem 1.875rem;
+  text-align: center;
+}
+
+.sidebar-brand::after {
+  display: block;
+  width: calc(100% - .5rem);
+  margin: 1.25rem auto 0;
+  border-top: 1px solid rgba(255, 255, 255, .16);
+  content: '';
+}
+
+.sidebar-brand-mark {
+  display: block;
+  width: 2.35rem;
+  height: 2.35rem;
+  margin: 0 auto .975rem;
+  fill: none;
+  stroke: #f7c974;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, .22));
 }
 
 .sidebar-eyebrow {
   color: #f7c974;
+  font-family: Georgia, "Times New Roman", "Songti SC", STSong, serif;
   font-size: .72rem;
-  font-weight: 800;
-  letter-spacing: .08em;
+  font-weight: 600;
+  letter-spacing: .17em;
   text-transform: uppercase;
 }
 
 .sidebar-title {
-  margin-top: .15rem;
-  font-size: 1.35rem;
-  font-weight: 900;
-  line-height: 1.15;
+  margin-top: .225rem;
+  color: #efd1a1;
+  font-family: Georgia, "Songti SC", STSong, serif;
+  font-size: 1.55rem;
+  font-weight: 400;
+  letter-spacing: .11em;
+  line-height: 1.25;
+}
+
+.sidebar-subtitle {
+  display: block;
+  margin-top: .45rem;
+  color: rgba(239, 209, 161, .72);
+  font-family: Georgia, "Songti SC", STSong, serif;
+  font-size: .76rem;
+  letter-spacing: .15em;
 }
 
 .sidebar-nav {
@@ -176,6 +215,101 @@ button {
   width: 100%;
 }
 
+@media (min-width: 720px) {
+  .sidebar {
+    width: 0;
+    overflow: hidden;
+    transition: width .28s cubic-bezier(.22, 1, .36, 1);
+  }
+
+  body.sidebar-expanded .sidebar {
+    width: var(--sidebar-w);
+    overflow-y: auto;
+  }
+
+  .sidebar-brand,
+  .sidebar-nav {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-10px);
+    transition: opacity .18s ease, transform .28s cubic-bezier(.22, 1, .36, 1);
+  }
+
+  body.sidebar-expanded .sidebar-brand,
+  body.sidebar-expanded .sidebar-nav {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+  }
+
+  .sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 50%;
+    left: 0;
+    z-index: 30;
+    width: 2.2rem;
+    height: 4.5rem;
+    border: 1px solid #e5e1da;
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    background: rgba(255, 255, 255, .92);
+    color: #2f2924;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transform: translateY(-50%);
+    box-shadow: 0 4px 14px rgba(39, 32, 26, .12);
+    transition: opacity .18s ease, background .15s ease, color .15s ease;
+  }
+
+  .sidebar-toggle:hover {
+    background: #fbf6ee;
+    color: #c2410c;
+  }
+
+  body.sidebar-expanded .sidebar-toggle {
+    opacity: 0;
+    pointer-events: auto;
+  }
+
+  .sidebar-collapse {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: .5rem;
+    right: 1rem;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid transparent;
+    border-radius: .55rem;
+    background: transparent;
+    color: rgba(255, 255, 255, .72);
+    line-height: 1;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+  }
+
+  .sidebar-collapse:hover {
+    border-color: rgba(255, 255, 255, .16);
+    background: rgba(255, 255, 255, .1);
+    color: #fff;
+  }
+
+  .sidebar-collapse svg {
+    display: block;
+    width: 1.2rem;
+    height: 1.2rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
 .main-area.lol-active {
   position: relative;
   background: #07111f;
@@ -198,7 +332,7 @@ button {
 }
 
 .app-shell.dashboard-shell {
-  max-width: 1180px;
+  max-width: 1240px;
 }
 
 .app-shell.routes-shell {
@@ -209,6 +343,37 @@ button {
 
 .app-shell.todo-shell {
   max-width: 1200px;
+}
+
+.capsule-layout {
+  position: relative;
+}
+
+.capsule-layout .main-area {
+  position: relative;
+  width: 100%;
+}
+
+.capsule-layout .app-shell {
+  padding-top: 5rem;
+}
+
+@media (min-width: 720px) {
+  .capsule-layout .floating-nav {
+    top: 1.25rem !important;
+  }
+
+  .capsule-layout .app-shell.routes-shell {
+    padding-top: 5rem;
+  }
+
+  .capsule-layout .routes-shell .route-hub {
+    padding-top: 0 !important;
+  }
+
+  .capsule-layout .routes-shell .hub-toolbar {
+    padding-left: .7rem;
+  }
 }
 
 /* ─── Animations ─── */
@@ -2606,12 +2771,19 @@ a.pill:hover {
   }
 
   .sidebar-brand {
-    padding: 1.2rem .8rem .9rem;
+    padding: 2.25rem .9rem 1.5rem;
     position: relative;
   }
 
+  .sidebar-brand::after { margin-top: 1.25rem; }
+
+  .sidebar-brand-mark {
+    width: 2.15rem;
+    height: 2.15rem;
+  }
+
   .sidebar-title {
-    font-size: 1.1rem;
+    font-size: 1.25rem;
   }
 
   .sidebar-nav {
@@ -2625,6 +2797,10 @@ a.pill:hover {
 
   .main-area {
     padding-top: .2rem;
+  }
+
+  .capsule-layout .app-shell {
+    padding-top: 4.75rem;
   }
 }
 
@@ -6603,6 +6779,24 @@ details.callout > summary:hover {
 @media (max-width: 760px) {
   .tracking-history-view[data-tracking-view-panel="focus"] .tracking-goal-card {
     min-height: 0;
+  }
+}
+
+/* ─── Stage 1 home canvas ─── */
+.home-layout .main-area {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.app-shell.home-shell {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+}
+
+@media (max-width: 719px) {
+  .home-layout .main-area {
+    overflow-x: hidden;
   }
 }
 

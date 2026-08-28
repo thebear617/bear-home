@@ -938,7 +938,16 @@ const moneyGoals = trackerGoalDefinitions.filter((goal) => goal.type === 'money'
       panel.querySelector('[data-history-summary]').innerHTML = `<article><span>⏱️</span><div><small>TOTAL WORK HOURS</small><b>${formatShortDuration(workTotal)}</b><em>${formatSignedDuration(workTotal - previousAggregate.workTotal)}</em></div></article><article><span>💪</span><div><small>ACTIVE DAYS</small><b>${activeDays} / ${daysInMonth}</b><em>${formatSignedNumber(activeDays - previousAggregate.activeDays)} · ${Math.round((activeDays / daysInMonth) * 100)}% of month</em></div></article><article><span>📖</span><div><small>TOTAL HABIT COMPLETIONS</small><b>${habitTotal}</b><em>${formatSignedNumber(habitTotal - previousAggregate.habitTotal)} · ${targetSelectedHabits.length} target habits selected</em></div></article><article><span>🍅</span><div><small>AVG POMODOROS / DAY</small><b>${activeDays ? (pomodoroTotal / activeDays).toFixed(1) : '0.0'}</b><em>${formatSignedNumber(pomodoroTotal - previousAggregate.pomodoroTotal)} · 最佳日：${bestDay ? bestDay.date.getDate() : '—'} 日</em></div></article>`;
       const breakdown = panel.querySelector('[data-month-breakdown]');
       if (breakdown) {
-        const workCategories = [...work.filter((item) => item.seconds !== undefined), { id: 'side-project', name: 'Side project', icon: '🌙' }];
+        const workCategories = [
+          ...workCards
+            .filter((card) => card.dataset.workSeconds !== undefined)
+            .map((card) => ({
+              id: card.dataset.workId,
+              name: card.querySelector('.tracking-work-copy small')?.textContent?.trim() || card.dataset.workId,
+              icon: card.querySelector('.tracking-work-icon')?.textContent?.trim() || '💻',
+            })),
+          { id: 'side-project', name: 'Side project', icon: '🌙' },
+        ];
         const knownCategoryIds = new Set(workCategories.map((item) => item.id));
         Object.keys(categoryTotals).filter((id) => !knownCategoryIds.has(id)).forEach((id) => workCategories.push({ id, name: id, icon: '💻' }));
         const maxWork = Math.max(...workCategories.map((category) => categoryTotals[category.id] || 0), 1);

@@ -1,21 +1,17 @@
 ---
-const repos = [
-  { name: 'bear-home', description: '熊窝 · 个人主页' },
-  { name: 'pig-home', description: '猪窝 · 家庭管理工具' },
-  { name: 'devnotes', description: '开发笔记 · DevNotes' }
-];
+import { githubProfile } from '../data/dashboard.js';
 ---
 <article class="github-profile-card">
   <div class="github-profile-summary">
-    <img src="https://github.com/thebear617.png?size=160" alt="orangebear 的 GitHub 头像" width="56" height="56" loading="lazy">
+    <img src={githubProfile.avatarUrl} alt={`${githubProfile.displayName} 的 GitHub 头像`} width="56" height="56" loading="lazy">
     <div>
-      <strong>orangebear</strong>
-      <a href="https://github.com/thebear617" target="_blank" rel="noopener">@thebear617 ↗</a>
+      <strong>{githubProfile.displayName}</strong>
+      <a href={githubProfile.profileUrl} target="_blank" rel="noopener">@{githubProfile.username} ↗</a>
     </div>
-    <span class="github-repo-count">7 个公开仓库</span>
+    <span class="github-repo-count">{githubProfile.publicRepos} 个公开仓库</span>
   </div>
   <ul class="github-repo-list">
-    {repos.map((repo) => (
+    {githubProfile.featuredRepos.map((repo) => (
       <li>
         <a href={`https://github.com/thebear617/${repo.name}`} target="_blank" rel="noopener">
           <span class="github-repo-icon" aria-hidden="true">⌘</span>

@@ -1,0 +1,103 @@
+---
+import { getNavigationItems } from '../data/navigation.js';
+
+const rootHref = Astro.url.pathname === '/' || Astro.url.pathname === '/index.html' ? './' : '../';
+const items = getNavigationItems(rootHref);
+const active = Astro.props.active ?? 'home';
+---
+
+<nav class="floating-nav" aria-label="主导航">
+  {items.map((item) => (
+    <a
+      class:list={['floating-nav-item', { active: active === item.id }]}
+      href={item.href}
+      aria-label={item.title}
+      aria-current={active === item.id ? 'page' : undefined}
+    >
+      <span aria-hidden="true">{item.icon}</span>
+      <small>{item.title}</small>
+    </a>
+  ))}
+</nav>
+
+<style>
+  .floating-nav {
+    position: absolute;
+    top: 1.25rem;
+    left: 1.4rem;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    gap: .28rem;
+    padding: .35rem .45rem;
+    border: 1px solid rgba(255, 255, 255, .8);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .48);
+    box-shadow: 0 10px 28px rgba(93, 91, 116, .08), inset 0 1px 0 rgba(255, 255, 255, .72);
+    backdrop-filter: blur(18px);
+  }
+
+  .floating-nav-item {
+    display: inline-grid;
+    place-items: center;
+    color: #61707c;
+    text-decoration: none;
+  }
+
+  .floating-nav-item {
+    position: relative;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 50%;
+    font-size: 1.05rem;
+    transition: background .18s ease, color .18s ease, transform .18s ease;
+  }
+
+  .floating-nav-item small {
+    position: absolute;
+    top: calc(100% + .5rem);
+    left: 50%;
+    padding: .22rem .45rem;
+    border: 1px solid rgba(255, 255, 255, .76);
+    border-radius: .45rem;
+    background: rgba(255, 255, 255, .78);
+    color: #5e6b76;
+    font-size: .65rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -.2rem);
+    transition: opacity .18s ease, transform .18s ease;
+  }
+
+  .floating-nav-item:hover,
+  .floating-nav-item:focus-visible,
+  .floating-nav-item.active {
+    background: rgba(255, 255, 255, .82);
+    color: #796d9b;
+    transform: translateY(-1px);
+  }
+
+  .floating-nav-item:hover small,
+  .floating-nav-item:focus-visible small {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .floating-nav-item:focus-visible {
+    outline: 2px solid rgba(137, 119, 171, .45);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 719px) {
+    .floating-nav {
+      top: .75rem;
+      left: .75rem;
+    }
+
+    .floating-nav-item small {
+      display: none;
+    }
+  }
+</style>

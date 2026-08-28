@@ -1,6 +1,6 @@
 ---
-import SiteSidebar from '../components/SiteSidebar.astro';
-const { title = '熊窝', active = 'routes', children } = Astro.props;
+import FloatingNav from '../components/FloatingNav.astro';
+const { title = '熊窝', active = 'routes', hideSidebar = false } = Astro.props;
 ---
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -11,31 +11,14 @@ const { title = '熊窝', active = 'routes', children } = Astro.props;
   <title>{title}</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
-  <div class="layout">
-    <SiteSidebar active={active} />
+<body class="sidebar-collapsed">
+  <div class:list={['layout', { 'home-layout': hideSidebar, 'capsule-layout': !hideSidebar }]}>
+    {!hideSidebar && <FloatingNav active={active} />}
     <div class="main-area">
-      <main class:list={['app-shell', { 'dashboard-shell': active === 'dashboard', 'routes-shell': active === 'routes' }]}>
+      <main class:list={['app-shell', { 'home-shell': active === 'home', 'dashboard-shell': active === 'dashboard', 'routes-shell': active === 'routes' }]}>
         <slot />
       </main>
     </div>
   </div>
 </body>
 </html>
-
-<script is:inline>
-  const sidebar = document.querySelector('.sidebar');
-  const backdrop = document.querySelector('.sidebar-backdrop');
-  document.querySelector('[data-sidebar-open]')?.addEventListener('click', () => {
-    sidebar?.classList.add('open');
-    backdrop?.classList.add('open');
-    document.body.classList.add('sidebar-open');
-    document.body.style.overflow = 'hidden';
-  });
-  document.querySelectorAll('[data-sidebar-close]').forEach((button) => button.addEventListener('click', () => {
-    sidebar?.classList.remove('open');
-    backdrop?.classList.remove('open');
-    document.body.classList.remove('sidebar-open');
-    document.body.style.overflow = '';
-  }));
-</script>
