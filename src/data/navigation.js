@@ -1,5 +1,5 @@
 const navigationItems = [
-  { id: 'home', title: '首页', icon: '⌂', sidebarIcon: '⌂', path: 'index.html' },
+  { id: 'home', title: '首页', icon: '⌂', sidebarIcon: '⌂', path: 'home/' },
   { id: 'routes', title: '路由表', icon: '⌘', sidebarIcon: '🗺️', path: 'routes/' },
   { id: 'dashboard', title: '生活仪表盘', icon: '◒', sidebarIcon: '🏠', path: 'dashboard/' },
 ];

@@ -12,6 +12,9 @@ const secondaryGroups = routeCategories.filter((category) => !primaryClusterIds.
 const homeWeatherLocation = weatherLocations[0];
 const homePlaylist = musicPlaylists.find((playlist) => playlist.name === '夜间低空飞行') ?? musicPlaylists[0];
 const homePlaylistUrl = `https://music.163.com/playlist?id=${homePlaylist.id}`;
+const homeRootHref = Astro.url.pathname.endsWith('/home/') || Astro.url.pathname.endsWith('/home/index.html') ? '../' : './';
+const dashboardHref = `${homeRootHref}dashboard/`;
+const routesHref = `${homeRootHref}routes/`;
 const today = new Date();
 const dateLabel = new Intl.DateTimeFormat('zh-CN', {
   year: 'numeric',
@@ -40,13 +43,13 @@ const calendarWeekday = new Intl.DateTimeFormat('zh-CN', { weekday: 'short' }).f
   <span class="home-orbit-dot home-orbit-dot-c" aria-hidden="true"></span>
   <span class="home-orbit-dot home-orbit-dot-d" aria-hidden="true"></span>
 
-  <a class="home-satellite home-satellite-weather" href="./dashboard/" data-home-weather data-latitude={homeWeatherLocation.latitude} data-longitude={homeWeatherLocation.longitude} title={`打开${homeWeatherLocation.name}天气详情`}>
+  <a class="home-satellite home-satellite-weather" href={dashboardHref} data-home-weather data-latitude={homeWeatherLocation.latitude} data-longitude={homeWeatherLocation.longitude} title={`打开${homeWeatherLocation.name}天气详情`}>
     <p class="home-satellite-label">天气 · {homeWeatherLocation.name}</p>
     <strong data-home-weather-temperature>--°</strong>
     <span data-home-weather-label>正在获取天气…</span>
   </a>
 
-  <a class="home-satellite home-satellite-calendar" href="./dashboard/" title="打开完整日历">
+  <a class="home-satellite home-satellite-calendar" href={dashboardHref} title="打开完整日历">
     <p class="home-satellite-label">日历</p>
     <strong>{calendarDay}</strong>
     <span>{calendarMonth} · {calendarWeekday}</span>
@@ -70,7 +73,7 @@ const calendarWeekday = new Intl.DateTimeFormat('zh-CN', { weekday: 'short' }).f
     <h2 id="home-focus-title">今天也慢慢过</h2>
     <time datetime={dateValue}>{dateLabel}</time>
     <p class="home-focus-copy">专注一件事，慢慢靠近目标。</p>
-    <a class="home-focus-action" href="./dashboard/">打开今日看板 <span aria-hidden="true">↗</span></a>
+    <a class="home-focus-action" href={dashboardHref}>打开今日看板 <span aria-hidden="true">↗</span></a>
   </article>
 
   {routeClusters.map((category, index) => (
@@ -105,7 +108,7 @@ const calendarWeekday = new Intl.DateTimeFormat('zh-CN', { weekday: 'short' }).f
     <strong data-home-tracker-title>今日摘要</strong>
     <div class="home-habit-dots" data-home-habit-dots aria-hidden="true"><i data-home-habit-dot></i><i data-home-habit-dot></i><i data-home-habit-dot></i><i data-home-habit-dot></i><i data-home-habit-dot></i></div>
     <span class="home-tracker-detail" data-home-tracker-detail>读取今日追踪…</span>
-    <a href="./dashboard/">查看完整追踪 ↗</a>
+    <a href={dashboardHref}>查看完整追踪 ↗</a>
   </article>
 
   <div class="home-secondary-routes" aria-label="其他路由分类">
@@ -121,7 +124,7 @@ const calendarWeekday = new Intl.DateTimeFormat('zh-CN', { weekday: 'short' }).f
     ))}
   </div>
 
-  <a class="home-routes-entry" href="./routes/">查看全部路由 <span aria-hidden="true">→</span></a>
+  <a class="home-routes-entry" href={routesHref}>查看全部路由 <span aria-hidden="true">→</span></a>
 </section>
 
 <script>
