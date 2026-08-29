@@ -25,7 +25,8 @@ export const ARCHIVED_TODO_BOARDS: TodoBoard[] = [
       { id: 'c13', title: '猪窝加上收入的逻辑', status: 'done', date: '2026-08-17', createdAt: '2026-08-16', url: '', note: '' },
       { id: 'c14', title: '补全之前个人开发时间线的 UI（个人审美记录）', status: 'done', date: '2026-08-18', createdAt: '2026-08-16', url: '', note: 'devnotes 补全各站点历史 UI 时间线，发布 v0.15.0' },
       { id: 'c15', title: '参考 B 站视频美化自己的个人仪表盘，学习他的记笔记方式', status: 'done', date: '2026-08-28', createdAt: '2026-08-16', url: 'https://lvyovo-wiki.tech/', note: '' },
-      { id: 'c22', title: '尝试 codex 原生功能与 skill：browser、computer use、product design、figma、image gen、goal 模式 for UI', status: 'done', date: '2026-08-24', createdAt: '2026-08-14', url: '', note: '8/24 完成 codex 原生功能尝试' }
+      { id: 'c22', title: '尝试 codex 原生功能与 skill：browser、computer use、product design、figma、image gen、goal 模式 for UI', status: 'done', date: '2026-08-24', createdAt: '2026-08-14', url: '', note: '8/24 完成 codex 原生功能尝试' },
+      { id: 'c19', title: '参考 B 站视频优化自己的看板视图', status: 'done', date: '2026-08-22', createdAt: '2026-08-18', url: 'https://www.bilibili.com/video/BV1F2Mw6FExo', note: '看板视图优化完成（侧边栏折叠/展开交互升级）' }
     ]
   },
   {
