@@ -5,7 +5,6 @@ import { ARCHIVED_TODO_BOARDS } from '../../data/archived-todo-data';
 
 const dateKey = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai' }).format(new Date());
 const boardsLoaded = Array.isArray(TODO_BOARDS) && TODO_BOARDS.length > 0;
-const firstBoard = TODO_BOARDS[0];
 ---
 
 <SiteLayout title="任务看板 · 熊窝" active="todo-board">
@@ -25,14 +24,6 @@ const firstBoard = TODO_BOARDS[0];
             <div class="todo-board-stats-fill" style="width: 0%"></div>
           </div>
         </div>
-        <nav class="todo-board-tabs" aria-label="任务分类">
-          {TODO_BOARDS.map(board => (
-            <button type="button" class:list={['todo-board-tab', { active: board.id === firstBoard?.id }]} data-tb-tab={board.id}>
-              <span class="todo-board-tab-icon">{board.icon}</span>
-              <span class="todo-board-tab-name">{board.id === 'summary' ? '汇总' : board.name}</span>
-            </button>
-          ))}
-        </nav>
         <div class="todo-board-columns">
           <div class="todo-board-column">
             <div class="todo-board-column-header todo-status-todo">

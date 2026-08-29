@@ -6,6 +6,9 @@ export interface TodoItem {
   note?: string;
   createdAt?: string;
   date?: string;
+  plannedStart?: string;
+  plannedEnd?: string;
+  completedAt?: string;
 }
 
 export interface TodoBoard {
@@ -27,9 +30,9 @@ export const TODO_BOARDS: TodoBoard[] = [
     name: '生活',
     icon: '🏠',
     items: [
-      { id: 'l1', title: '给宝宝做相册（0/80页）', status: 'doing', date: '2026-07-19', createdAt: '2026-07-19', url: '', note: '' },
+      { id: 'l1', title: '给宝宝做相册（0/80页）', status: 'todo', date: '2026-07-19', createdAt: '2026-07-19', url: '', note: '' },
       { id: 'l8', title: '带赫兹去博辰复诊', status: 'todo', date: '2026-09-02', createdAt: '2026-08-02', url: '', note: '赫兹口炎治疗（441）后续' },
-      { id: 'l31', title: '阿里的 qoder 免费领 800 次千问 3.8 max 调用', status: 'todo', date: '2026-09-03', createdAt: '2026-09-01', url: '', note: '9/3 可免费领，记得选 qoder cn' },
+      { id: 'l31', title: '阿里的 qoder 免费领 2000 次千问 3.8 max 调用', status: 'todo', date: '2026-09-03', createdAt: '2026-09-01', url: 'https://qoder.com.cn/referral?spm=5176.28644950.0.0.30d079bbM3C7y1', note: '9/3 前开通可以有 2000 次调用' },
       { id: 'l35', title: 'MiniMax 的 2000 积分到期', status: 'todo', date: '2026-11-11', createdAt: '2026-08-12', url: '', note: '到期前用掉，别浪费' },
     ]
   },
