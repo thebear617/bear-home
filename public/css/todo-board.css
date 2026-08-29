@@ -817,13 +817,15 @@
 }
 
 .hm-outer {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
+  display: block;
   max-width: 100%;
   overflow-x: auto;
   padding-bottom: 2px;
+}
+
+.hm-chart {
+  width: max-content;
+  margin: 0 auto;
 }
 
 .hm-months {
@@ -831,6 +833,7 @@
   grid-template-columns: 28px repeat(var(--hm-week-count), 17px);
   column-gap: 3px;
   min-width: max-content;
+  margin-bottom: 7px;
   font-size: 11px;
   color: #9a8e80;
   line-height: 1;
@@ -844,7 +847,7 @@
   font-weight: 400;
   font-size: 11px;
   color: #9a8e80;
-  text-align: left;
+  text-align: center;
   padding: 0;
   white-space: nowrap;
 }
@@ -927,129 +930,289 @@
   border: none;
 }
 
-.hm-drawer-backdrop {
+.hm-popover-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(47, 41, 36, 0.08);
+  backdrop-filter: blur(2px);
   z-index: 100;
+  animation: hmPopoverFadeIn 0.18s ease;
 }
 
-.hm-drawer {
+.hm-popover {
   position: fixed;
-  top: 0;
-  right: 0;
-  width: 380px;
-  max-width: 90vw;
-  height: 100%;
-  background: #ffffff;
+  top: 50%;
+  left: 50%;
+  width: min(410px, calc(100vw - 32px));
+  max-height: min(620px, calc(100vh - 32px));
+  transform: translate(-50%, -50%);
+  background: #fffdfa;
+  border: 1px solid #ded2c4;
+  border-radius: 24px;
   z-index: 101;
   display: flex;
   flex-direction: column;
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
-  animation: hmDrawerIn 0.2s ease;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(73, 54, 38, 0.2), 0 4px 12px rgba(73, 54, 38, 0.08);
+  animation: hmPopoverIn 0.2s cubic-bezier(0.22, 0.8, 0.24, 1);
 }
 
-@keyframes hmDrawerIn {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+@keyframes hmPopoverFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.hm-drawer-header {
+@keyframes hmPopoverIn {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 12px)) scale(0.98); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.hm-popover-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 20px 20px 16px;
-  border-bottom: 1px solid #e7dfd3;
-  flex-shrink: 0;
+  gap: 9px;
+  padding: 10px 20px 14px;
 }
 
-.hm-drawer-date {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-}
-
-.hm-drawer-date-value {
-  font-size: 16px;
-  font-weight: 600;
-  color: #2f2924;
-}
-
-.hm-drawer-date-rel {
-  font-size: 13px;
-  color: #9a8e80;
-}
-
-.hm-drawer-count {
-  font-size: 13px;
-  color: #9a8e80;
+.hm-popover-kicker,
+.hm-popover-count,
+.hm-popover-date-rel,
+.hm-popover-board {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
   white-space: nowrap;
 }
 
-.hm-drawer-close {
-  width: 32px;
-  height: 32px;
+.hm-popover-kicker {
+  gap: 7px;
+  padding: 6px 10px;
+  border: 1px solid #e7dfd3;
+  background: #f7f3ee;
+  color: #5a4f44;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.hm-popover-kicker-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c2410c;
+  box-shadow: 0 0 0 3px rgba(194, 65, 12, 0.12);
+}
+
+.hm-popover-count {
+  margin-left: auto;
+  padding: 5px 10px;
+  background: #edf7ef;
+  color: #3e8054;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.hm-popover-close {
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  background: #f7f3ee;
+  border: 1px solid #e7dfd3;
+  background: #fff;
   border-radius: 50%;
-  font-size: 14px;
-  color: #5a4f44;
+  color: #8d7d6c;
+  font-size: 12px;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
   flex-shrink: 0;
 }
 
-.hm-drawer-close:hover {
-  background: #e7dfd3;
+.hm-popover-close:hover {
+  border-color: #c2410c;
+  background: #fff4ed;
+  color: #c2410c;
 }
 
-.hm-drawer-list {
+.hm-popover-date-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 20px;
+  padding: 14px 15px;
+  border: 1px solid #ede5da;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.hm-popover-date-value {
+  color: #2f2924;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 19px;
+  letter-spacing: 0.02em;
+}
+
+.hm-popover-date-rel {
+  padding: 5px 9px;
+  background: #f7f3ee;
+  color: #75685b;
+  font-size: 11px;
+}
+
+.hm-popover-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   list-style: none;
   margin: 0;
-  padding: 12px 20px 20px;
+  padding: 12px 20px 14px;
   overflow-y: auto;
-  flex: 1;
 }
 
-.hm-drawer-item {
+.hm-popover-item {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 10px 0;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #5a4f44;
-  border-bottom: 1px solid #f0ebe4;
+  padding: 11px 12px;
+  border: 1px solid #eee7dd;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 2px 0 rgba(87, 64, 43, 0.04);
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.hm-drawer-item:last-child {
-  border-bottom: none;
+.hm-popover-item:hover {
+  border-color: #dfc5ad;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(87, 64, 43, 0.08);
 }
 
-.hm-drawer-item-badge {
+.hm-popover-item-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 25px;
   flex-shrink: 0;
-  font-size: 18px;
-  line-height: 1.4;
+  border: 1px solid #e7dfd3;
+  border-radius: 9px;
+  background: #faf7f2;
+  color: #a09180;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
 }
 
-.hm-drawer-link {
-  color: #c2410c;
+.hm-popover-item-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.hm-popover-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.hm-popover-board {
+  gap: 4px;
+  padding: 4px 8px;
+  background: #f7f3ee;
+  color: #806f60;
+  font-size: 10px;
+}
+
+.hm-popover-item-title {
+  margin-top: 6px;
+  color: #51463c;
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.hm-popover-link {
+  color: #b34b1b;
   text-decoration: none;
 }
 
-.hm-drawer-link:hover {
+.hm-popover-link:hover {
+  color: #8e3612;
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-.hm-drawer-empty {
+.hm-popover-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 26px 16px 30px;
+  border: 1px dashed #ded2c4;
+  border-radius: 15px;
   color: #9a8e80;
-  font-size: 14px;
-  text-align: center;
-  padding: 32px 16px;
+  font-size: 12px;
+}
+
+.hm-popover-empty-mark {
+  color: #c8b9a8;
+  font-size: 18px;
+}
+
+.hm-popover-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 20px 16px;
+}
+
+.hm-popover-pagination button {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e7dfd3;
+  border-radius: 50%;
+  background: #fff;
+  color: #75685b;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hm-popover-pagination button:hover:not(:disabled) {
+  border-color: #c2410c;
+  color: #c2410c;
+}
+
+.hm-popover-pagination button:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.hm-popover-pagination > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  border: 1px solid #eee7dd;
+  border-radius: 999px;
+  background: #faf7f2;
+  color: #a09180;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+}
+
+.hm-popover-pagination > span strong {
+  color: #5a4f44;
+  font-weight: 600;
+}
+
+.hm-popover-pagination > span i {
+  color: #c8b9a8;
+  font-style: normal;
 }
 
 @media (max-width: 768px) {
@@ -1086,6 +1249,37 @@
 
   .todo-board-history-group summary {
     flex-wrap: wrap;
+  }
+
+  .hm-chart {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .hm-popover {
+    width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
+    border-radius: 20px;
+  }
+
+  .hm-popover-header {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .hm-popover-date-row {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .hm-popover-section-heading {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .hm-popover-list {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .todo-gantt {

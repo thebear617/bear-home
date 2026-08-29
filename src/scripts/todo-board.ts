@@ -27,12 +27,14 @@ interface TodoLocalState {
 
 const SUMMARY_BOARD_IDS = ['life', 'coding', 'research'];
 const BOARD_PAGE_SIZE = 4;
+const HEATMAP_PAGE_SIZE = 3;
 const TODO_STORAGE_KEY = 'bear-home.todo-board.v1';
 
 let activeTabId = 'summary';
 let currentView: 'board' | 'gantt' = 'board';
 let historyOpen = false;
 let selectedHeatmapDate: string | null = null;
+let heatmapPage = 0;
 let scheduleItemId: string | null = null;
 let completionItemId: string | null = null;
 let ganttShowCompleted = false;
@@ -319,7 +321,7 @@ function renderHeatmap(): string {
     weeks.push(week);
   }
 
-  let monthLabels = '';
+  const monthStarts: { weekIndex: number; label: string }[] = [];
   let lastMonthKey = '';
   weeks.forEach((week, weekIndex) => {
     const monthStart = week.find((item) => item.date.getDate() === 1);
@@ -327,9 +329,14 @@ function renderHeatmap(): string {
     if (!labelDate) return;
     const monthKey = labelDate.date.getFullYear() + '-' + labelDate.date.getMonth();
     if (monthKey === lastMonthKey) return;
-    monthLabels += '<span class="hm-month-label" style="grid-column: ' + (weekIndex + 2) + '">' + monthNames[labelDate.date.getMonth()] + '</span>';
+    monthStarts.push({ weekIndex, label: monthNames[labelDate.date.getMonth()] });
     lastMonthKey = monthKey;
   });
+  const monthLabels = monthStarts.map((month, index) => {
+    const nextWeekIndex = monthStarts[index + 1]?.weekIndex || weeks.length;
+    const span = Math.max(1, nextWeekIndex - month.weekIndex);
+    return '<span class="hm-month-label" style="grid-column: ' + (month.weekIndex + 2) + ' / span ' + span + '">' + month.label + '</span>';
+  }).join('');
 
   const dayRows = [0, 1, 2, 3, 4, 5, 6].map((rowIndex) => {
     const cells = weeks.map((week) => {
@@ -351,35 +358,49 @@ function renderHeatmap(): string {
       '<span class="hm-summary">过去一年 · ' + completedDays + ' 天 · ' + completedItems + ' 项</span>' +
     '</div>' +
     '<div class="hm-outer">' +
-      '<div class="hm-months" style="--hm-week-count: ' + weeks.length + '"><span></span>' + monthLabels + '</div>' +
-      '<div class="hm-grid" style="--hm-week-count: ' + weeks.length + '" role="grid" aria-label="过去一年的完成记录">' + dayRows + '</div>' +
-      '<div class="hm-legend"><span>少</span><span class="hm-cell"></span><span class="hm-cell hm-lvl-1"></span><span class="hm-cell hm-lvl-2"></span><span class="hm-cell hm-lvl-3"></span><span class="hm-cell hm-lvl-4"></span><span>多</span></div>' +
+      '<div class="hm-chart">' +
+        '<div class="hm-months" style="--hm-week-count: ' + weeks.length + '"><span></span>' + monthLabels + '</div>' +
+        '<div class="hm-grid" style="--hm-week-count: ' + weeks.length + '" role="grid" aria-label="过去一年的完成记录">' + dayRows + '</div>' +
+        '<div class="hm-legend"><span>少</span><span class="hm-cell"></span><span class="hm-cell hm-lvl-1"></span><span class="hm-cell hm-lvl-2"></span><span class="hm-cell hm-lvl-3"></span><span class="hm-cell hm-lvl-4"></span><span>多</span></div>' +
+      '</div>' +
     '</div>' +
-    renderDrawer(data) +
+    renderHeatmapPopover(data) +
   '</section>';
 }
 
-function renderDrawer(data: Map<string, HeatmapItem[]>): string {
+function renderHeatmapPopover(data: Map<string, HeatmapItem[]>): string {
   if (!selectedHeatmapDate) return '';
   const items = data.get(selectedHeatmapDate) || [];
+  const pageCount = Math.max(1, Math.ceil(items.length / HEATMAP_PAGE_SIZE));
+  const currentPage = Math.min(heatmapPage, pageCount - 1);
+  const visibleItems = items.slice(currentPage * HEATMAP_PAGE_SIZE, (currentPage + 1) * HEATMAP_PAGE_SIZE);
   const itemHtml = items.length === 0
-    ? '<p class="hm-drawer-empty">当日无完成记录</p>'
-    : items.map((item) => {
+    ? '<div class="hm-popover-empty"><span class="hm-popover-empty-mark">—</span><span>这一天还没有完成记录</span></div>'
+    : visibleItems.map((item, index) => {
       const title = item.url
-        ? '<a href="' + escape(item.url) + '" target="_blank" rel="noopener" class="hm-drawer-link">' + escape(item.title) + '</a>'
+        ? '<a href="' + escape(item.url) + '" target="_blank" rel="noopener" class="hm-popover-link">' + escape(item.title) + '</a>'
         : escape(item.title);
-      return '<li class="hm-drawer-item"><span class="hm-drawer-item-badge">' + escape(item.boardIcon) + '</span> ' + title + '</li>';
+      const board = item.boardName
+        ? '<span class="hm-popover-board">' + escape(item.boardIcon) + ' ' + escape(item.boardName) + '</span>'
+        : '<span class="hm-popover-board">' + escape(item.boardIcon) + ' 任务</span>';
+      const itemIndex = currentPage * HEATMAP_PAGE_SIZE + index + 1;
+      return '<li class="hm-popover-item"><span class="hm-popover-item-index">' + String(itemIndex).padStart(2, '0') + '</span><div class="hm-popover-item-body"><div class="hm-popover-item-meta">' + board + '</div><div class="hm-popover-item-title">' + title + '</div></div></li>';
     }).join('');
+  const pagination = pageCount > 1
+    ? '<div class="hm-popover-pagination" aria-label="完成记录分页"><button type="button" data-hm-page="prev" data-hm-page-count="' + pageCount + '"' + (currentPage === 0 ? ' disabled' : '') + ' aria-label="上一页">‹</button><span><strong>' + (currentPage + 1) + '</strong><i>/</i>' + pageCount + '</span><button type="button" data-hm-page="next" data-hm-page-count="' + pageCount + '"' + (currentPage === pageCount - 1 ? ' disabled' : '') + ' aria-label="下一页">›</button></div>'
+    : '';
 
-  return '<div class="hm-drawer-backdrop" data-hm-close></div>' +
-    '<div class="hm-drawer" role="dialog" aria-label="' + escape(selectedHeatmapDate) + ' 完成记录">' +
-      '<div class="hm-drawer-header">' +
-        '<div class="hm-drawer-date"><span class="hm-drawer-date-value">' + escape(selectedHeatmapDate) + '</span><span class="hm-drawer-date-rel">' + escape(relativeTime(selectedHeatmapDate)) + '</span></div>' +
-        '<span class="hm-drawer-count">' + items.length + ' 条</span>' +
-        '<button class="hm-drawer-close" data-hm-close aria-label="关闭">✕</button>' +
+  return '<div class="hm-popover-backdrop" data-hm-close></div>' +
+    '<section class="hm-popover" role="dialog" aria-modal="true" aria-label="' + escape(selectedHeatmapDate) + ' 完成记录">' +
+      '<div class="hm-popover-header">' +
+        '<div class="hm-popover-kicker"><span class="hm-popover-kicker-dot"></span><span>完成记录</span></div>' +
+        '<span class="hm-popover-count">' + items.length + ' 条</span>' +
+        '<button class="hm-popover-close" data-hm-close aria-label="关闭">✕</button>' +
       '</div>' +
-      '<ul class="hm-drawer-list">' + itemHtml + '</ul>' +
-    '</div>';
+      '<div class="hm-popover-date-row"><strong class="hm-popover-date-value">' + escape(selectedHeatmapDate) + '</strong><span class="hm-popover-date-rel">' + escape(relativeTime(selectedHeatmapDate)) + '</span></div>' +
+      '<ul class="hm-popover-list">' + itemHtml + '</ul>' +
+      pagination +
+    '</section>';
 }
 
 function renderCard(item: BoardItem): string {
@@ -703,7 +724,18 @@ document.addEventListener('click', (event) => {
   const historyButton = target.closest<HTMLButtonElement>('[data-tb-history]');
   if (historyButton) {
     selectedHeatmapDate = null;
+    heatmapPage = 0;
     historyOpen = !historyOpen;
+    refresh();
+    return;
+  }
+
+  const heatmapPageButton = target.closest<HTMLButtonElement>('[data-hm-page]');
+  if (heatmapPageButton && !heatmapPageButton.disabled) {
+    const pageCount = Number(heatmapPageButton.dataset.hmPageCount || 1);
+    heatmapPage = heatmapPageButton.dataset.hmPage === 'next'
+      ? Math.min(heatmapPage + 1, pageCount - 1)
+      : Math.max(0, heatmapPage - 1);
     refresh();
     return;
   }
@@ -712,12 +744,14 @@ document.addEventListener('click', (event) => {
   if (cell) {
     const date = cell.dataset.hmDate || null;
     selectedHeatmapDate = selectedHeatmapDate === date ? null : date;
+    heatmapPage = 0;
     refresh();
     return;
   }
 
   if (target.closest('[data-hm-close]')) {
     selectedHeatmapDate = null;
+    heatmapPage = 0;
     refresh();
   }
 });
@@ -770,6 +804,7 @@ document.addEventListener('keydown', (event) => {
   event.preventDefault();
   const date = cell.dataset.hmDate || null;
   selectedHeatmapDate = selectedHeatmapDate === date ? null : date;
+  heatmapPage = 0;
   refresh();
 });
 
@@ -777,6 +812,7 @@ document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
   if (selectedHeatmapDate || scheduleItemId || completionItemId) {
     selectedHeatmapDate = null;
+    heatmapPage = 0;
     scheduleItemId = null;
     completionItemId = null;
     refresh();
