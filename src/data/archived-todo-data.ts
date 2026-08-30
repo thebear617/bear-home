@@ -75,7 +75,8 @@ export const ARCHIVED_TODO_BOARDS: TodoBoard[] = [
       { id: 'l32', title: '过马路去校医院看牙齿', status: 'done', date: '2026-08-28', createdAt: '2026-08-25', url: '', note: '' },
       { id: 'l33', title: '过马路问学校的电脑多少钱', status: 'done', date: '2026-08-28', createdAt: '2026-08-25', url: '', note: '' },
       { id: 'l15', title: '研究京东 PLUS 12 积分如何使用', status: 'done', date: '2026-08-28', createdAt: '2026-08-08', url: '', note: '京东 PLUS 会员每年有 12 积分，在「我的 → PLUS 专区 → 生活服务包」可兑换家政保洁 / 洗衣洗鞋 / 洗车 / 寄快递 / 在线问诊 / 读书月卡等（保洁 5 分、洗车 3 分、洗衣洗鞋 3 分、寄件 1 分）' },
-      { id: 'l34', title: '在家里买油瓶', status: 'done', date: '2026-08-28', createdAt: '2026-08-25', url: '', note: '' }
+      { id: 'l34', title: '在家里买油瓶', status: 'done', date: '2026-08-28', createdAt: '2026-08-25', url: '', note: '' },
+      { id: 'l36', title: '制定猪窝的 1 周菜单', status: 'done', date: '2026-08-30', createdAt: '2026-08-30', url: 'https://life.thebear617.cn/life/home-weekly-menu/', note: '8/30 完成' }
     ]
   }
 ];
