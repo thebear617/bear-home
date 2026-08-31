@@ -42,7 +42,6 @@ export const TODO_BOARDS: TodoBoard[] = [
     icon: '💻',
     items: [
       { id: 'c10', title: '复现 chatnotes', status: 'todo', date: '2026-08-22', createdAt: '2026-08-08', url: 'https://www.bilibili.com/video/BV11mNA6vEJX', note: '顺序学习的时候， 一颗节点树（N 个节点=N 个卡片画布），逆序总结收敛的时候，一篇markdown（N 个悬浮窗=经过内容总结后的 N 个节点）-无限画布去做节点树，就是可以自己任意拖拽组织的（这个能实现吗，感觉聊天对话里不能实现，但每个对话总结好以后就能实现了）' },
-      { id: 'c21', title: '猫猫笔记升级及后台升级', status: 'todo', date: '2026-08-25', createdAt: '2026-08-23', url: '', note: '' },
     ]
   },
   {
