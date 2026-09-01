@@ -24,6 +24,7 @@ TARGETS = [
     ("西电学生邮箱.png", "mail.stu.xidian.edu.cn"),
     ("西电智课平台.png", "xdspoc.xidian.edu.cn"),
     ("西电信息网络技术中心.png", "xxzx.xidian.edu.cn"),
+    ("西电研究生系统.png", "yjspt.xidian.edu.cn"),
     ("Bilibili.png", "www.bilibili.com"),
 ]
 
