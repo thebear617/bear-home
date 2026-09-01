@@ -25,3 +25,25 @@ if ! git diff --quiet HEAD -- "$snapshot"; then
   echo "错误：追踪快照尚未提交，请先 git add/commit $snapshot。" >&2
   exit 1
 fi
+
+state_file="src/data/todo-state.json"
+
+if [ ! -f "$state_file" ]; then
+  echo "错误：缺少 $state_file。" >&2
+  exit 1
+fi
+
+if ! git ls-files --error-unmatch -- "$state_file" >/dev/null 2>&1; then
+  echo "错误：$state_file 尚未加入 Git，请先 git add/commit。" >&2
+  exit 1
+fi
+
+if ! node scripts/validate-todo-state.mjs; then
+  echo "错误：任务看板状态校验失败，请修正 $state_file 后重新 git add/commit。" >&2
+  exit 1
+fi
+
+if ! git diff --quiet HEAD -- "$state_file"; then
+  echo "错误：任务看板状态尚未提交，请先 git add/commit $state_file。" >&2
+  exit 1
+fi

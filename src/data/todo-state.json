@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-01T07:10:44.536Z",
+  "items": {
+    "l1": {
+      "status": "doing",
+      "plannedStart": "2026-08-29",
+      "plannedEnd": "2026-09-07",
+      "phases": [
+        {
+          "id": "p1",
+          "title": "设计思路",
+          "start": "2026-08-29",
+          "end": "2026-08-31",
+          "status": "done"
+        },
+        {
+          "id": "p1788241669840",
+          "title": "选照片归档",
+          "start": "2026-09-01",
+          "end": "2026-09-04",
+          "status": "doing"
+        },
+        {
+          "id": "p1788241713639",
+          "title": "完成排版",
+          "start": "2026-09-05",
+          "end": "2026-09-07",
+          "status": "todo"
+        }
+      ]
+    },
+    "c21": {
+      "status": "doing",
+      "plannedStart": "2026-08-29",
+      "plannedEnd": "2026-08-31"
+    },
+    "c19": {
+      "status": "done",
+      "completedAt": "2026-08-29"
+    },
+    "c10": {
+      "status": "doing",
+      "plannedStart": "2026-09-01",
+      "plannedEnd": "2026-09-20"
+    }
+  }
+}

@@ -1,7 +1,7 @@
 {
   "name": "bear-home",
   "private": true,
-  "version": "0.28.0",
+  "version": "0.29.0",
   "type": "module",
   "scripts": {
     "dev": "astro dev --port 4321",
@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "install-hooks": "sh scripts/install-hooks.sh",
     "tracker:migrate": "node scripts/migrate-tracker-snapshot.mjs",
-    "tracker:validate": "node scripts/validate-tracker-snapshot.mjs"
+    "tracker:validate": "node scripts/validate-tracker-snapshot.mjs",
+    "todo:validate": "node scripts/validate-todo-state.mjs"
   },
   "devDependencies": {
     "astro": "^7.2.0"

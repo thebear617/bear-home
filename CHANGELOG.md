@@ -1,5 +1,35 @@
 # 熊窝 personal 更新日志
 
+## v0.29.0 — 2026-09-01
+
+feat(todo-board): 本地编辑不丢视图 + 分割缝拖拽修复 + 工具栏精简
+
+- fix: 拖拽阶段分割缝时右阶段预览错位重叠——列号原来相对左阶段起点计算，只有第一道缝碰巧正确；改为统一以任务条起点为参照（`leftStartColumn`），并为阶段格子加 `grid-row: 1` 兜底，任何预览值都不会把阶段挤到第二行
+- feat: 借鉴 lifenotes/devnotes 本地 CMS 的做法，`astro.config.mjs` 中 todo-sync / tracker-sync 自写盘后 2.5s 内吞掉 dev server 的 `full-reload` / `update` 广播——本地编辑甘特图不再整页刷新、视图不再被重置回看板
+- chore: 移除甘特图「划分阶段」按钮的阶段列表悬浮窗与「定位今天」按钮；工具栏改为副标题左对齐、「显示已完成」与计划区间在右侧对齐成一列
+
+feat(todo-board): 甘特条支持阶段划分，长任务拆成有名字的连续子区间
+
+- feat: 任务补丁新增 `phases[]`（id/title/start/end/status），阶段连续无缝铺满计划区间，首阶段对齐 plannedStart、末阶段收在 plannedEnd
+- feat: 甘特条从实体色块改为阶段轨道容器，每段独立着色（未开始灰 / 进行中橙 / 完成绿）；≥3 天的阶段显示名称，更短的只留颜色与悬浮提示
+- feat: 甘特行新增「分阶段 / 阶段 N」入口，弹窗按「切割点」编辑（每行只填结束日期，下一段自动从次日开始），支持添加、删除、平均分配、清除
+- feat: 拖拽整条时阶段整体平移；拖拽两端时只动首/末阶段边界；移出甘特图时清除阶段
+- feat: 看板卡片新增阶段缩略条，按天数比例着色并显示当前阶段名
+- chore: 阶段编辑用草稿数组驱动，避免 refresh() 重建 DOM 时丢失用户输入
+- chore: `/__todo_sync` 支持 phases 字段，落盘前统一归一化（排序、消除空档、末阶段闭合、天数不足时截断多余阶段）
+- chore: `todo:validate` 增加阶段校验——id/名称/日期格式、start ≤ end、阶段间不得留空档、末阶段必须收在 plannedEnd
+- chore: 拖拽手柄改为绝对定位，不再占用布局流，保证阶段列宽与日期轴严格对齐
+
+feat(todo-board): 任务看板状态去 localStorage 化，真源迁入仓库随发布构建同步
+
+- feat: 新增 `src/data/todo-state.json` 作为任务状态唯一真源（status / plannedStart / plannedEnd / completedAt 字段级补丁，结构与原 localStorage 补丁一致）
+- feat: `astro.config.mjs` 新增 `todoSyncPlugin`，本地 dev 下看板操作通过 `POST /__todo_sync` 合并写回仓库状态文件（按任务 id 整体替换，空补丁即清除）
+- feat: 构建时状态文件经 `define:vars` 注入页面并内联进静态产物，线上零额外请求；`git push` 后 CI 校验通过即发布，全设备一致
+- feat: 线上看板转为只读：不渲染编辑按钮、禁用甘特条拖拽，header 显示「🔒 线上只读」徽标；本地 dev 全功能可编辑，写盘成功才算修改成功
+- fix: 归档任务不再可能被本地残留补丁污染状态（原 localStorage 补丁覆盖归档状态的根因消除）
+- chore: 新增 `npm run todo:validate` 校验脚本；pre-push hook 与 GitHub Actions 均加入任务状态校验，未提交的状态文件将阻断推送/发布
+- chore: 本地 dev 首次打开看板时自动把旧 localStorage（`bear-home.todo-board.v1`）补丁迁移进仓库并清除旧 key
+
 ## v0.25.0 — 2026-08-08
 
 feat(routes): 路由表「娱乐」分组更名为「购物娱乐」，新增京东商城入口

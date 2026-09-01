@@ -2,6 +2,7 @@
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import { TODO_BOARDS } from '../../data/todo-data';
 import { ARCHIVED_TODO_BOARDS } from '../../data/archived-todo-data';
+import todoState from '../../data/todo-state.json';
 
 const dateKey = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai' }).format(new Date());
 const boardsLoaded = Array.isArray(TODO_BOARDS) && TODO_BOARDS.length > 0;
@@ -58,9 +59,10 @@ const boardsLoaded = Array.isArray(TODO_BOARDS) && TODO_BOARDS.length > 0;
       <div class="todo-board-empty">看板数据未加载。请检查 todo-data.ts 是否正常编译。</div>
     )}
   </div>
-  <script define:vars={{ boards: TODO_BOARDS, archived: ARCHIVED_TODO_BOARDS }}>
+  <script define:vars={{ boards: TODO_BOARDS, archived: ARCHIVED_TODO_BOARDS, state: todoState }}>
     window.__TODO_BOARDS = boards;
     window.__ARCHIVED_TODO_BOARDS = archived;
+    window.__TODO_STATE = state;
   </script>
   <script>
     import '../../scripts/todo-board';
