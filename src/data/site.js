@@ -55,6 +55,7 @@ export const routeCategories = [
     icon: '🔬',
     items: [
       { name: 'AI Paper Notes', desc: 'AI 顶会论文中文速读速查，23000+ 篇覆盖 12 会议 55 领域', url: 'https://papernotes.org/', tags: ['科研', '论文'], addedAt: '2026-08-27', icon: '/assets/routes/PaperNotes.png' },
+      { name: '考研单词2026', desc: 'B 站考研最全分类单词 2026 版，没事看两眼复习', url: 'https://www.bilibili.com/video/BV1Ng396xEZK/', tags: ['学习', '单词'], addedAt: '2026-09-01', icon: '/assets/routes/英语单词本.png' },
     ]
   },
   {
