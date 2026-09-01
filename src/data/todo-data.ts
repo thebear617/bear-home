@@ -31,8 +31,9 @@ export const TODO_BOARDS: TodoBoard[] = [
     icon: '🏠',
     items: [
       { id: 'l1', title: '给宝宝做相册（0/80页）', status: 'todo', date: '2026-07-19', createdAt: '2026-07-19', url: '', note: '' },
-      { id: 'l8', title: '带赫兹去博辰复诊', status: 'todo', date: '2026-09-02', createdAt: '2026-08-02', url: '', note: '赫兹口炎治疗（441）后续' },
+      { id: 'l8', title: '带赫兹去博辰复诊，明天商量月饼选择', status: 'todo', date: '2026-09-02', createdAt: '2026-08-02', url: '', note: '赫兹口炎治疗（441）后续' },
       { id: 'l31', title: '阿里的 qoder 免费领 2000 次千问 3.8 max 调用', status: 'todo', date: '2026-09-03', createdAt: '2026-09-01', url: 'https://qoder.com.cn/referral?spm=5176.28644950.0.0.30d079bbM3C7y1', note: '9/3 前开通可以有 2000 次调用' },
+      { id: 'l32', title: '和 1931 商量猫猫周边', status: 'todo', date: '2026-09-08', createdAt: '2026-09-01', url: '', note: '在图书馆阅悦咖啡商量猫猫设计' },
     ]
   },
   {

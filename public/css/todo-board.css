@@ -251,6 +251,140 @@
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
+.todo-board-add {
+  border: 1px solid #c2410c;
+  border-radius: 20px;
+  padding: 6px 14px;
+  background: #c2410c;
+  color: #ffffff;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.todo-board-add:hover {
+  background: #9a3412;
+  border-color: #9a3412;
+}
+
+.todo-new-field {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+  color: #5a4f44;
+  font-size: 12px;
+}
+
+.todo-new-field input,
+.todo-new-field select,
+.todo-new-field textarea {
+  width: 100%;
+  padding: 8px 9px;
+  border: 1px solid #e7dfd3;
+  border-radius: 7px;
+  background: #fbf8f3;
+  color: #2f2924;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.todo-new-field textarea {
+  resize: vertical;
+}
+
+.todo-new-field input:focus,
+.todo-new-field select:focus,
+.todo-new-field textarea:focus {
+  outline: 2px solid rgba(194, 65, 12, .22);
+  border-color: #c2410c;
+}
+
+.todo-new-field-spacer {
+  display: none;
+}
+
+/* 「新增任务」弹窗：橙色 kicker 兼作标题（语义与「新增任务」重复，不再另设 h2）。
+   用两级选择器压过后文的 .todo-modal-kicker（11px），字号与右侧 28px 关闭按钮视觉等高。 */
+.todo-modal-header .todo-new-title {
+  margin-bottom: 0;
+  color: #c2410c;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+  letter-spacing: .02em;
+}
+
+.todo-new-field-label {
+  display: block;
+}
+
+/* 看板分类自定义下拉：替代原生 select 的系统弹出样式。 */
+.todo-new-dropdown {
+  position: relative;
+}
+
+.todo-new-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 9px;
+  border: 1px solid #e7dfd3;
+  border-radius: 7px;
+  background: #fbf8f3;
+  color: #2f2924;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.todo-new-dropdown-toggle:hover {
+  border-color: #c2410c;
+}
+
+.todo-new-dropdown-caret {
+  color: #9a8e80;
+  font-size: 11px;
+}
+
+.todo-new-dropdown-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 5;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: #ffffff;
+  border: 1px solid #e7dfd3;
+  border-radius: 9px;
+  box-shadow: 0 10px 28px rgba(47, 41, 36, .14);
+}
+
+.todo-new-dropdown-option {
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: #2f2924;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.todo-new-dropdown-option:hover {
+  background: #f7f3ee;
+}
+
+.todo-new-dropdown-option.is-selected {
+  color: #c2410c;
+  font-weight: 600;
+}
+
+.todo-new-dropdown-option.is-selected::after {
+  content: '✓';
+  float: right;
+}
+
 .todo-board-history-toggle:hover {
   background: #fbf6ee;
   border-color: #c2410c;
@@ -438,6 +572,15 @@
 .todo-card-action:hover {
   border-color: #c2410c;
   color: #c2410c;
+}
+
+.todo-card-action-danger {
+  color: #b91c1c;
+}
+
+.todo-card-action-danger:hover {
+  border-color: #b91c1c;
+  color: #b91c1c;
 }
 
 .todo-card-doing {

@@ -18,6 +18,8 @@ interface HeatmapItem {
 type BoardItem = TodoItem & {
   sourceBoard?: { id: string; name: string; icon: string };
   phases?: TodoPhase[];
+  // 来自 archived-todo-data.ts 的归档条目：不可删除、永远视为已完成。
+  archived?: boolean;
 };
 
 type TodoPhaseStatus = 'todo' | 'doing' | 'done';
@@ -53,6 +55,7 @@ let heatmapPage = 0;
 let scheduleItemId: string | null = null;
 let completionItemId: string | null = null;
 let phaseItemId: string | null = null;
+let newItemOpen = false;
 // 阶段弹窗的编辑草稿。弹窗内所有增删改都先落在草稿上，保存时才写回状态文件。
 // 因为 refresh() 会重建整个看板（含弹窗 DOM），必须靠草稿保留用户正在输入的内容。
 let phaseDraft: TodoPhase[] | null = null;
@@ -378,6 +381,7 @@ function archivedItems(): BoardItem[] {
           status: 'done',
           // 完成日期仍可由「修改完成日期」交互更新，这里沿用补丁里的 completedAt（若有）。
           completedAt: local.completedAt ?? item.completedAt ?? item.date,
+          archived: true,
           sourceBoard: { id: board.id, name: board.name, icon: board.icon },
         });
       });
@@ -639,7 +643,11 @@ function renderCard(item: BoardItem): string {
       ? '<button type="button" class="todo-card-action" data-tb-edit-completed="' + escape(item.id) + '">修改完成日期</button>'
       : '<button type="button" class="todo-card-action" data-tb-complete="' + escape(item.id) + '">完成</button>')
     : '';
-  const actions = scheduleAction || completionAction ? '<div class="todo-card-actions">' + scheduleAction + completionAction + '</div>' : '';
+  // 归档条目不可删；其余任务 dev 下都可删（POST /__todo_file 直接改 todo-data.ts）。
+  const deleteAction = isEditable() && !item.archived
+    ? '<button type="button" class="todo-card-action todo-card-action-danger" data-tb-delete="' + escape(item.id) + '">删除</button>'
+    : '';
+  const actions = scheduleAction || completionAction || deleteAction ? '<div class="todo-card-actions">' + scheduleAction + completionAction + deleteAction + '</div>' : '';
   const title = item.url
     ? '<a href="' + escape(item.url) + '" target="_blank" rel="noopener" class="todo-card-link"><h3 class="todo-card-title">' + escape(item.title) + '</h3></a>'
     : '<h3 class="todo-card-title">' + escape(item.title) + '</h3>';
@@ -791,6 +799,40 @@ function renderCompletionModal(): string {
     '</section>';
 }
 
+// 「新增任务」弹窗：创建的条目整体存进 todo-state.json 的 customItems，不动 todo-data.ts。
+// 新建的任务一律先进待办，排期走卡片上的「开始排期」。
+function renderNewItemModal(): string {
+  if (!newItemOpen) return '';
+  const summaryBoards = boards().filter((board) => SUMMARY_BOARD_IDS.includes(board.id));
+  const firstBoard = summaryBoards[0];
+  if (!firstBoard) return '';
+  const boardOptions = summaryBoards.map((board, index) =>
+    '<li role="option" class="todo-new-dropdown-option' + (index === 0 ? ' is-selected' : '') + '" data-board-option="' + escape(board.id) + '" aria-selected="' + (index === 0 ? 'true' : 'false') + '">' + escape(board.icon + ' ' + board.name) + '</li>'
+  ).join('');
+  return '<div class="todo-modal-backdrop" data-tb-modal-close></div>' +
+    '<section class="todo-modal" role="dialog" aria-modal="true" aria-labelledby="todo-new-title">' +
+      '<div class="todo-modal-header"><div><span class="todo-modal-kicker todo-new-title" id="todo-new-title">新增任务</span></div><button type="button" class="todo-modal-close" data-tb-modal-close aria-label="关闭">✕</button></div>' +
+      '<form data-tb-new-form>' +
+        '<div class="todo-new-field"><span class="todo-new-field-label">看板分类</span>' +
+          '<div class="todo-new-dropdown" data-new-board-dropdown>' +
+            '<button type="button" class="todo-new-dropdown-toggle" data-tb-board-toggle aria-haspopup="listbox" aria-expanded="false"><span class="todo-new-dropdown-label">' + escape(firstBoard.icon + ' ' + firstBoard.name) + '</span><span class="todo-new-dropdown-caret">▾</span></button>' +
+            '<ul class="todo-new-dropdown-list" role="listbox" hidden>' + boardOptions + '</ul>' +
+            '<input type="hidden" name="boardId" value="' + escape(firstBoard.id) + '">' +
+          '</div>' +
+        '</div>' +
+        '<label class="todo-new-field">任务名称<input type="text" name="title" maxlength="120" placeholder="要做什么？" required aria-label="任务名称"></label>' +
+        '<label class="todo-new-field">链接（可选）<input type="url" name="url" placeholder="https://…" aria-label="任务链接"></label>' +
+        '<label class="todo-new-field">备注（可选）<textarea name="note" rows="2" maxlength="500" placeholder="补充说明" aria-label="任务备注"></textarea></label>' +
+        '<div class="todo-date-fields">' +
+          '<label>目标日期<input type="date" name="date" value="' + escape(todayStr()) + '" required aria-label="目标日期"></label>' +
+          '<span class="todo-new-field-spacer" aria-hidden="true"></span>' +
+        '</div>' +
+        '<div class="todo-modal-actions"><button type="button" class="todo-modal-secondary" data-tb-modal-close>取消</button><button type="submit" class="todo-modal-primary">添加任务</button></div>' +
+      '</form>' +
+    '</section>';
+}
+
+
 // 阶段按「切割点」编辑：每行只填结束日期，下一段自动从次日开始，末段自动收在计划结束日。
 // 这样阶段之间永远无缝，不需要用户输入成对的 start/end。
 function renderPhaseModal(): string {
@@ -873,9 +915,12 @@ function renderBoard(): string {
   const modeBadge = isEditable()
     ? ''
     : '<span class="todo-board-mode-badge" title="任务状态保存在仓库中，本地运行 npm run dev 后即可编辑">🔒 线上只读</span>';
-  const header = '<header class="todo-board-header"><div class="todo-board-date"><span class="todo-board-date-icon">📅</span><span class="todo-board-date-text">' + escape(todayStr()) + '（今天）</span>' + modeBadge + '</div><div class="todo-board-header-actions">' + renderViewSwitch() + '<button class="todo-board-history-toggle" type="button" data-tb-history>📜 查看历史 ' + (historyOpen ? '▴' : '▾') + '</button></div></header>';
+  const addButton = isEditable()
+    ? '<button type="button" class="todo-board-add" data-tb-add-new>➕ 新增任务</button>'
+    : '';
+  const header = '<header class="todo-board-header"><div class="todo-board-date"><span class="todo-board-date-icon">📅</span><span class="todo-board-date-text">' + escape(todayStr()) + '（今天）</span>' + modeBadge + '</div><div class="todo-board-header-actions">' + addButton + renderViewSwitch() + '<button class="todo-board-history-toggle" type="button" data-tb-history>📜 查看历史 ' + (historyOpen ? '▴' : '▾') + '</button></div></header>';
   if (!boardsLoaded) return header + '<div class="todo-board-empty">看板数据未加载。请检查 todo-data.ts 是否正常编译。</div>';
-  return header + renderStats() + (historyOpen ? renderHeatmap() : '') + (currentView === 'gantt' ? renderGantt() : renderColumns()) + renderScheduleModal() + renderCompletionModal() + renderPhaseModal();
+  return header + renderStats() + (historyOpen ? renderHeatmap() : '') + (currentView === 'gantt' ? renderGantt() : renderColumns()) + renderScheduleModal() + renderCompletionModal() + renderPhaseModal() + renderNewItemModal();
 }
 
 function refresh() {
@@ -1254,6 +1299,88 @@ document.addEventListener('click', (event) => {
     return;
   }
 
+  // 自定义下拉：点击下拉外部时收起展开的选项列表。
+  if (!target.closest('[data-new-board-dropdown]')) {
+    document.querySelectorAll<HTMLElement>('[data-new-board-dropdown] .todo-new-dropdown-list:not([hidden])').forEach((list) => {
+      list.hidden = true;
+      const toggle = list.closest('.todo-new-dropdown')?.querySelector<HTMLButtonElement>('[data-tb-board-toggle]');
+      toggle?.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  const boardToggle = target.closest<HTMLButtonElement>('[data-tb-board-toggle]');
+  if (boardToggle) {
+    const list = boardToggle.closest('.todo-new-dropdown')?.querySelector<HTMLElement>('.todo-new-dropdown-list');
+    if (list) {
+      list.hidden = !list.hidden;
+      boardToggle.setAttribute('aria-expanded', list.hidden ? 'false' : 'true');
+    }
+    return;
+  }
+
+  const boardOption = target.closest<HTMLElement>('[data-board-option]');
+  if (boardOption) {
+    const dropdown = boardOption.closest<HTMLElement>('[data-new-board-dropdown]');
+    if (dropdown) {
+      const hiddenInput = dropdown.querySelector<HTMLInputElement>('input[name="boardId"]');
+      if (hiddenInput) hiddenInput.value = boardOption.dataset.boardOption || '';
+      const label = dropdown.querySelector<HTMLElement>('.todo-new-dropdown-label');
+      if (label) label.textContent = boardOption.textContent?.trim() || hiddenInput?.value || '';
+      dropdown.querySelectorAll<HTMLElement>('[data-board-option]').forEach((option) => {
+        const selected = option === boardOption;
+        option.classList.toggle('is-selected', selected);
+        option.setAttribute('aria-selected', selected ? 'true' : 'false');
+      });
+      const list = dropdown.querySelector<HTMLElement>('.todo-new-dropdown-list');
+      if (list) list.hidden = true;
+      dropdown.querySelector<HTMLButtonElement>('[data-tb-board-toggle]')?.setAttribute('aria-expanded', 'false');
+    }
+    return;
+  }
+
+  const addNewButton = target.closest<HTMLButtonElement>('[data-tb-add-new]');
+  if (addNewButton) {
+    newItemOpen = true;
+    scheduleItemId = null;
+    completionItemId = null;
+    phaseItemId = null;
+    refresh();
+    return;
+  }
+
+  const deleteButton = target.closest<HTMLButtonElement>('[data-tb-delete]');
+  if (deleteButton) {
+    const itemId = deleteButton.dataset.tbDelete;
+    if (itemId) {
+      if (!isEditable()) {
+        showToast('🔒 线上只读：请在本地 dev（npm run dev）中删除任务');
+        return;
+      }
+      const item = itemById(itemId);
+      if (!item || item.archived) return;
+      if (!window.confirm('确定删除「' + item.title + '」？将从 todo-data.ts 中移除，不可恢复。')) return;
+      fetch('/__todo_file', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'remove', id: itemId }),
+      })
+        .then(async (response) => {
+          if (!response.ok) throw new Error(String(response.status));
+          const result = await response.json() as { found?: boolean };
+          if (!result.found) throw new Error('not found');
+          // 自写盘的 HMR 广播被抑制，内存里的看板数据手动同步，UI 立即一致。
+          boards().forEach((board) => {
+            board.items = board.items.filter((boardItem) => boardItem.id !== itemId);
+          });
+          showToast('🗑️ 已从 todo-data.ts 删除');
+          Object.keys(boardPages).forEach((key) => delete boardPages[key]);
+          refresh();
+        })
+        .catch(() => showToast('⚠️ 删除失败：请确认本地 dev server 正在运行（npm run dev）'));
+    }
+    return;
+  }
+
   const scheduleButton = target.closest<HTMLButtonElement>('[data-tb-schedule]');
   if (scheduleButton) {
     scheduleItemId = scheduleButton.dataset.tbSchedule || null;
@@ -1370,6 +1497,7 @@ document.addEventListener('click', (event) => {
     scheduleItemId = null;
     completionItemId = null;
     phaseItemId = null;
+    newItemOpen = false;
     refresh();
     return;
   }
@@ -1428,6 +1556,48 @@ document.addEventListener('change', (event) => {
 
 document.addEventListener('submit', (event) => {
   const form = event.target as HTMLFormElement;
+  const newForm = form.closest<HTMLFormElement>('[data-tb-new-form]');
+  if (newForm) {
+    event.preventDefault();
+    if (!isEditable()) {
+      showToast('🔒 线上只读：请在本地 dev（npm run dev）中新增任务');
+      return;
+    }
+    const boardId = (newForm.elements.namedItem('boardId') as HTMLInputElement | null)?.value || '';
+    const titleInput = newForm.elements.namedItem('title') as HTMLInputElement | null;
+    const urlInput = newForm.elements.namedItem('url') as HTMLInputElement | null;
+    const noteInput = newForm.elements.namedItem('note') as HTMLTextAreaElement | null;
+    const dateInput = newForm.elements.namedItem('date') as HTMLInputElement | null;
+    const title = titleInput?.value.trim() || '';
+    if (!boardId || !title || !dateInput?.value) return;
+    fetch('/__todo_file', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'add',
+        boardId,
+        title,
+        url: urlInput?.value.trim() || '',
+        note: noteInput?.value.trim() || '',
+        date: dateInput.value,
+        createdAt: todayStr(),
+      }),
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(String(response.status));
+        const result = await response.json() as { item: TodoItem };
+        // 自写盘的 HMR 广播被抑制，内存里的看板数据手动同步，UI 立即一致。
+        const board = boards().find((candidate) => candidate.id === boardId);
+        if (board) board.items.push(result.item);
+        showToast('✅ 已写入 todo-data.ts（' + result.item.id + '）');
+        newItemOpen = false;
+        Object.keys(boardPages).forEach((key) => delete boardPages[key]);
+        refresh();
+      })
+      .catch(() => showToast('⚠️ 新增失败：请确认本地 dev server 正在运行（npm run dev）'));
+    return;
+  }
+
   const scheduleForm = form.closest<HTMLFormElement>('[data-tb-schedule-form]');
   if (scheduleForm) {
     event.preventDefault();
@@ -1492,13 +1662,14 @@ document.addEventListener('keydown', (event) => {
 
 document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
-  if (selectedHeatmapDate || scheduleItemId || completionItemId || phaseItemId) {
+  if (selectedHeatmapDate || scheduleItemId || completionItemId || phaseItemId || newItemOpen) {
     selectedHeatmapDate = null;
     heatmapPage = 0;
     scheduleItemId = null;
     completionItemId = null;
     phaseItemId = null;
     phaseDraft = null;
+    newItemOpen = false;
     refresh();
   }
 });

@@ -105,7 +105,7 @@ personal/
 
 ## 任务看板
 
-任务看板位于 `/todo-board/`，独立于生活仪表盘，包含汇总、编程、科研和生活四个视图，以及待办、进行中、已完成、历史归档和年度完成热力图。任务数据维护在 `src/data/todo-data.ts`，完成任务后移入 `src/data/archived-todo-data.ts`。
+任务看板位于 `/todo-board/`，独立于生活仪表盘，包含汇总、编程、科研和生活四个视图，以及待办、进行中、已完成、历史归档和年度完成热力图。任务清单唯一来源是 `src/data/todo-data.ts`，状态真源是 `src/data/todo-state.json`（status、计划区间、阶段的字段级补丁），完成任务后移入 `src/data/archived-todo-data.ts`。本地 dev 下可直接在看板点「➕ 新增任务」弹窗创建任务、点卡片「删除」移除任务——两个操作都由 dev server 直接写回 `todo-data.ts`（`/__todo_file` 端点）；线上只读。
 
 ## 追踪数据同步
 
@@ -228,7 +228,7 @@ npm run install-hooks
 - **路由表**：修改 `src/data/site.js` 的 `routeCategories`，新增条目的 `addedAt` 使用添加当天日期。
 - **生活仪表盘**：修改 `src/components/LifeDashboard.astro`；外部 widget、歌单和 GitHub 卡片均在组件中维护。
 - **追踪看板**：修改 `src/components/TrackingBoard.astro`；发布数据遵循上面的快照同步流程。
-- **任务看板**：修改 `src/data/todo-data.ts`；完成任务移入 `src/data/archived-todo-data.ts`。
+- **任务看板**：修改 `src/data/todo-data.ts`；推进状态 / 排期 / 划阶段在本地 dev 看板上操作（写回 `src/data/todo-state.json`），或直接编辑该文件；新增 / 删除任务也可以用看板的「➕ 新增任务」按钮和卡片「删除」按钮（dev 下直接写回 `todo-data.ts`）；完成任务移入 `src/data/archived-todo-data.ts`。
 - **长期目标**：修改 `src/data/tracker-config.js`，然后运行 `npm run tracker:migrate` 和 `npm run tracker:validate`。
 - **全站样式**：修改 `public/css/style.css`。
 - **版本记录**：变更说明写入 `CHANGELOG.md`，但不要把历史游戏板块重新写回当前目录结构。

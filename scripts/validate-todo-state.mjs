@@ -30,6 +30,7 @@ function nextDay(dateKey) {
 if (state.version !== 1 || !state.items || typeof state.items !== 'object' || Array.isArray(state.items)) {
   errors.push('顶层结构不完整：需要 { version: 1, items: {...} }');
 } else {
+
   for (const [id, patch] of Object.entries(state.items)) {
     if (!/^[a-z0-9][a-z0-9-]*$/i.test(id)) {
       errors.push(`非法任务 id：${id}`);

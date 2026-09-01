@@ -6,6 +6,10 @@ import { normalizeLongTermState } from './src/data/tracker-config.js';
 
 const trackerSnapshotPath = fileURLToPath(new URL('./public/data/tracker-snapshot.json', import.meta.url));
 const todoStatePath = fileURLToPath(new URL('./src/data/todo-state.json', import.meta.url));
+const todoDataPath = fileURLToPath(new URL('./src/data/todo-data.ts', import.meta.url));
+
+// 看板「新增 / 删除任务」直接写回 todo-data.ts。看板 id → 任务 id 前缀。
+const TODO_FILE_BOARD_PREFIXES = { life: 'l', coding: 'c', research: 'r' };
 
 const TODO_STATUSES = ['todo', 'doing', 'done'];
 
@@ -121,6 +125,68 @@ function normalizeTodoPatch(raw) {
   return patch;
 }
 
+// 「新增任务」弹窗的落盘：往 todo-data.ts 对应看板的 items 数组头部插入一行。
+// 字符串一律走 JSON.stringify（双引号 + 转义），保证引号 / 换行都不会破坏单行格式。
+function nextTodoItemId(source, boardId) {
+  const prefix = TODO_FILE_BOARD_PREFIXES[boardId];
+  if (!prefix) throw new Error(`unknown board: ${boardId}`);
+  let max = 0;
+  for (const match of source.matchAll(new RegExp("id: '" + prefix + "(\\d+)'", 'g'))) {
+    max = Math.max(max, Number(match[1]));
+  }
+  return prefix + (max + 1);
+}
+
+function addTodoItemToFile(payload) {
+  const boardId = payload?.boardId;
+  if (typeof boardId !== 'string' || !TODO_FILE_BOARD_PREFIXES[boardId]) throw new Error('invalid board');
+  const title = typeof payload.title === 'string' ? payload.title.trim() : '';
+  if (!title) throw new Error('invalid title');
+  if (!isValidDateKey(payload.date)) throw new Error('invalid date');
+  const url = typeof payload.url === 'string' ? payload.url.trim() : '';
+  const note = typeof payload.note === 'string' ? payload.note.trim() : '';
+  const createdAt = isValidDateKey(payload.createdAt) ? payload.createdAt : formatDateKey(new Date());
+
+  if (!existsSync(todoDataPath)) throw new Error('todo-data.ts missing');
+  const source = readFileSync(todoDataPath, 'utf8');
+  const lines = source.split('\n');
+  const boardIndex = lines.findIndex((line) => new RegExp(`^\\s*id: '${boardId}',$`).test(line));
+  if (boardIndex === -1) throw new Error(`board not found: ${boardId}`);
+  let itemsIndex = -1;
+  let inlineEmpty = false;
+  for (let index = boardIndex + 1; index < lines.length; index += 1) {
+    if (/^\s*items: \[\s*$/.test(lines[index])) { itemsIndex = index; break; }
+    // summary / research 这类空看板的 items 写成一行 `items: []`，插入时展开成多行。
+    if (/^\s*items: \[\]\s*,?\s*$/.test(lines[index])) { itemsIndex = index; inlineEmpty = true; break; }
+    // 已经走出这个看板的块还没找到 items，说明该看板没有 items 数组。
+    if (/^\s*\},?\s*$/.test(lines[index])) break;
+  }
+  if (itemsIndex === -1) throw new Error(`items array not found for board: ${boardId}`);
+  const id = nextTodoItemId(source, boardId);
+  const itemLine = `      { id: '${id}', title: ${JSON.stringify(title)}, status: 'todo', date: '${payload.date}', createdAt: '${createdAt}', url: ${JSON.stringify(url)}, note: ${JSON.stringify(note)} },`;
+  if (inlineEmpty) {
+    lines.splice(itemsIndex, 1, '    items: [', itemLine, '    ]');
+  } else {
+    lines.splice(itemsIndex + 1, 0, itemLine);
+  }
+  writeFileSync(todoDataPath, lines.join('\n'), 'utf8');
+  lastSelfWriteAt = Date.now();
+  return { id, title, status: 'todo', date: payload.date, createdAt, url, note, boardId };
+}
+
+function removeTodoItemFromFile(id) {
+  if (typeof id !== 'string' || !/^[a-z]\d+$/i.test(id)) throw new Error('invalid id');
+  const source = readFileSync(todoDataPath, 'utf8');
+  const lines = source.split('\n');
+  const itemPattern = new RegExp("^\\s*\\{ id: '" + id + "',");
+  const index = lines.findIndex((line) => itemPattern.test(line));
+  if (index === -1) return { found: false };
+  lines.splice(index, 1);
+  writeFileSync(todoDataPath, lines.join('\n'), 'utf8');
+  lastSelfWriteAt = Date.now();
+  return { found: true };
+}
+
 function mergeTodoItems(currentItems, incomingItems) {
   const merged = { ...(currentItems && typeof currentItems === 'object' ? currentItems : {}) };
   for (const [id, patch] of Object.entries(incomingItems || {})) {
@@ -199,6 +265,36 @@ function todoSyncPlugin() {
     name: 'todo-sync',
     configureServer(server) {
       suppressSelfWriteReload(server);
+      server.middlewares.use('/__todo_file', (request, response, next) => {
+        // 「新增 / 删除任务」按钮：直接写回 src/data/todo-data.ts（仅本地 dev）。
+        if (request.method !== 'POST') {
+          next();
+          return;
+        }
+        const chunks = [];
+        request.on('data', (chunk) => chunks.push(chunk));
+        request.on('end', () => {
+          try {
+            const payload = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+            if (payload?.action === 'add') {
+              const item = addTodoItemToFile(payload);
+              response.writeHead(200, { 'Content-Type': 'application/json' });
+              response.end(JSON.stringify({ ok: true, item }));
+              return;
+            }
+            if (payload?.action === 'remove') {
+              const result = removeTodoItemFromFile(payload.id);
+              response.writeHead(200, { 'Content-Type': 'application/json' });
+              response.end(JSON.stringify({ ok: true, ...result }));
+              return;
+            }
+            throw new Error('unknown action');
+          } catch (error) {
+            response.writeHead(400, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: error instanceof Error ? error.message : 'invalid request' }));
+          }
+        });
+      });
       server.middlewares.use('/__todo_sync', (request, response, next) => {
         if (request.method !== 'POST') {
           next();
