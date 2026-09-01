@@ -152,8 +152,14 @@ function archivedItems(): BoardItem[] {
     .filter((board) => SUMMARY_BOARD_IDS.includes(board.id))
     .forEach((board) => {
       board.items.forEach((item) => {
+        const local = localState.items[item.id] || {};
         merged.push({
           ...applyLocalState(item),
+          // 归档任务的状态以归档文件为准（永远视为已完成）。
+          // 不清掉 localStorage 里旧补丁的 status（如曾经的 'doing'）会导致归档项被错误标成进行中。
+          status: 'done',
+          // 完成日期仍可由「修改完成日期」交互更新，这里沿用补丁里的 completedAt（若有）。
+          completedAt: local.completedAt ?? item.completedAt ?? item.date,
           sourceBoard: { id: board.id, name: board.name, icon: board.icon },
         });
       });
