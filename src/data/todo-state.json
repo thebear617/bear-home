@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-01T13:45:28.591Z",
+  "updatedAt": "2026-09-02T11:16:00.841Z",
   "items": {
     "l1": {
       "status": "doing",
@@ -43,6 +43,10 @@
       "status": "doing",
       "plannedStart": "2026-09-01",
       "plannedEnd": "2026-09-20"
+    },
+    "l39": {
+      "status": "done",
+      "completedAt": "2026-09-02"
     }
   }
 }

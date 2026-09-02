@@ -8,6 +8,7 @@ feat(todo-board): 看板视图支持「新增任务」弹窗，直接写回 todo
 - feat: 新增端点 `POST /__todo_file`：add 往 `src/data/todo-data.ts` 对应看板的 items 数组头部插入一行（id 按看板前缀 l/c/r 取现有最大值递增），remove 按 id 整行移除；字符串统一 JSON.stringify 序列化，引号 / 换行不破坏单行格式；写盘复用 self-write 抑制窗口，客户端同步内存看板数据保持 UI 一致
 - feat: 卡片「删除」按钮对全部非归档任务开放（confirm 确认），与弹窗新增走同一条 todo-data.ts 写回链路——任务清单从此只有 todo-data.ts 一个来源
 - chore: 上一版 customItems 方案整体退役（`/__todo_sync` 协议字段、渲染合并路径、`todo:validate` 校验全部移除），已有自定义条目手动迁移进 todo-data.ts
+- fix: 新任务 id 生成只扫活跃文件，会撞上归档文件里同前缀的更大编号（验收时 l33 与归档 l33 撞号，状态补丁互相污染、弹窗标题张冠李戴）——改为扫活跃 + 归档两个文件取全局最大值递增，冲突条目已改号 l39
 
 ## v0.29.0 — 2026-09-01
 

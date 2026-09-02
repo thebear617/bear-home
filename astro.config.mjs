@@ -7,6 +7,7 @@ import { normalizeLongTermState } from './src/data/tracker-config.js';
 const trackerSnapshotPath = fileURLToPath(new URL('./public/data/tracker-snapshot.json', import.meta.url));
 const todoStatePath = fileURLToPath(new URL('./src/data/todo-state.json', import.meta.url));
 const todoDataPath = fileURLToPath(new URL('./src/data/todo-data.ts', import.meta.url));
+const archivedTodoDataPath = fileURLToPath(new URL('./src/data/archived-todo-data.ts', import.meta.url));
 
 // 看板「新增 / 删除任务」直接写回 todo-data.ts。看板 id → 任务 id 前缀。
 const TODO_FILE_BOARD_PREFIXES = { life: 'l', coding: 'c', research: 'r' };
@@ -127,12 +128,16 @@ function normalizeTodoPatch(raw) {
 
 // 「新增任务」弹窗的落盘：往 todo-data.ts 对应看板的 items 数组头部插入一行。
 // 字符串一律走 JSON.stringify（双引号 + 转义），保证引号 / 换行都不会破坏单行格式。
-function nextTodoItemId(source, boardId) {
+// id 取活跃 + 归档两个文件的全局最大值递增：归档任务与新任务共用 l/c/r 前缀，
+// 只扫活跃文件会发出与归档冲突的 id（v0.30.0 验收时 l33 撞号事故的根因）。
+function nextTodoItemId(sources, boardId) {
   const prefix = TODO_FILE_BOARD_PREFIXES[boardId];
   if (!prefix) throw new Error(`unknown board: ${boardId}`);
   let max = 0;
-  for (const match of source.matchAll(new RegExp("id: '" + prefix + "(\\d+)'", 'g'))) {
-    max = Math.max(max, Number(match[1]));
+  for (const source of sources) {
+    for (const match of source.matchAll(new RegExp("id: '" + prefix + "(\\d+)'", 'g'))) {
+      max = Math.max(max, Number(match[1]));
+    }
   }
   return prefix + (max + 1);
 }
@@ -149,6 +154,8 @@ function addTodoItemToFile(payload) {
 
   if (!existsSync(todoDataPath)) throw new Error('todo-data.ts missing');
   const source = readFileSync(todoDataPath, 'utf8');
+  // 归档文件可能不存在（首次使用），缺省按空内容参与 id 扫描。
+  const archivedSource = existsSync(archivedTodoDataPath) ? readFileSync(archivedTodoDataPath, 'utf8') : '';
   const lines = source.split('\n');
   const boardIndex = lines.findIndex((line) => new RegExp(`^\\s*id: '${boardId}',$`).test(line));
   if (boardIndex === -1) throw new Error(`board not found: ${boardId}`);
@@ -162,7 +169,7 @@ function addTodoItemToFile(payload) {
     if (/^\s*\},?\s*$/.test(lines[index])) break;
   }
   if (itemsIndex === -1) throw new Error(`items array not found for board: ${boardId}`);
-  const id = nextTodoItemId(source, boardId);
+  const id = nextTodoItemId([source, archivedSource], boardId);
   const itemLine = `      { id: '${id}', title: ${JSON.stringify(title)}, status: 'todo', date: '${payload.date}', createdAt: '${createdAt}', url: ${JSON.stringify(url)}, note: ${JSON.stringify(note)} },`;
   if (inlineEmpty) {
     lines.splice(itemsIndex, 1, '    items: [', itemLine, '    ]');
