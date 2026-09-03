@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-03T12:06:57.764Z",
+  "updatedAt": "2026-09-03T13:16:45.890Z",
   "items": {
     "l1": {
       "status": "todo"
@@ -24,6 +24,34 @@
     "l40": {
       "status": "done",
       "completedAt": "2026-09-03"
+    },
+    "l42": {
+      "status": "doing",
+      "plannedStart": "2026-09-03",
+      "plannedEnd": "2026-09-12",
+      "phases": [
+        {
+          "id": "p1",
+          "title": "约人，确定时间",
+          "start": "2026-09-03",
+          "end": "2026-09-07",
+          "status": "doing"
+        },
+        {
+          "id": "p1788441370348",
+          "title": "拉群，商定项目",
+          "start": "2026-09-08",
+          "end": "2026-09-11",
+          "status": "todo"
+        },
+        {
+          "id": "p1788441389591",
+          "title": "出发",
+          "start": "2026-09-12",
+          "end": "2026-09-12",
+          "status": "todo"
+        }
+      ]
     }
   }
 }
