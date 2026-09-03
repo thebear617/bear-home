@@ -9,7 +9,7 @@ const todoStatePath = fileURLToPath(new URL('./src/data/todo-state.json', import
 const todoDataPath = fileURLToPath(new URL('./src/data/todo-data.ts', import.meta.url));
 const archivedTodoDataPath = fileURLToPath(new URL('./src/data/archived-todo-data.ts', import.meta.url));
 
-// 看板「新增 / 删除任务」直接写回 todo-data.ts。看板 id → 任务 id 前缀。
+// 看板「新增 / 编辑 / 删除任务」直接写回 todo-data.ts。看板 id → 任务 id 前缀。
 const TODO_FILE_BOARD_PREFIXES = { life: 'l', coding: 'c', research: 'r' };
 
 const TODO_STATUSES = ['todo', 'doing', 'done'];
@@ -194,6 +194,52 @@ function removeTodoItemFromFile(id) {
   return { found: true };
 }
 
+// 「编辑任务」弹窗的落盘：更新活动任务的静态资料，并支持把任务移动到另一个看板。
+// 状态 / 排期 / 完成日期仍由 todo-state.json 管理，这里只改 todo-data.ts 中的标题、分类、链接、备注和目标日期。
+function updateTodoItemInFile(payload) {
+  const id = payload?.id;
+  if (typeof id !== 'string' || !/^[a-z]\d+$/i.test(id)) throw new Error('invalid id');
+  const boardId = payload?.boardId;
+  if (typeof boardId !== 'string' || !TODO_FILE_BOARD_PREFIXES[boardId]) throw new Error('invalid board');
+  const title = typeof payload.title === 'string' ? payload.title.trim() : '';
+  if (!title) throw new Error('invalid title');
+  if (!isValidDateKey(payload.date)) throw new Error('invalid date');
+  const url = typeof payload.url === 'string' ? payload.url.trim() : '';
+  const note = typeof payload.note === 'string' ? payload.note.trim() : '';
+
+  const source = readFileSync(todoDataPath, 'utf8');
+  const lines = source.split('\n');
+  const itemPattern = new RegExp("^\\s*\\{ id: '" + id + "',");
+  const itemIndex = lines.findIndex((line) => itemPattern.test(line));
+  if (itemIndex === -1) throw new Error('task not found');
+
+  const originalLine = lines[itemIndex];
+  const status = originalLine.match(/status:\s*'(todo|doing|done)'/)?.[1] || 'todo';
+  const createdAt = originalLine.match(/createdAt:\s*'(\d{4}-\d{2}-\d{2})'/)?.[1] || payload.date;
+  const itemLine = `      { id: '${id}', title: ${JSON.stringify(title)}, status: '${status}', date: '${payload.date}', createdAt: '${createdAt}', url: ${JSON.stringify(url)}, note: ${JSON.stringify(note)} },`;
+
+  // 先删掉原行，再重新定位目标看板，避免源看板和目标看板位置变化时使用过期索引。
+  lines.splice(itemIndex, 1);
+  const boardIndex = lines.findIndex((line) => new RegExp(`^\\s*id: '${boardId}',$`).test(line));
+  if (boardIndex === -1) throw new Error(`board not found: ${boardId}`);
+  let itemsIndex = -1;
+  let inlineEmpty = false;
+  for (let index = boardIndex + 1; index < lines.length; index += 1) {
+    if (/^\s*items: \[\s*$/.test(lines[index])) { itemsIndex = index; break; }
+    if (/^\s*items: \[\]\s*,?\s*$/.test(lines[index])) { itemsIndex = index; inlineEmpty = true; break; }
+    if (/^\s*\},?\s*$/.test(lines[index])) break;
+  }
+  if (itemsIndex === -1) throw new Error(`items array not found for board: ${boardId}`);
+  if (inlineEmpty) {
+    lines.splice(itemsIndex, 1, '    items: [', itemLine, '    ]');
+  } else {
+    lines.splice(itemsIndex + 1, 0, itemLine);
+  }
+  writeFileSync(todoDataPath, lines.join('\n'), 'utf8');
+  lastSelfWriteAt = Date.now();
+  return { id, title, status, date: payload.date, createdAt, url, note, boardId };
+}
+
 function mergeTodoItems(currentItems, incomingItems) {
   const merged = { ...(currentItems && typeof currentItems === 'object' ? currentItems : {}) };
   for (const [id, patch] of Object.entries(incomingItems || {})) {
@@ -273,7 +319,7 @@ function todoSyncPlugin() {
     configureServer(server) {
       suppressSelfWriteReload(server);
       server.middlewares.use('/__todo_file', (request, response, next) => {
-        // 「新增 / 删除任务」按钮：直接写回 src/data/todo-data.ts（仅本地 dev）。
+        // 「新增 / 编辑 / 删除任务」按钮：直接写回 src/data/todo-data.ts（仅本地 dev）。
         if (request.method !== 'POST') {
           next();
           return;
@@ -293,6 +339,12 @@ function todoSyncPlugin() {
               const result = removeTodoItemFromFile(payload.id);
               response.writeHead(200, { 'Content-Type': 'application/json' });
               response.end(JSON.stringify({ ok: true, ...result }));
+              return;
+            }
+            if (payload?.action === 'update') {
+              const item = updateTodoItemInFile(payload);
+              response.writeHead(200, { 'Content-Type': 'application/json' });
+              response.end(JSON.stringify({ ok: true, item }));
               return;
             }
             throw new Error('unknown action');

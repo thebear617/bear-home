@@ -56,6 +56,7 @@ let scheduleItemId: string | null = null;
 let completionItemId: string | null = null;
 let phaseItemId: string | null = null;
 let newItemOpen = false;
+let editItemId: string | null = null;
 // 阶段弹窗的编辑草稿。弹窗内所有增删改都先落在草稿上，保存时才写回状态文件。
 // 因为 refresh() 会重建整个看板（含弹窗 DOM），必须靠草稿保留用户正在输入的内容。
 let phaseDraft: TodoPhase[] | null = null;
@@ -643,11 +644,14 @@ function renderCard(item: BoardItem): string {
       ? '<button type="button" class="todo-card-action" data-tb-edit-completed="' + escape(item.id) + '">修改完成日期</button>'
       : '<button type="button" class="todo-card-action" data-tb-complete="' + escape(item.id) + '">完成</button>')
     : '';
+  const editAction = isEditable() && !item.archived
+    ? '<button type="button" class="todo-card-action" data-tb-edit="' + escape(item.id) + '">编辑</button>'
+    : '';
   // 归档条目不可删；其余任务 dev 下都可删（POST /__todo_file 直接改 todo-data.ts）。
   const deleteAction = isEditable() && !item.archived
     ? '<button type="button" class="todo-card-action todo-card-action-danger" data-tb-delete="' + escape(item.id) + '">删除</button>'
     : '';
-  const actions = scheduleAction || completionAction || deleteAction ? '<div class="todo-card-actions">' + scheduleAction + completionAction + deleteAction + '</div>' : '';
+  const actions = scheduleAction || editAction || completionAction || deleteAction ? '<div class="todo-card-actions">' + scheduleAction + editAction + completionAction + deleteAction + '</div>' : '';
   const title = item.url
     ? '<a href="' + escape(item.url) + '" target="_blank" rel="noopener" class="todo-card-link"><h3 class="todo-card-title">' + escape(item.title) + '</h3></a>'
     : '<h3 class="todo-card-title">' + escape(item.title) + '</h3>';
@@ -799,35 +803,39 @@ function renderCompletionModal(): string {
     '</section>';
 }
 
-// 「新增任务」弹窗：创建的条目整体存进 todo-state.json 的 customItems，不动 todo-data.ts。
-// 新建的任务一律先进待办，排期走卡片上的「开始排期」。
 function renderNewItemModal(): string {
   if (!newItemOpen) return '';
   const summaryBoards = boards().filter((board) => SUMMARY_BOARD_IDS.includes(board.id));
   const firstBoard = summaryBoards[0];
   if (!firstBoard) return '';
+  const editingItem = editItemId ? itemById(editItemId) : undefined;
+  const isEditing = Boolean(editingItem && !editingItem.archived);
+  const selectedBoardId = editingItem?.sourceBoard?.id || firstBoard.id;
   const boardOptions = summaryBoards.map((board, index) =>
-    '<li role="option" class="todo-new-dropdown-option' + (index === 0 ? ' is-selected' : '') + '" data-board-option="' + escape(board.id) + '" aria-selected="' + (index === 0 ? 'true' : 'false') + '">' + escape(board.icon + ' ' + board.name) + '</li>'
+    '<li role="option" class="todo-new-dropdown-option' + (board.id === selectedBoardId ? ' is-selected' : '') + '" data-board-option="' + escape(board.id) + '" aria-selected="' + (board.id === selectedBoardId ? 'true' : 'false') + '">' + escape(board.icon + ' ' + board.name) + '</li>'
   ).join('');
+  const selectedBoard = summaryBoards.find((board) => board.id === selectedBoardId) || firstBoard;
+  const modalTitle = isEditing ? '编辑任务' : '新增任务';
+  const submitLabel = isEditing ? '保存修改' : '添加任务';
   return '<div class="todo-modal-backdrop" data-tb-modal-close></div>' +
     '<section class="todo-modal" role="dialog" aria-modal="true" aria-labelledby="todo-new-title">' +
-      '<div class="todo-modal-header"><div><span class="todo-modal-kicker todo-new-title" id="todo-new-title">新增任务</span></div><button type="button" class="todo-modal-close" data-tb-modal-close aria-label="关闭">✕</button></div>' +
-      '<form data-tb-new-form>' +
+      '<div class="todo-modal-header"><div><span class="todo-modal-kicker todo-new-title" id="todo-new-title">' + modalTitle + '</span></div><button type="button" class="todo-modal-close" data-tb-modal-close aria-label="关闭">✕</button></div>' +
+      '<form data-tb-new-form' + (isEditing ? ' data-editing-id="' + escape(editingItem?.id) + '"' : '') + '>' +
         '<div class="todo-new-field"><span class="todo-new-field-label">看板分类</span>' +
           '<div class="todo-new-dropdown" data-new-board-dropdown>' +
-            '<button type="button" class="todo-new-dropdown-toggle" data-tb-board-toggle aria-haspopup="listbox" aria-expanded="false"><span class="todo-new-dropdown-label">' + escape(firstBoard.icon + ' ' + firstBoard.name) + '</span><span class="todo-new-dropdown-caret">▾</span></button>' +
+            '<button type="button" class="todo-new-dropdown-toggle" data-tb-board-toggle aria-haspopup="listbox" aria-expanded="false"><span class="todo-new-dropdown-label">' + escape(selectedBoard.icon + ' ' + selectedBoard.name) + '</span><span class="todo-new-dropdown-caret">▾</span></button>' +
             '<ul class="todo-new-dropdown-list" role="listbox" hidden>' + boardOptions + '</ul>' +
-            '<input type="hidden" name="boardId" value="' + escape(firstBoard.id) + '">' +
+            '<input type="hidden" name="boardId" value="' + escape(selectedBoard.id) + '">' +
           '</div>' +
         '</div>' +
-        '<label class="todo-new-field">任务名称<input type="text" name="title" maxlength="120" placeholder="要做什么？" required aria-label="任务名称"></label>' +
-        '<label class="todo-new-field">链接（可选）<input type="url" name="url" placeholder="https://…" aria-label="任务链接"></label>' +
-        '<label class="todo-new-field">备注（可选）<textarea name="note" rows="2" maxlength="500" placeholder="补充说明" aria-label="任务备注"></textarea></label>' +
+        '<label class="todo-new-field">任务名称<input type="text" name="title" maxlength="120" placeholder="要做什么？" value="' + escape(editingItem?.title || '') + '" required aria-label="任务名称"></label>' +
+        '<label class="todo-new-field">链接（可选）<input type="url" name="url" placeholder="https://…" value="' + escape(editingItem?.url || '') + '" aria-label="任务链接"></label>' +
+        '<label class="todo-new-field">备注（可选）<textarea name="note" rows="2" maxlength="500" placeholder="补充说明" aria-label="任务备注">' + escape(editingItem?.note || '') + '</textarea></label>' +
         '<div class="todo-date-fields">' +
-          '<label>目标日期<input type="date" name="date" value="' + escape(todayStr()) + '" required aria-label="目标日期"></label>' +
+          '<label>目标日期<input type="date" name="date" value="' + escape(editingItem?.date || todayStr()) + '" required aria-label="目标日期"></label>' +
           '<span class="todo-new-field-spacer" aria-hidden="true"></span>' +
         '</div>' +
-        '<div class="todo-modal-actions"><button type="button" class="todo-modal-secondary" data-tb-modal-close>取消</button><button type="submit" class="todo-modal-primary">添加任务</button></div>' +
+        '<div class="todo-modal-actions"><button type="button" class="todo-modal-secondary" data-tb-modal-close>取消</button><button type="submit" class="todo-modal-primary">' + submitLabel + '</button></div>' +
       '</form>' +
     '</section>';
 }
@@ -1341,6 +1349,21 @@ document.addEventListener('click', (event) => {
   const addNewButton = target.closest<HTMLButtonElement>('[data-tb-add-new]');
   if (addNewButton) {
     newItemOpen = true;
+    editItemId = null;
+    scheduleItemId = null;
+    completionItemId = null;
+    phaseItemId = null;
+    refresh();
+    return;
+  }
+
+  const editButton = target.closest<HTMLButtonElement>('[data-tb-edit]');
+  if (editButton) {
+    const itemId = editButton.dataset.tbEdit;
+    const item = itemById(itemId || null);
+    if (!item || item.archived) return;
+    editItemId = item.id;
+    newItemOpen = true;
     scheduleItemId = null;
     completionItemId = null;
     phaseItemId = null;
@@ -1498,6 +1521,7 @@ document.addEventListener('click', (event) => {
     completionItemId = null;
     phaseItemId = null;
     newItemOpen = false;
+    editItemId = null;
     refresh();
     return;
   }
@@ -1570,11 +1594,14 @@ document.addEventListener('submit', (event) => {
     const dateInput = newForm.elements.namedItem('date') as HTMLInputElement | null;
     const title = titleInput?.value.trim() || '';
     if (!boardId || !title || !dateInput?.value) return;
+    const editingId = newForm.dataset.editingId || '';
+    const action = editingId ? 'update' : 'add';
     fetch('/__todo_file', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        action: 'add',
+        action,
+        ...(editingId ? { id: editingId } : {}),
         boardId,
         title,
         url: urlInput?.value.trim() || '',
@@ -1585,12 +1612,19 @@ document.addEventListener('submit', (event) => {
     })
       .then(async (response) => {
         if (!response.ok) throw new Error(String(response.status));
-        const result = await response.json() as { item: TodoItem };
+        const result = await response.json() as { item: TodoItem & { boardId?: string } };
         // 自写盘的 HMR 广播被抑制，内存里的看板数据手动同步，UI 立即一致。
-        const board = boards().find((candidate) => candidate.id === boardId);
+        const targetBoardId = result.item.boardId || boardId;
+        if (editingId) {
+          boards().forEach((board) => {
+            board.items = board.items.filter((boardItem) => boardItem.id !== editingId);
+          });
+        }
+        const board = boards().find((candidate) => candidate.id === targetBoardId);
         if (board) board.items.push(result.item);
-        showToast('✅ 已写入 todo-data.ts（' + result.item.id + '）');
+        showToast(editingId ? '✅ 已更新 todo-data.ts（' + result.item.id + '）' : '✅ 已写入 todo-data.ts（' + result.item.id + '）');
         newItemOpen = false;
+        editItemId = null;
         Object.keys(boardPages).forEach((key) => delete boardPages[key]);
         refresh();
       })
@@ -1670,6 +1704,7 @@ document.addEventListener('keydown', (event) => {
     phaseItemId = null;
     phaseDraft = null;
     newItemOpen = false;
+    editItemId = null;
     refresh();
   }
 });
