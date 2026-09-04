@@ -18,6 +18,16 @@ function isValidDateKey(value) {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
+function isValidHourKey(value) {
+  return typeof value === 'string' && /^([01]\d|2[0-3]):00$/.test(value);
+}
+
+function toScheduledDateTime(dateKey, timeKey) {
+  if (!isValidDateKey(dateKey) || !isValidHourKey(timeKey)) return null;
+  const value = new Date(dateKey + 'T' + timeKey + ':00');
+  return Number.isNaN(value.getTime()) ? null : value;
+}
+
 function toUtcDate(dateKey) {
   if (!isValidDateKey(dateKey)) return null;
   const date = new Date(dateKey + 'T12:00:00');
@@ -40,13 +50,59 @@ function diffDays(start, end) {
   return Math.round((endUtc - startUtc) / 86400000);
 }
 
+function addHours(date, amount) {
+  const next = new Date(date);
+  next.setHours(next.getHours() + amount);
+  return next;
+}
+
+function formatHourKey(date) {
+  return String(date.getHours()).padStart(2, '0') + ':00';
+}
+
 function normalizePhaseStatus(value) {
   return TODO_STATUSES.includes(value) ? value : 'todo';
 }
 
 // 与 src/scripts/todo-board.ts 的 normalizePhases 保持同一套语义：
 // 阶段严格连续、无缝铺满计划区间，首阶段对齐 plannedStart，末阶段收在 plannedEnd。
-function normalizePhases(plannedStart, plannedEnd, phases) {
+function normalizePhases(plannedStart, plannedEnd, phases, plannedStartTime, plannedEndTime) {
+  const hourlyStart = toScheduledDateTime(plannedStart, plannedStartTime);
+  const hourlyEnd = toScheduledDateTime(plannedEnd, plannedEndTime);
+  if (hourlyStart && hourlyEnd && hourlyEnd > hourlyStart) {
+    if (!Array.isArray(phases) || phases.length === 0) return undefined;
+    const cleaned = phases.filter((phase) => phase && typeof phase.id === 'string');
+    if (cleaned.length === 0) return undefined;
+    const phaseDateTime = (phase, boundary) => toScheduledDateTime(phase[boundary], boundary === 'start' ? phase.startTime : phase.endTime);
+    const ordered = [...cleaned].sort((a, b) => (phaseDateTime(a, 'start')?.getTime() || 0) - (phaseDateTime(b, 'start')?.getTime() || 0));
+    const result = [];
+    let cursor = new Date(hourlyStart);
+    const lastIndex = ordered.length - 1;
+    for (let index = 0; index < ordered.length; index += 1) {
+      if (cursor >= hourlyEnd) break;
+      const phase = ordered[index];
+      let phaseEnd = index === lastIndex ? new Date(hourlyEnd) : phaseDateTime(phase, 'end');
+      if (!phaseEnd || phaseEnd <= cursor) phaseEnd = addHours(cursor, 1);
+      if (phaseEnd > hourlyEnd) phaseEnd = new Date(hourlyEnd);
+      if (phaseEnd <= cursor) break;
+      result.push({
+        id: phase.id,
+        title: (phase.title || '').trim() || '未命名阶段',
+        start: formatDateKey(cursor),
+        end: formatDateKey(phaseEnd),
+        startTime: formatHourKey(cursor),
+        endTime: formatHourKey(phaseEnd),
+        status: normalizePhaseStatus(phase.status),
+      });
+      cursor = new Date(phaseEnd);
+    }
+    const tail = result[result.length - 1];
+    if (tail && (tail.end !== formatDateKey(hourlyEnd) || tail.endTime !== formatHourKey(hourlyEnd))) {
+      tail.end = formatDateKey(hourlyEnd);
+      tail.endTime = formatHourKey(hourlyEnd);
+    }
+    return result.length > 0 ? result : undefined;
+  }
   const start = toUtcDate(plannedStart);
   const end = toUtcDate(plannedEnd);
   if (!start || !end || diffDays(start, end) < 0) return undefined;
@@ -110,6 +166,15 @@ function normalizeTodoPatch(raw) {
       patch[key] = raw[key];
     }
   }
+  for (const key of ['plannedStartTime', 'plannedEndTime']) {
+    if (raw[key] !== undefined) {
+      if (!isValidHourKey(raw[key])) throw new Error(`invalid todo ${key}`);
+      patch[key] = raw[key];
+    }
+  }
+  if ((raw.plannedStartTime === undefined) !== (raw.plannedEndTime === undefined)) {
+    throw new Error('todo hour schedule requires both start and end time');
+  }
   // 空数组表示清除阶段：不写入 patch，配合下方整体替换即可移除旧阶段。
   if (raw.phases !== undefined && Array.isArray(raw.phases) && raw.phases.length > 0) {
     for (const phase of raw.phases) {
@@ -119,6 +184,12 @@ function normalizeTodoPatch(raw) {
       if (phase.status !== undefined && !TODO_STATUSES.includes(phase.status)) throw new Error('invalid todo phase status');
       for (const key of ['start', 'end']) {
         if (phase[key] !== undefined && !isValidDateKey(phase[key])) throw new Error(`invalid todo phase ${key}`);
+      }
+      for (const key of ['startTime', 'endTime']) {
+        if (phase[key] !== undefined && !isValidHourKey(phase[key])) throw new Error(`invalid todo phase ${key}`);
+      }
+      if ((phase.startTime === undefined) !== (phase.endTime === undefined)) {
+        throw new Error('todo hour phase requires both start and end time');
       }
     }
     patch.phases = raw.phases;
@@ -252,7 +323,15 @@ function mergeTodoItems(currentItems, incomingItems) {
     // 阶段依附于计划区间，拿到完整区间后再归一化，保证落盘的数据一定连续无缝。
     const plannedStart = normalized.plannedStart ?? currentItems?.[id]?.plannedStart;
     const plannedEnd = normalized.plannedEnd ?? currentItems?.[id]?.plannedEnd;
-    const phases = normalizePhases(plannedStart, plannedEnd, normalized.phases);
+    if ((normalized.plannedStartTime === undefined) !== (normalized.plannedEndTime === undefined)) {
+      throw new Error(`todo ${id} hour schedule requires both start and end time`);
+    }
+    if (normalized.plannedStartTime && normalized.plannedEndTime) {
+      const startAt = toScheduledDateTime(plannedStart, normalized.plannedStartTime);
+      const endAt = toScheduledDateTime(plannedEnd, normalized.plannedEndTime);
+      if (!startAt || !endAt || endAt <= startAt) throw new Error(`todo ${id} hour schedule is invalid`);
+    }
+    const phases = normalizePhases(plannedStart, plannedEnd, normalized.phases, normalized.plannedStartTime, normalized.plannedEndTime);
     if (phases) normalized.phases = phases;
     else delete normalized.phases;
     merged[id] = normalized;

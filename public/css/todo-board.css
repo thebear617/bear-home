@@ -727,6 +727,36 @@
   gap: 5px;
 }
 
+.todo-gantt-scale {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid #e7dfd3;
+  border-radius: 6px;
+  background: #fbf8f3;
+}
+
+.todo-gantt-scale-button {
+  padding: 4px 7px;
+  border: 0;
+  border-right: 1px solid #e7dfd3;
+  background: transparent;
+  color: #9a8e80;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.todo-gantt-scale-button:last-child {
+  border-right: 0;
+}
+
+.todo-gantt-scale-button.is-active {
+  background: #ffeddc;
+  color: #9a3e13;
+  font-weight: 600;
+}
+
 /* 工具栏右侧纵栏：显示已完成开关在上、日期范围在下，统一右对齐。 */
 .todo-gantt-side {
   display: flex;
@@ -753,6 +783,11 @@
   min-width: max(100%, calc(var(--todo-gantt-days) * 42px + var(--todo-gantt-label-width)));
 }
 
+.todo-hour-gantt-grid {
+  --todo-gantt-label-width: 220px;
+  min-width: max(100%, calc(var(--todo-gantt-hours) * 54px + var(--todo-gantt-label-width)));
+}
+
 .todo-gantt-axis-row,
 .todo-gantt-row {
   display: grid;
@@ -762,7 +797,9 @@
 .todo-gantt-axis-label,
 .todo-gantt-axis-track,
 .todo-gantt-label,
-.todo-gantt-track {
+.todo-gantt-track,
+.todo-hour-gantt-axis-track,
+.todo-hour-gantt-track {
   border-bottom: 1px solid #e7dfd3;
 }
 
@@ -788,13 +825,19 @@
 }
 
 .todo-gantt-axis-track,
-.todo-gantt-track {
+.todo-gantt-track,
+.todo-hour-gantt-axis-track,
+.todo-hour-gantt-track {
   display: grid;
   grid-template-columns: var(--todo-gantt-columns);
   min-width: 0;
 }
 
 .todo-gantt-axis-track {
+  background: #fbf8f3;
+}
+
+.todo-hour-gantt-axis-track {
   background: #fbf8f3;
 }
 
@@ -812,6 +855,39 @@
   background: #fff0e5;
   color: #c2410c;
   font-weight: 600;
+}
+
+.todo-hour-gantt-hour {
+  display: grid;
+  min-width: 0;
+  min-height: 38px;
+  align-content: center;
+  padding: 3px 2px;
+  border-left: 1px solid #eee7dd;
+  color: #9a8e80;
+  font-size: 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.todo-hour-gantt-hour small {
+  min-height: 12px;
+  color: #b1a495;
+  font-size: 9px;
+  font-weight: 400;
+}
+
+.todo-hour-gantt-hour b {
+  font-weight: 500;
+}
+
+.todo-hour-gantt-hour.is-day-start {
+  background: #f8f2e8;
+}
+
+.todo-hour-gantt-hour.is-today {
+  background: #fff0e5;
+  color: #c2410c;
 }
 
 .todo-gantt-actions {
@@ -865,6 +941,93 @@
   min-height: 52px;
   background-image: linear-gradient(to right, transparent calc(100% - 1px), #eee7dd calc(100% - 1px));
   background-size: calc(100% / var(--todo-gantt-days)) 100%;
+}
+
+.todo-hour-gantt-track {
+  position: relative;
+  align-items: center;
+  min-height: 52px;
+  background-image: linear-gradient(to right, transparent calc(100% - 1px), #eee7dd calc(100% - 1px));
+  background-size: calc(100% / var(--todo-gantt-hours)) 100%;
+}
+
+.todo-hour-gantt-bar {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-column: var(--todo-gantt-start) / span var(--todo-gantt-span);
+  min-width: 0;
+  min-height: 30px;
+  align-content: center;
+  gap: 1px;
+  margin: 6px 0;
+  padding: 4px 6px;
+  overflow: hidden;
+  border: 1px solid #d76a31;
+  border-radius: 7px;
+  background: #ffeddc;
+  color: #6f3217;
+  text-align: center;
+  cursor: grab;
+}
+
+.todo-hour-gantt-bar.is-dragging {
+  cursor: grabbing;
+  border-color: #c2410c;
+  box-shadow: 0 2px 8px rgba(194, 65, 12, .16);
+}
+
+.todo-hour-gantt-bar.is-resizing {
+  cursor: ew-resize;
+}
+
+.todo-hour-gantt-bar.has-phases {
+  display: block;
+  padding: 1px;
+  background: #fffdfa;
+}
+
+.todo-hour-gantt-phases {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--todo-gantt-span, 1), 1fr);
+  min-height: 28px;
+  height: 100%;
+}
+
+.todo-hour-gantt-bar-copy {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  min-width: 0;
+  gap: 1px;
+  height: 100%;
+}
+
+.todo-hour-gantt-bar strong,
+.todo-hour-gantt-bar small,
+.todo-hour-gantt-bar-copy strong,
+.todo-hour-gantt-bar-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.todo-hour-gantt-bar strong,
+.todo-hour-gantt-bar-copy strong {
+  font-size: 11px;
+}
+
+.todo-hour-gantt-bar small,
+.todo-hour-gantt-bar-copy small {
+  font-size: 10px;
+  opacity: .72;
+}
+
+.todo-hour-gantt-bar-done {
+  border-color: #55a982;
+  background: #dcf5e9;
+  color: #216a4a;
 }
 
 .todo-gantt-bar {
@@ -1101,7 +1264,15 @@
   left: 0;
 }
 
+.todo-gantt-handle[data-hour-gantt-edge="start"] {
+  left: 0;
+}
+
 .todo-gantt-handle[data-gantt-edge="end"] {
+  right: 0;
+}
+
+.todo-gantt-handle[data-hour-gantt-edge="end"] {
   right: 0;
 }
 
@@ -1230,6 +1401,10 @@
   gap: 12px;
 }
 
+.todo-time-fields {
+  margin-top: 12px;
+}
+
 .todo-date-fields label,
 .todo-completion-field {
   display: grid;
@@ -1322,6 +1497,7 @@
 
 .todo-phase-row input[type="text"],
 .todo-phase-row input[type="date"],
+.todo-phase-row input[type="datetime-local"],
 .todo-phase-row select {
   width: 100%;
   min-width: 0;
@@ -1965,6 +2141,10 @@
   .todo-gantt-grid {
     --todo-gantt-label-width: 150px;
   }
+
+  .todo-hour-gantt-grid {
+    --todo-gantt-label-width: 150px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -2007,6 +2187,7 @@
   }
 
   .todo-phase-row input[type="date"],
+  .todo-phase-row input[type="datetime-local"],
   .todo-phase-end-static {
     grid-column: 2 / span 1;
   }
@@ -2020,6 +2201,10 @@
   }
 
   .todo-gantt-grid {
+    --todo-gantt-label-width: 118px;
+  }
+
+  .todo-hour-gantt-grid {
     --todo-gantt-label-width: 118px;
   }
 

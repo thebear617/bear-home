@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-03T13:16:45.890Z",
+  "updatedAt": "2026-09-04T06:26:04.110Z",
   "items": {
     "l1": {
       "status": "todo"
@@ -52,6 +52,68 @@
           "status": "todo"
         }
       ]
+    },
+    "r5": {
+      "status": "doing",
+      "plannedStart": "2026-09-03",
+      "plannedEnd": "2026-09-06",
+      "phases": [
+        {
+          "id": "p1",
+          "title": "看论文学习",
+          "start": "2026-09-03",
+          "end": "2026-09-05",
+          "status": "doing"
+        },
+        {
+          "id": "p1788443741991",
+          "title": "做 ppt：工作总结、工作计划",
+          "start": "2026-09-06",
+          "end": "2026-09-06",
+          "status": "todo"
+        }
+      ]
+    },
+    "l8": {
+      "status": "doing",
+      "plannedStart": "2026-09-05",
+      "plannedEnd": "2026-09-05",
+      "plannedStartTime": "09:00",
+      "plannedEndTime": "18:00",
+      "phases": [
+        {
+          "id": "p1",
+          "title": "小蓝充电",
+          "start": "2026-09-05",
+          "end": "2026-09-05",
+          "startTime": "09:00",
+          "endTime": "13:00",
+          "status": "todo"
+        },
+        {
+          "id": "p1788503142450",
+          "title": "工位布置",
+          "start": "2026-09-05",
+          "end": "2026-09-05",
+          "startTime": "13:00",
+          "endTime": "15:00",
+          "status": "todo"
+        },
+        {
+          "id": "p1788503153637",
+          "title": "赫兹医院",
+          "start": "2026-09-05",
+          "end": "2026-09-05",
+          "startTime": "15:00",
+          "endTime": "18:00",
+          "status": "todo"
+        }
+      ]
+    },
+    "c11": {
+      "status": "doing",
+      "plannedStart": "2026-09-04",
+      "plannedEnd": "2026-09-07"
     }
   }
 }
