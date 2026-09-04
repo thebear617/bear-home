@@ -1168,11 +1168,13 @@ function renderStats(): string {
 
 function renderColumn(status: 'todo' | 'doing' | 'done', label: string, statusClass: string, items: TodoItem[], suffix: string): string {
   const emptyText = status === 'todo' ? '📥 暂无待办' : status === 'doing' ? '🚀 暂无进行中' : '✅ 等待你完成第一个任务';
+  // 「进行中」卡片带排期/阶段进度条，单卡更高，每页少放一条，避免整列被拉高。
+  const pageSize = status === 'doing' ? 3 : BOARD_PAGE_SIZE;
   const pageKey = activeTabId + ':' + status;
-  const pageCount = Math.max(1, Math.ceil(items.length / BOARD_PAGE_SIZE));
+  const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
   const page = Math.min(boardPages[pageKey] || 0, pageCount - 1);
   boardPages[pageKey] = page;
-  const pageItems = items.slice(page * BOARD_PAGE_SIZE, (page + 1) * BOARD_PAGE_SIZE);
+  const pageItems = items.slice(page * pageSize, (page + 1) * pageSize);
   const cards = items.length > 0 ? pageItems.map(renderCard).join('') : '<p class="todo-board-empty">' + emptyText + '</p>';
   const pagination = pageCount > 1
     ? '<div class="todo-board-pagination"><button type="button" data-tb-page="prev" data-tb-status="' + status + '"' + (page === 0 ? ' disabled' : '') + '>上一页</button><span>' + (page + 1) + ' / ' + pageCount + '</span><button type="button" data-tb-page="next" data-tb-status="' + status + '"' + (page === pageCount - 1 ? ' disabled' : '') + '>下一页</button></div>'
