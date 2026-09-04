@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-04T06:26:04.110Z",
+  "updatedAt": "2026-09-04T16:13:01.180Z",
   "items": {
     "l1": {
       "status": "todo"
@@ -113,7 +113,34 @@
     "c11": {
       "status": "doing",
       "plannedStart": "2026-09-04",
-      "plannedEnd": "2026-09-07"
+      "plannedEnd": "2026-09-07",
+      "phases": [
+        {
+          "id": "p1",
+          "title": "开发笔记：调整分类学",
+          "start": "2026-09-04",
+          "end": "2026-09-05",
+          "status": "done"
+        },
+        {
+          "id": "p1788538340645",
+          "title": "开发笔记：逐篇笔记整理以及常识笔记：调整分类学",
+          "start": "2026-09-06",
+          "end": "2026-09-06",
+          "status": "doing"
+        },
+        {
+          "id": "p1788538370712",
+          "title": "常识笔记：逐篇整理",
+          "start": "2026-09-07",
+          "end": "2026-09-07",
+          "status": "todo"
+        }
+      ]
+    },
+    "l44": {
+      "status": "done",
+      "completedAt": "2026-09-04"
     }
   }
 }

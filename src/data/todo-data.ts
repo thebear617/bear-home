@@ -33,6 +33,8 @@ export const TODO_BOARDS: TodoBoard[] = [
     name: '生活',
     icon: '🏠',
     items: [
+      { id: 'l45', title: "猪窝：美食记录升级", status: 'todo', date: '2026-09-08', createdAt: '2026-09-05', url: "", note: "集成做菜记录➕菜谱➕食材存放甘特图➕价格图" },
+      { id: 'l44', title: "购买一个 在家喝的500ml的水瓶", status: 'todo', date: '2026-09-04', createdAt: '2026-09-04', url: "https://item.jd.com/100135363038.html?pcdk=stPamDq6YyH3dOCYnsmj539riQCTQKktAH1iqhinti2pPavR2ev4votaoc0caxqi.rQ4a.tlbT&spmTag=YTAyMTkuYjAwMjM1Ni5jMDAwMDcyMTAua2V5d29yZF9lbnRlciU0MDE3ODg1MDkzNzczNTYlMjMxNzgwOTAzMzUyNzI3OTM0MzgwMTk0JTIzMTM1MzYzMDAzMiUyQ2EwMjQwLmIwMDI0OTMuYzAwMDA0MDI3LjIlMjNza3VfY2FyZCU0MDE3ODg1MTAyNzUzNDclMjMxNzgwOTAzMzUyNzI3OTM0MzgwMTk0JTIzNzkzMDU0NjI2", note: "500mL 水瓶 透明 宽口 耐热 密封｜已找到，价格为 14.31，还需要一个防尘盖" },
       { id: 'l8', title: "带赫兹去博辰复诊，顺便回学校收拾东西", status: 'todo', date: '2026-09-02', createdAt: '2026-08-02', url: "", note: "赫兹口炎治疗（441）后续" },
       { id: 'l43', title: "猪窝：支出记录升级", status: 'todo', date: '2026-09-03', createdAt: '2026-09-03', url: "", note: "把攒钱计划、定期支出、会员订阅看能否集成到一块" },
       { id: 'l42', title: "和梓健哥他们聚一聚", status: 'todo', date: '2026-09-03', createdAt: '2026-09-03', url: "", note: "下周六（9 月 12 日）和他们约着聚一聚，郑炟、董传天、田均恺、陆才、梓健哥、马钰程、赵钰彬、韩耀文" },
