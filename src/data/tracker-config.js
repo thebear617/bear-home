@@ -40,6 +40,36 @@ export const trackerGoalDefinitions = [
     unit: '¥',
     status: 'active',
   },
+  {
+    // 博士毕业要求（《西安电子科技大学研究生必修环节实施细则》）：
+    // 在学期间参加学术（技术）报告/论坛不少于 10 次。
+    id: 'academic-reports',
+    title: '学术报告 / 论坛',
+    label: 'Academic reports & forums',
+    type: 'count',
+    icon: '📣',
+    progressLabel: '已参加',
+    progressLabelEn: 'Attended',
+    current: 0,
+    target: 10,
+    unit: '',
+    status: 'active',
+  },
+  {
+    // 子集目标：其中在国内外学术（技术）会议或论坛上做口头报告不少于 3 次。
+    // 做口头报告时两个目标都要 +1。
+    id: 'academic-oral',
+    title: '其中 · 口头报告',
+    label: 'Oral presentations',
+    type: 'count',
+    icon: '🎤',
+    progressLabel: '已完成',
+    progressLabelEn: 'Presented',
+    current: 0,
+    target: 3,
+    unit: '',
+    status: 'active',
+  },
 ];
 
 const goalDefinitionsById = new Map(trackerGoalDefinitions.map((goal) => [goal.id, goal]));
