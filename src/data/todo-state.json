@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-07T13:28:02.288Z",
+  "updatedAt": "2026-09-10T06:14:45.762Z",
   "items": {
     "l1": {
       "status": "todo"
@@ -34,13 +34,13 @@
           "id": "p1",
           "title": "约人，确定时间",
           "start": "2026-09-03",
-          "end": "2026-09-08",
+          "end": "2026-09-09",
           "status": "doing"
         },
         {
           "id": "p1788441370348",
           "title": "拉群，商定项目",
-          "start": "2026-09-09",
+          "start": "2026-09-10",
           "end": "2026-09-11",
           "status": "todo"
         },
@@ -113,9 +113,10 @@
       ]
     },
     "c11": {
-      "status": "doing",
+      "status": "done",
       "plannedStart": "2026-09-04",
-      "plannedEnd": "2026-09-08",
+      "plannedEnd": "2026-09-09",
+      "completedAt": "2026-09-09",
       "phases": [
         {
           "id": "p1",
@@ -135,8 +136,8 @@
           "id": "p1788538370712",
           "title": "两边笔记的逐字整理",
           "start": "2026-09-07",
-          "end": "2026-09-08",
-          "status": "doing"
+          "end": "2026-09-09",
+          "status": "done"
         }
       ]
     },
@@ -147,12 +148,29 @@
     "l32": {
       "status": "doing",
       "plannedStart": "2026-09-07",
-      "plannedEnd": "2026-09-09"
+      "plannedEnd": "2026-09-13",
+      "phases": [
+        {
+          "id": "p1",
+          "title": "核对意向",
+          "start": "2026-09-07",
+          "end": "2026-09-09",
+          "status": "done"
+        },
+        {
+          "id": "p1788942575898",
+          "title": "整理材料",
+          "start": "2026-09-10",
+          "end": "2026-09-13",
+          "status": "doing"
+        }
+      ]
     },
     "l46": {
-      "status": "doing",
+      "status": "done",
       "plannedStart": "2026-09-08",
       "plannedEnd": "2026-09-09",
+      "completedAt": "2026-09-08",
       "phases": [
         {
           "id": "p1",
@@ -171,9 +189,67 @@
       ]
     },
     "l45": {
-      "status": "doing",
+      "status": "done",
       "plannedStart": "2026-09-07",
-      "plannedEnd": "2026-09-09"
+      "plannedEnd": "2026-09-10",
+      "completedAt": "2026-09-09",
+      "phases": [
+        {
+          "id": "p1",
+          "title": "四个视图、基本数据",
+          "start": "2026-09-07",
+          "end": "2026-09-08",
+          "status": "done"
+        },
+        {
+          "id": "p1788845606058",
+          "title": "视图合并，信息去冗",
+          "start": "2026-09-09",
+          "end": "2026-09-10",
+          "status": "done"
+        }
+      ]
+    },
+    "l43": {
+      "status": "done",
+      "plannedStart": "2026-09-09",
+      "plannedEnd": "2026-09-10",
+      "completedAt": "2026-09-10",
+      "plannedStartTime": "17:00",
+      "plannedEndTime": "14:00",
+      "phases": [
+        {
+          "id": "p1",
+          "title": "单页面三视图",
+          "start": "2026-09-09",
+          "end": "2026-09-09",
+          "startTime": "17:00",
+          "endTime": "22:00",
+          "status": "done"
+        },
+        {
+          "id": "p1788930402470",
+          "title": "三视图合并：粗实现",
+          "start": "2026-09-09",
+          "end": "2026-09-10",
+          "startTime": "22:00",
+          "endTime": "10:00",
+          "status": "done"
+        },
+        {
+          "id": "p1789020803667",
+          "title": "三视图合并：微调",
+          "start": "2026-09-10",
+          "end": "2026-09-10",
+          "startTime": "10:00",
+          "endTime": "14:00",
+          "status": "done"
+        }
+      ]
+    },
+    "c23": {
+      "status": "done",
+      "completedAt": "2026-09-10"
     }
   }
 }
