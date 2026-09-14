@@ -1,6 +1,6 @@
 ---
 import FloatingNav from '../components/FloatingNav.astro';
-const { title = '熊窝', active = 'routes', hideSidebar = false } = Astro.props;
+const { title = '熊窝', active = 'routes', hideSidebar = false, navVariant = 'default' } = Astro.props;
 ---
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -9,14 +9,15 @@ const { title = '熊窝', active = 'routes', hideSidebar = false } = Astro.props
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/favicon.png">
     <title>{title}</title>
-  <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
     {active === 'todo-board' && <link rel="stylesheet" href="/css/todo-board.css">}
+    {active === 'crm' && <link rel="stylesheet" href="/css/crm.css?v=crm-v34">}
 </head>
 <body class="sidebar-collapsed">
   <div class:list={['layout', { 'home-layout': hideSidebar, 'capsule-layout': !hideSidebar }]}>
-    {!hideSidebar && <FloatingNav active={active} />}
+    {!hideSidebar && <FloatingNav active={active} variant={navVariant} />}
     <div class="main-area">
-      <main class:list={['app-shell', { 'home-shell': active === 'home', 'dashboard-shell': active === 'dashboard', 'routes-shell': active === 'routes', 'todo-shell': active === 'todo-board' }]}>
+      <main class:list={['app-shell', { 'home-shell': active === 'home', 'dashboard-shell': active === 'dashboard', 'routes-shell': active === 'routes', 'todo-shell': active === 'todo-board', 'crm-shell': active === 'crm' }]}>
         <slot />
       </main>
     </div>

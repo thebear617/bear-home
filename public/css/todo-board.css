@@ -935,6 +935,23 @@
   color: #c2410c;
 }
 
+/* 小时轴的任务行多一个「转为按天」按钮，按钮组排三列；窄屏退回两列免得文字挤出边框。 */
+.todo-gantt-actions.is-triple {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.todo-gantt-convert {
+  border-color: #f0cdb0;
+  background: #fffdfa;
+  color: #b45309;
+}
+
+.todo-gantt-convert:hover {
+  border-color: #b45309;
+  background: #fff7ed;
+  color: #92400e;
+}
+
 .todo-gantt-track {
   position: relative;
   align-items: center;
@@ -1373,6 +1390,11 @@
   font-weight: 600;
 }
 
+/* 阶段弹窗没有 kicker，只剩一行任务名：行高顶到关闭按钮的高度，两者视觉居中。 */
+.todo-modal-phases .todo-modal-header h2 {
+  line-height: 28px;
+}
+
 .todo-modal-close {
   width: 28px;
   height: 28px;
@@ -1495,9 +1517,9 @@
   font-size: 10px;
 }
 
-.todo-phase-row input[type="text"],
 .todo-phase-row input[type="date"],
 .todo-phase-row input[type="datetime-local"],
+.todo-phase-row textarea,
 .todo-phase-row select {
   width: 100%;
   min-width: 0;
@@ -1510,8 +1532,21 @@
   font-size: 12px;
 }
 
+/* 阶段名沿用原来那个输入框的样式，只是从单行变成可换行：
+   一行装不下就在框内折行、整框跟着长高，超过上限才在框内滚动；没有拖拽手柄。 */
+.todo-phase-row textarea[name="phaseTitle"] {
+  box-sizing: border-box;
+  resize: none;
+  overflow-y: hidden;
+}
+
+.todo-phase-row textarea[name="phaseTitle"].is-scrollable {
+  overflow-y: auto;
+}
+
 .todo-phase-row input:focus,
-.todo-phase-row select:focus {
+.todo-phase-row select:focus,
+.todo-phase-row textarea:focus {
   outline: 2px solid rgba(194, 65, 12, 0.22);
   border-color: #c2410c;
 }
@@ -2145,6 +2180,10 @@
   .todo-hour-gantt-grid {
     --todo-gantt-label-width: 150px;
   }
+
+  .todo-gantt-actions.is-triple {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 480px) {
@@ -2177,7 +2216,7 @@
     row-gap: 6px;
   }
 
-  .todo-phase-row input[name="phaseTitle"] {
+  .todo-phase-row textarea[name="phaseTitle"] {
     grid-column: 2 / span 3;
   }
 

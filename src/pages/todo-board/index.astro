@@ -25,35 +25,9 @@ const boardsLoaded = Array.isArray(TODO_BOARDS) && TODO_BOARDS.length > 0;
             <div class="todo-board-stats-fill" style="width: 0%"></div>
           </div>
         </div>
-        <div class="todo-board-columns">
-          <div class="todo-board-column">
-            <div class="todo-board-column-header todo-status-todo">
-              <span class="todo-board-column-dot"></span>
-              待办 <span class="todo-board-column-count">-</span>
-            </div>
-            <div class="todo-board-column-body">
-              <p class="todo-board-empty">📥 暂无待办</p>
-            </div>
-          </div>
-          <div class="todo-board-column">
-            <div class="todo-board-column-header todo-status-doing">
-              <span class="todo-board-column-dot"></span>
-              进行中 <span class="todo-board-column-count">-</span>
-            </div>
-            <div class="todo-board-column-body">
-              <p class="todo-board-empty">🚀 暂无进行中</p>
-            </div>
-          </div>
-          <div class="todo-board-column">
-            <div class="todo-board-column-header todo-status-done">
-              <span class="todo-board-column-dot"></span>
-              已完成 <span class="todo-board-column-count">-/0</span>
-            </div>
-            <div class="todo-board-column-body">
-              <p class="todo-board-empty">✅ 等待你完成第一个任务</p>
-            </div>
-          </div>
-        </div>
+        {/* 脚本执行前的骨架。默认视图是甘特图（见 todo-board.ts 的 currentView），
+            这里就不摆看板三列了，给一句中性占位，免得进站先闪一下「待办 / 进行中 / 已完成」。 */}
+        <p class="todo-board-empty">正在排布甘特图…</p>
       </>
     ) : (
       <div class="todo-board-empty">看板数据未加载。请检查 todo-data.ts 是否正常编译。</div>

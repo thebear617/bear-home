@@ -105,7 +105,7 @@ personal/
 
 ## 任务看板
 
-任务看板位于 `/todo-board/`，独立于生活仪表盘，包含汇总、编程、科研和生活四个视图，以及待办、进行中、已完成、历史归档和年度完成热力图。任务清单唯一来源是 `src/data/todo-data.ts`，状态真源是 `src/data/todo-state.json`（status、计划区间、阶段的字段级补丁），完成任务后移入 `src/data/archived-todo-data.ts`。本地 dev 下可直接在看板点「➕ 新增任务」弹窗创建任务、点卡片「删除」移除任务——两个操作都由 dev server 直接写回 `todo-data.ts`（`/__todo_file` 端点）；线上只读。
+任务看板位于 `/todo-board/`，独立于生活仪表盘，包含汇总、编程、科研和生活四个视图，以及待办、进行中、已完成、历史归档和年度完成热力图。默认视图是**甘特图**（进站先看当前在推进什么、排到哪一天；可在「按天 / 按小时」两种精度间切换），点横条即唤起阶段编辑改名字与区间；切到「看板视图」则是待办 / 进行中 / 已完成三列。任务清单唯一来源是 `src/data/todo-data.ts`，状态真源是 `src/data/todo-state.json`（status、计划区间、阶段的字段级补丁），完成任务后移入 `src/data/archived-todo-data.ts`。本地 dev 下可直接在看板点「➕ 新增任务」弹窗创建任务、点卡片「删除」移除任务——两个操作都由 dev server 直接写回 `todo-data.ts`（`/__todo_file` 端点）；线上只读。
 
 ## 追踪数据同步
 

@@ -4,12 +4,24 @@ import { getNavigationItems } from '../data/navigation.js';
 const rootHref = Astro.url.pathname === '/' || Astro.url.pathname === '/index.html' ? './' : '../';
 const items = getNavigationItems(rootHref);
 const active = Astro.props.active ?? 'home';
+const variant = Astro.props.variant ?? 'default';
 ---
 
-<nav class="floating-nav" aria-label="主导航">
+<nav class:list={['floating-nav', { 'floating-nav-crm': variant === 'crm' }]} aria-label="主导航">
+  {variant === 'crm' && (
+    <a class="floating-nav-brand" href={`${rootHref}home/`} aria-label="返回熊窝首页">
+      <svg viewBox="0 0 32 28" aria-hidden="true" focusable="false">
+        <path d="M8 9 6 4.8a2.7 2.7 0 0 1 4.7-1.9L13 6.1a8 8 0 0 1 6 0l2.3-3.2A2.7 2.7 0 0 1 26 4.8L24 9a8 8 0 0 1 1.2 4.2v4.1a7.2 7.2 0 0 1-7.2 7.2h-4A7.2 7.2 0 0 1 6.8 17.3v-4.1A8 8 0 0 1 8 9Z"></path>
+        <circle cx="12" cy="13.5" r="1.1"></circle>
+        <circle cx="20" cy="13.5" r="1.1"></circle>
+        <path d="M13 18c1.8 1.2 4.2 1.2 6 0"></path>
+      </svg>
+      <strong>熊窝</strong>
+    </a>
+  )}
   {items.map((item) => (
     <a
-      class:list={['floating-nav-item', { active: active === item.id }]}
+      class:list={['floating-nav-item', `nav-${item.id}`, { active: active === item.id }]}
       href={item.href}
       aria-label={item.title}
       aria-current={active === item.id ? 'page' : undefined}
@@ -90,6 +102,86 @@ const active = Astro.props.active ?? 'home';
     outline-offset: 2px;
   }
 
+  .floating-nav-crm {
+    left: 0;
+    right: auto;
+    justify-content: flex-start;
+    gap: .3rem;
+    width: fit-content;
+    max-width: calc(100vw - 1rem);
+    padding: .3rem .45rem;
+    border-color: rgba(255, 255, 255, .86);
+    background: rgba(255, 252, 247, .68);
+    box-shadow: 0 8px 24px rgba(94, 61, 32, .06), inset 0 1px 0 rgba(255, 255, 255, .82);
+  }
+
+  .floating-nav-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    min-height: 2.35rem;
+    margin-right: .15rem;
+    padding: .28rem .7rem .28rem .55rem;
+    border-radius: 999px;
+    color: #4d2f1d;
+    text-decoration: none;
+  }
+
+  .floating-nav-brand svg {
+    width: 1.55rem;
+    height: 1.4rem;
+    fill: none;
+    stroke: #7b421e;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .floating-nav-brand strong {
+    font-family: Georgia, "Songti SC", STSong, serif;
+    font-size: 1.12rem;
+    letter-spacing: .08em;
+  }
+
+  .floating-nav-crm .floating-nav-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+    width: auto;
+    min-height: 2.35rem;
+    padding: .3rem .78rem;
+    border-radius: 999px;
+    font-size: .9rem;
+  }
+
+  .floating-nav-crm .floating-nav-item small {
+    position: static;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font-size: .78rem;
+    font-weight: 700;
+    line-height: 1.2;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+
+  .floating-nav-crm .floating-nav-item:hover,
+  .floating-nav-crm .floating-nav-item:focus-visible,
+  .floating-nav-crm .floating-nav-item.active {
+    background: #fae8d6;
+    color: #b45309;
+    transform: none;
+  }
+
+  .floating-nav-crm .floating-nav-item:focus-visible {
+    outline-color: rgba(194, 65, 12, .35);
+  }
+
   @media (max-width: 719px) {
     .floating-nav {
       top: .75rem;
@@ -99,5 +191,63 @@ const active = Astro.props.active ?? 'home';
     .floating-nav-item small {
       display: none;
     }
+
+    .floating-nav-crm {
+      position: fixed;
+      top: auto;
+      right: .6rem;
+      bottom: .7rem;
+      left: .6rem;
+      z-index: 40;
+      justify-content: space-around;
+      gap: .15rem;
+      width: auto;
+      max-width: none;
+      padding: .35rem .3rem;
+      backdrop-filter: none;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .floating-nav-crm::-webkit-scrollbar {
+      display: none;
+    }
+
+    .floating-nav-crm .floating-nav-brand {
+      position: fixed;
+      top: .75rem;
+      left: .8rem;
+      z-index: 40;
+      margin: 0;
+      padding: .25rem .45rem;
+      background: rgba(255, 252, 247, .68);
+      box-shadow: 0 8px 24px rgba(94, 61, 32, .06);
+    }
+
+    .floating-nav-crm .floating-nav-item {
+      flex-shrink: 0;
+      flex: 1 1 0;
+      min-width: 0;
+      min-height: 3.1rem;
+      padding: .25rem .2rem;
+      flex-direction: column;
+      gap: .14rem;
+      border-radius: 12px;
+    }
+
+    .floating-nav-crm .floating-nav-item small {
+      display: inline;
+      max-width: 5.2em;
+      overflow: hidden;
+      font-size: .62rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .floating-nav-crm .nav-crm { order: 1; }
+    .floating-nav-crm .nav-todo-board { order: 2; }
+    .floating-nav-crm .nav-dashboard { order: 3; }
+    .floating-nav-crm .nav-routes { order: 4; }
+    .floating-nav-crm .nav-home { order: 5; }
   }
 </style>

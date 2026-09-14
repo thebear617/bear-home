@@ -51,7 +51,9 @@ const HEATMAP_PAGE_SIZE = 3;
 const LEGACY_TODO_STORAGE_KEY = 'bear-home.todo-board.v1';
 
 let activeTabId = 'summary';
-let currentView: 'board' | 'gantt' = 'board';
+// 默认落在甘特图：进站第一眼是「现在正在推进什么、排到哪一天」，比看板更贴近当天的工作焦点。
+// 每次进站都从甘特图开始，不记住上次的视图切换。
+let currentView: 'board' | 'gantt' = 'gantt';
 let historyOpen = false;
 let selectedHeatmapDate: string | null = null;
 let heatmapPage = 0;
@@ -318,6 +320,58 @@ function splitEvenly(phases: TodoPhase[], plannedStart: string, plannedEnd: stri
   });
 }
 
+// 「转为按天」的换算：丢掉整点端点，日期区间沿用原来的首尾两天；
+// 阶段按天重排，每个阶段至少占 1 天，阶段数多于原天数时把计划结束日顺延到刚好放得下，
+// 避免 normalizePhases 按天归一化时把放不下的阶段直接截断丢失。
+function hourlyToDaySchedule(item: BoardItem): { plannedStart: string; plannedEnd: string; phases?: TodoPhase[] } | null {
+  const startAt = parseScheduledDateTime(item.plannedStart, item.plannedStartTime);
+  const endAt = parseScheduledDateTime(item.plannedEnd, item.plannedEndTime);
+  if (!startAt || !endAt || endAt < startAt) return null;
+  const plannedStart = fmtDate(startAt);
+  let plannedEnd = fmtDate(endAt);
+  const phases = item.phases || [];
+  if (phases.length === 0) return { plannedStart, plannedEnd };
+  const startDate = parseDate(plannedStart) || new Date();
+  const dayCount = dateDiff(startDate, parseDate(plannedEnd) || startDate) + 1;
+  if (phases.length > dayCount) plannedEnd = fmtDate(addDays(startDate, phases.length - 1));
+  // 先剥离阶段的整点端点（按天排期不允许带 startTime / endTime），再按天平均铺满计划区间。
+  const stripped = phases.map((phase) => ({ id: phase.id, title: phase.title, start: phase.start, end: phase.end, status: phase.status }));
+  const spread = splitEvenly(stripped, plannedStart, plannedEnd);
+  return { plannedStart, plannedEnd, phases: normalizePhases(plannedStart, plannedEnd, spread) };
+}
+
+// 小时排期 → 日期排期：小时端点只属于「按小时」视图，转换后任务回到日期轴。
+function convertHourlyItemToDay(itemId: string): void {
+  if (!isEditable()) {
+    showToast('🔒 线上只读：请在本地 dev（npm run dev）中修改任务排期');
+    return;
+  }
+  const item = itemById(itemId);
+  if (!item || item.archived) return;
+  const next = hourlyToDaySchedule(item);
+  if (!next) {
+    showToast('⚠️ 该任务没有完整的整点排期，无法转为按天');
+    return;
+  }
+  const phaseCount = next.phases?.length || 0;
+  if (phaseCount > 0 && next.plannedEnd !== item.plannedEnd) {
+    if (!window.confirm('「' + item.title + '」有 ' + phaseCount + ' 个阶段，按天排期每个阶段至少占 1 天，计划区间会由 ' + shortDate(item.plannedStart) + '—' + shortDate(item.plannedEnd) + ' 调整为 ' + shortDate(next.plannedStart) + '—' + shortDate(next.plannedEnd) + '。确定转换吗？（也可以先在「分阶段」里合并阶段）')) return;
+  }
+  const patch = { ...(todoState.items[itemId] || {}) };
+  patch.plannedStart = next.plannedStart;
+  patch.plannedEnd = next.plannedEnd;
+  delete patch.plannedStartTime;
+  delete patch.plannedEndTime;
+  if (next.phases && next.phases.length > 0) patch.phases = next.phases;
+  else delete patch.phases;
+  todoState.items[itemId] = patch;
+  pushTodoState();
+  // 转换后任务已不在小时轴上，切到「按天」让结果立即可见。
+  ganttGranularity = 'day';
+  showToast('🗓️ 已转为按天排期 ' + shortDate(next.plannedStart) + '—' + shortDate(next.plannedEnd) + '，可继续拖动调整');
+  refresh();
+}
+
 // refresh() 会重建弹窗 DOM，重建前先把用户当前输入抓回草稿，避免输入丢失。
 function syncPhaseDraftFromDom(): void {
   const form = document.querySelector<HTMLFormElement>('[data-tb-phase-form]');
@@ -330,7 +384,7 @@ function syncPhaseDraftFromDom(): void {
   const rows = Array.from(form.querySelectorAll<HTMLElement>('.todo-phase-row'));
   phaseDraft = rows.map((row, index) => {
     const previous = phaseDraft?.[index];
-    const titleInput = row.querySelector<HTMLInputElement>('input[name="phaseTitle"]');
+    const titleInput = row.querySelector<HTMLTextAreaElement>('textarea[name="phaseTitle"]');
     const dateInput = row.querySelector<HTMLInputElement>('input[name="phaseEnd"]');
     const dateTimeInput = row.querySelector<HTMLInputElement>('input[name="phaseEndDateTime"]');
     const statusSelect = row.querySelector<HTMLSelectElement>('select[name="phaseStatus"]');
@@ -339,7 +393,8 @@ function syncPhaseDraftFromDom(): void {
     const [endDate = '', endTime = ''] = endDateTime.split('T');
     const phase: TodoPhase = {
       id: row.dataset.phaseRow || previous?.id || 'p' + (index + 1),
-      title: titleInput?.value ?? previous?.title ?? '未命名阶段',
+      // 阶段名是单行语义（会进甘特条标签和悬浮窗），折行 / 连续空白统一收成单个空格。
+      title: (titleInput?.value ?? previous?.title ?? '').replace(/\s+/g, ' ').trim(),
       start: previous?.start ?? plannedStart,
       end: isLast ? plannedEnd : (hourly ? (endDate || previous?.end || plannedEnd) : (dateInput?.value || previous?.end || plannedEnd)),
       status: statusSelect?.value === 'done' ? 'done' : statusSelect?.value === 'doing' ? 'doing' : 'todo',
@@ -350,6 +405,64 @@ function syncPhaseDraftFromDom(): void {
     }
     return phase;
   });
+}
+
+// 阶段名输入框沿用原来那个输入框的样式，只是可以换行：一行装不下就整框长高，
+// 最多长到 66px（约 3 行），再长在框内滚动。不做拖拽缩放。
+const PHASE_TITLE_BOX_MAX = 66;
+
+function autosizePhaseTitleField(field: HTMLTextAreaElement): void {
+  field.style.height = 'auto';
+  // scrollHeight 不含边框，box-sizing: border-box 下要补回来，否则底部会差 2px 顶出滚动条。
+  const border = field.offsetHeight - field.clientHeight;
+  const needed = field.scrollHeight + border;
+  field.style.height = Math.min(needed, PHASE_TITLE_BOX_MAX) + 'px';
+  // 没长到上限就不给滚动条，免得单行时右边多一条灰线。
+  field.classList.toggle('is-scrollable', needed > PHASE_TITLE_BOX_MAX);
+}
+
+function autosizePhaseTitles(root: ParentNode): void {
+  root.querySelectorAll<HTMLTextAreaElement>('textarea[name="phaseTitle"]').forEach(autosizePhaseTitleField);
+}
+
+// refresh() 会重建弹窗 DOM，光标必须等新节点挂上再放，所以先把「想聚焦哪个阶段」记成待办。
+let phaseFocusPending: { id: string | null; mode: 'end' | 'select' } | null = null;
+
+function focusPendingPhaseField(container: HTMLElement): void {
+  if (!phaseFocusPending || !phaseItemId) return;
+  const { id, mode } = phaseFocusPending;
+  phaseFocusPending = null;
+  const row = id
+    ? container.querySelector<HTMLElement>('[data-phase-row="' + id + '"]')
+    : container.querySelector<HTMLElement>('.todo-phase-row');
+  const field = row?.querySelector<HTMLTextAreaElement>('textarea[name="phaseTitle"]');
+  if (!field) return;
+  field.focus();
+  // 新加的阶段名默认是占位文案，直接全选方便覆写；已有阶段则把光标放到末尾，方便接着补内容。
+  if (mode === 'select') field.select();
+  else field.setSelectionRange(field.value.length, field.value.length);
+}
+
+// 打开阶段编辑弹窗。phaseId 是横条上点中的那一段，光标会直接落在它的名字上；
+// 不传就退回「当前阶段」（进行中 > 未开始 > 第一段）。
+function openPhaseEditor(itemId: string, phaseId?: string): void {
+  if (!isEditable()) {
+    showToast('🔒 线上只读：请在本地 dev（npm run dev）中划分任务阶段');
+    return;
+  }
+  phaseItemId = itemId;
+  phaseDraft = null;
+  scheduleItemId = null;
+  completionItemId = null;
+  // 阶段悬浮窗的 z-index 比弹窗高，点横条打开弹窗前先把它收掉，免得压在弹窗上面。
+  hidePhaseTooltip();
+  const phases = itemById(itemId)?.phases || [];
+  const target = phases.find((phase) => phase.id === phaseId)
+    || phases.find((phase) => phase.status === 'doing')
+    || phases.find((phase) => phase.status === 'todo')
+    || phases[0];
+  phaseFocusPending = { id: target?.id || null, mode: 'end' };
+  refresh();
 }
 
 function updateItemPhases(id: string, phases: TodoPhase[] | undefined): void {
@@ -875,14 +988,20 @@ function renderGantt(): string {
   const windowLabel = ganttGranularity === 'hour' && hourlyRange
     ? shortDate(fmtDate(hourlyRange.start)) + ' ' + String(hourlyRange.start.getHours()).padStart(2, '0') + ':00—' + shortDate(fmtDate(hourlyRange.end)) + ' ' + String(hourlyRange.end.getHours()).padStart(2, '0') + ':00'
     : shortDate(fmtDate(dayRange.start)) + '—' + shortDate(fmtDate(dayRange.end));
+  // 操作提示统一放在标题下面这行副标题里，底部图例行只剩下色块含义，扫一眼就能对上颜色。
+  const dateOnlyCount = scheduledItems.length - hourItems.length;
+  const subtitle = ganttGranularity === 'hour'
+    ? '点横条编辑阶段，拖分割线按小时调边界，任务行的「转为按天」可改回日期排期。'
+      + (dateOnlyCount > 0 ? '另有 ' + dateOnlyCount + ' 项仅按日期排期的任务，请切到「按天」查看。' : '')
+    : '拖动整条移动计划，拖动两端调整日期，点横条即可编辑阶段；1–2 天的小任务可填整点时间切到「按小时」。';
   const toolbar = '<div class="todo-gantt-toolbar">' +
-    '<div><h2 class="todo-gantt-title">任务甘特图</h2><p class="todo-gantt-subtitle">按天排期可拖拽调整；短任务可填写整点时间并切换到小时轴。</p></div>' +
+    '<div><h2 class="todo-gantt-title">任务甘特图</h2><p class="todo-gantt-subtitle">' + subtitle + '</p></div>' +
     '<div class="todo-gantt-side">' +
       '<div class="todo-gantt-controls"><span class="todo-gantt-scale" role="group" aria-label="甘特图精度"><button type="button" class="todo-gantt-scale-button' + (ganttGranularity === 'day' ? ' is-active' : '') + '" data-tb-gantt-scale="day" aria-pressed="' + (ganttGranularity === 'day' ? 'true' : 'false') + '">按天</button><button type="button" class="todo-gantt-scale-button' + (ganttGranularity === 'hour' ? ' is-active' : '') + '" data-tb-gantt-scale="hour" aria-pressed="' + (ganttGranularity === 'hour' ? 'true' : 'false') + '">按小时</button></span><label><input type="checkbox" data-tb-gantt-completed' + (ganttShowCompleted ? ' checked' : '') + '> 显示已完成</label></div>' +
       '<span class="todo-gantt-window">' + windowLabel + '</span>' +
     '</div>' +
   '</div>';
-  if (ganttGranularity === 'hour') return renderHourGantt(scheduledItems, hourItems, hourlyRange, toolbar);
+  if (ganttGranularity === 'hour') return renderHourGantt(hourItems, hourlyRange, toolbar);
   if (dayItems.length === 0) {
     return '<section class="todo-gantt" aria-label="任务甘特图">' + toolbar + '<div class="todo-gantt-empty"><strong>还没有按天排期的任务</strong><span>填写了具体小时的短任务会显示在“按小时”视图；其他任务可按日期排期。</span></div></section>';
   }
@@ -930,7 +1049,7 @@ const phaseButton = isEditable()
       const phaseSpan = Math.max(1, dateDiff(phaseStart, phaseEnd) + 1);
       const phasePeriod = shortDate(phase.start) + '—' + shortDate(phase.end);
       const phaseStatusLabel = phase.status === 'done' ? '已完成' : phase.status === 'doing' ? '进行中' : '未开始';
-      const cell = '<span class="todo-gantt-phase is-' + phase.status + '" data-phase-index="' + index + '" style="--phase-start: ' + phaseStartColumn + '; --phase-span: ' + phaseSpan + '" data-tb-phase-tooltip data-phase-title="' + escape(phase.title) + '" data-phase-period="' + escape(phasePeriod) + '" data-phase-status="' + phase.status + '" data-phase-status-label="' + escape(phaseStatusLabel) + '">' +
+      const cell = '<span class="todo-gantt-phase is-' + phase.status + '" data-phase-index="' + index + '" data-phase-id="' + escape(phase.id) + '" style="--phase-start: ' + phaseStartColumn + '; --phase-span: ' + phaseSpan + '" data-tb-phase-tooltip data-phase-title="' + escape(phase.title) + '" data-phase-period="' + escape(phasePeriod) + '" data-phase-status="' + phase.status + '" data-phase-status-label="' + escape(phaseStatusLabel) + '">' +
         // 阶段平铺最多 4 个字符，超出截断；悬浮窗始终展示完整名字。
         (phase.title ? '<span class="todo-gantt-phase-copy">' + escape(truncatePhaseTitle(phase.title)) + '</span>' : '') +
       '</span>';
@@ -961,11 +1080,12 @@ const phaseButton = isEditable()
     '<div class="todo-gantt-scroll"><div class="todo-gantt-grid" data-range-start="' + escape(fmtDate(range.start)) + '" data-gantt-days="' + range.days.length + '" style="' + gridStyle + '">' +
       '<div class="todo-gantt-axis-row"><span class="todo-gantt-axis-label">任务 / 计划</span><div class="todo-gantt-axis-track">' + axis + '</div></div>' + rows +
     '</div></div>' +
-    '<div class="todo-gantt-legend"><span><i class="todo-gantt-legend-swatch"></i>进行中</span><span><i class="todo-gantt-legend-swatch is-done"></i>已完成</span><span><i class="todo-gantt-legend-swatch is-todo"></i>未开始阶段</span><span>拖动整条移动计划，拖动两端调整日期</span></div>' +
+    // 操作提示统一挪到标题下的副标题，这里只留颜色图例。
+    '<div class="todo-gantt-legend"><span><i class="todo-gantt-legend-swatch"></i>进行中</span><span><i class="todo-gantt-legend-swatch is-done"></i>已完成</span><span><i class="todo-gantt-legend-swatch is-todo"></i>未开始阶段</span></div>' +
   '</section>';
 }
 
-function renderHourGantt(allScheduledItems: BoardItem[], items: BoardItem[], range: HourGanttRange | null, toolbar: string): string {
+function renderHourGantt(items: BoardItem[], range: HourGanttRange | null, toolbar: string): string {
   if (!range || items.length === 0) {
     return '<section class="todo-gantt" aria-label="任务甘特图（按小时）">' + toolbar + '<div class="todo-gantt-empty"><strong>还没有按小时排期的任务</strong><span>在看板里点击“开始排期”或“调整排期”，同时填写开始和结束的整点时间后，会显示在这里。</span></div></section>';
   }
@@ -997,8 +1117,12 @@ function renderHourGantt(allScheduledItems: BoardItem[], items: BoardItem[], ran
     const removeButton = isEditable()
       ? '<button type="button" class="todo-gantt-remove" data-tb-gantt-remove="' + escape(item.id) + '">移出甘特图</button>'
       : '';
+    // 小时排期专有：把任务从小时轴搬回日期轴，整点端点会被丢弃。
+    const convertButton = isEditable()
+      ? '<button type="button" class="todo-gantt-remove todo-gantt-convert" data-tb-hour-to-day="' + escape(item.id) + '" aria-label="转为按天排期：' + escape(item.title) + '" title="丢弃整点时间，改为日期级排期">转为按天</button>'
+      : '';
     const actions = isEditable()
-      ? '<div class="todo-gantt-actions">' + phaseButton + removeButton + '</div>'
+      ? '<div class="todo-gantt-actions is-triple">' + phaseButton + convertButton + removeButton + '</div>'
       : '';
     const phaseCells = phases.map((phase, index) => {
       const phaseStart = phaseDateTime(phase, 'start') || start;
@@ -1007,7 +1131,7 @@ function renderHourGantt(allScheduledItems: BoardItem[], items: BoardItem[], ran
       const phaseSpan = Math.max(1, hourDiff(phaseStart, phaseEnd));
       const phasePeriod = shortDate(phase.start) + ' ' + (phase.startTime || '') + '—' + shortDate(phase.end) + ' ' + (phase.endTime || '');
       const phaseStatusLabel = phase.status === 'done' ? '已完成' : phase.status === 'doing' ? '进行中' : '未开始';
-      const cell = '<span class="todo-gantt-phase is-' + phase.status + '" data-phase-index="' + index + '" style="--phase-start: ' + phaseStartColumn + '; --phase-span: ' + phaseSpan + '" data-tb-phase-tooltip data-phase-title="' + escape(phase.title) + '" data-phase-period="' + escape(phasePeriod) + '" data-phase-status="' + phase.status + '" data-phase-status-label="' + escape(phaseStatusLabel) + '">' +
+      const cell = '<span class="todo-gantt-phase is-' + phase.status + '" data-phase-index="' + index + '" data-phase-id="' + escape(phase.id) + '" style="--phase-start: ' + phaseStartColumn + '; --phase-span: ' + phaseSpan + '" data-tb-phase-tooltip data-phase-title="' + escape(phase.title) + '" data-phase-period="' + escape(phasePeriod) + '" data-phase-status="' + phase.status + '" data-phase-status-label="' + escape(phaseStatusLabel) + '">' +
         (phase.title ? '<span class="todo-gantt-phase-copy">' + escape(truncatePhaseTitle(phase.title)) + '</span>' : '') +
       '</span>';
       if (index === phases.length - 1 || !isEditable()) return cell;
@@ -1022,13 +1146,10 @@ function renderHourGantt(allScheduledItems: BoardItem[], items: BoardItem[], ran
       '<div class="todo-hour-gantt-track" data-hour-task-track="' + escape(item.id) + '"><div class="todo-hour-gantt-bar todo-hour-gantt-bar-' + status + (phases.length > 0 ? ' has-phases' : '') + '" data-tb-hour-gantt-bar data-task-id="' + escape(item.id) + '" data-start="' + escape(fmtDate(start)) + '" data-start-time="' + escape(hourKey(start)) + '" data-end="' + escape(fmtDate(end)) + '" data-end-time="' + escape(hourKey(end)) + '" style="--todo-gantt-start: ' + startColumn + '; --todo-gantt-span: ' + span + ';" aria-label="' + escape(item.title + '，计划' + period + (phases.length > 0 ? '，共 ' + phases.length + ' 个阶段' : '')) + '"><span class="todo-gantt-handle" data-hour-gantt-edge="start" aria-hidden="true"></span>' + barInner + '<span class="todo-gantt-handle" data-hour-gantt-edge="end" aria-hidden="true"></span></div></div>' +
     '</div>';
   }).join('');
-  const dateOnlyCount = allScheduledItems.length - items.length;
-  const note = dateOnlyCount > 0
-    ? '另有 ' + dateOnlyCount + ' 项仅按日期排期的任务，请在“按天”查看。'
-    : '按小时排期任务也可划分阶段。';
+  // 操作提示都在标题下的副标题里，图例只留色块含义。
   return '<section class="todo-gantt todo-hour-gantt" aria-label="任务甘特图（按小时）">' + toolbar +
     '<div class="todo-gantt-scroll"><div class="todo-hour-gantt-grid" data-gantt-hours="' + range.hours.length + '" data-range-start="' + escape(fmtDate(range.start)) + '" data-range-start-time="' + escape(hourKey(range.start)) + '" data-range-end="' + escape(fmtDate(range.end)) + '" data-range-end-time="' + escape(hourKey(range.end)) + '" style="' + gridStyle + '"><div class="todo-gantt-axis-row"><span class="todo-gantt-axis-label">任务 / 时间</span><div class="todo-hour-gantt-axis-track">' + axis + '</div></div>' + rows + '</div></div>' +
-    '<div class="todo-gantt-legend"><span><i class="todo-gantt-legend-swatch"></i>进行中</span><span><i class="todo-gantt-legend-swatch is-done"></i>已完成</span><span>' + note + '</span><span>拖动阶段分割线可按小时调整边界</span></div>' +
+    '<div class="todo-gantt-legend"><span><i class="todo-gantt-legend-swatch"></i>进行中</span><span><i class="todo-gantt-legend-swatch is-done"></i>已完成</span><span><i class="todo-gantt-legend-swatch is-todo"></i>未开始阶段</span></div>' +
   '</section>';
 }
 
@@ -1142,7 +1263,8 @@ function renderPhaseModal(): string {
       : '<input type="date" name="phaseEnd" value="' + escape(phase.end) + '" min="' + escape(plannedStart) + '" max="' + escape(plannedEnd) + '" required aria-label="阶段结束日期">';
     return '<div class="todo-phase-row' + (hourly ? ' is-hourly' : '') + '" data-phase-row="' + escape(phase.id) + '">' +
       '<span class="todo-phase-index">' + (index + 1) + '</span>' +
-      '<input type="text" name="phaseTitle" value="' + escape(phase.title) + '" maxlength="40" placeholder="阶段名称" aria-label="阶段名称" required>' +
+      // 多行输入：长阶段名换行显示全，高度由 autosizePhaseTitles 跟着内容走。
+      '<textarea name="phaseTitle" rows="1" maxlength="40" placeholder="阶段名称" aria-label="阶段名称" required>' + escape(phase.title) + '</textarea>' +
       '<span class="todo-phase-until">至</span>' + (hourly ? hourField : dateField) +
       '<select name="phaseStatus" aria-label="阶段状态">' + statusOptions + '</select>' +
       '<button type="button" class="todo-phase-remove" data-tb-phase-remove="' + escape(phase.id) + '" aria-label="删除阶段：' + escape(phase.title) + '"' + (phases.length <= 1 ? ' disabled' : '') + '>✕</button>' +
@@ -1151,9 +1273,10 @@ function renderPhaseModal(): string {
 
   return '<div class="todo-modal-backdrop" data-tb-modal-close></div>' +
     '<section class="todo-modal todo-modal-phases" role="dialog" aria-modal="true" aria-labelledby="todo-phase-title">' +
-      '<div class="todo-modal-header"><div><span class="todo-modal-kicker">划分任务阶段</span><h2 id="todo-phase-title">' + escape(item.title) + '</h2></div><button type="button" class="todo-modal-close" data-tb-modal-close aria-label="关闭">✕</button></div>' +
+      // 不设 kicker：「划分任务阶段」与弹窗里的内容重复，只留任务名当标题。
+      '<div class="todo-modal-header"><div><h2 id="todo-phase-title">' + escape(item.title) + '</h2></div><button type="button" class="todo-modal-close" data-tb-modal-close aria-label="关闭">✕</button></div>' +
       '<form data-tb-phase-form data-task-id="' + escape(item.id) + '" data-planned-start="' + escape(plannedStart) + '" data-planned-end="' + escape(plannedEnd) + '" data-planned-start-time="' + escape(plannedStartTime || '') + '" data-planned-end-time="' + escape(plannedEndTime || '') + '" data-phase-granularity="' + (hourly ? 'hour' : 'day') + '">' +
-        '<p class="todo-modal-help">计划区间 ' + escape(hourly ? shortDate(plannedStart) + ' ' + plannedStartTime + ' — ' + shortDate(plannedEnd) + ' ' + plannedEndTime + '（共 ' + totalUnits + ' 小时）' : shortDate(plannedStart) + ' — ' + shortDate(plannedEnd) + '（共 ' + totalUnits + ' 天）') + '。阶段连续铺满整段，末阶段自动收在结束' + (hourly ? '时刻' : '日') + '。</p>' +
+        '<p class="todo-modal-help">计划区间 ' + escape(hourly ? shortDate(plannedStart) + ' ' + plannedStartTime + ' — ' + shortDate(plannedEnd) + ' ' + plannedEndTime + '（共 ' + totalUnits + ' 小时）' : shortDate(plannedStart) + ' — ' + shortDate(plannedEnd) + '（共 ' + totalUnits + ' 天）') + '。阶段连续铺满整段，末阶段自动收在结束' + (hourly ? '时刻' : '日') + '。阶段名会自动换行，回车结束编辑。</p>' +
         '<div class="todo-phase-list">' + rows + '</div>' +
         '<div class="todo-phase-tools"><button type="button" class="todo-phase-add" data-tb-phase-add' + (canAdd ? '' : ' disabled') + '>＋ 添加阶段</button><button type="button" class="todo-phase-even" data-tb-phase-even>平均分配</button></div>' +
         '<div class="todo-modal-actions"><button type="button" class="todo-modal-secondary" data-tb-phase-clear>清除阶段</button><button type="button" class="todo-modal-secondary" data-tb-modal-close>取消</button><button type="submit" class="todo-modal-primary">保存阶段</button></div>' +
@@ -1209,7 +1332,11 @@ function renderBoard(): string {
 
 function refresh() {
   const container = document.getElementById('todoBoard');
-  if (container) container.innerHTML = renderBoard();
+  if (!container) return;
+  container.innerHTML = renderBoard();
+  // 重建后重算阶段名输入框高度，并把待聚焦的光标放回去，编辑过程不丢节奏。
+  autosizePhaseTitles(container);
+  focusPendingPhaseField(container);
 }
 
 interface GanttDragState {
@@ -1221,6 +1348,8 @@ interface GanttDragState {
   rangeStart: Date;
   originalStart: Date;
   originalEnd: Date;
+  // 按下时落在横条的哪一段阶段上：抬手时若排期没变，就当「点了一下横条」，直接编辑这一段。
+  phaseId?: string;
 }
 
 let ganttDragState: GanttDragState | null = null;
@@ -1338,16 +1467,19 @@ function finishSeamDrag(): void {
   state.bar.classList.remove('is-resizing');
   seamDragState = null;
   hidePhaseTooltip();
-  if (state.lastLeftEnd !== state.leftEnd) {
-    const next = state.phasesSnapshot.map((phase) => ({ ...phase }));
-    const left = next[state.seamIndex];
-    const right = next[state.seamIndex + 1];
-    if (left && right) {
-      left.end = state.lastLeftEnd;
-      right.start = fmtDate(addDays(parseDate(state.lastLeftEnd) || new Date(), 1));
-      const item = itemById(state.itemId);
-      updateItemPhases(state.itemId, normalizePhases(item?.plannedStart, item?.plannedEnd, next));
-    }
+  if (state.lastLeftEnd === state.leftEnd) {
+    // 分割线没被拖动 = 点在了阶段边界上，也按「点击横条」处理，打开左侧那一段的编辑。
+    openPhaseEditor(state.itemId, state.phasesSnapshot[state.seamIndex]?.id);
+    return;
+  }
+  const next = state.phasesSnapshot.map((phase) => ({ ...phase }));
+  const left = next[state.seamIndex];
+  const right = next[state.seamIndex + 1];
+  if (left && right) {
+    left.end = state.lastLeftEnd;
+    right.start = fmtDate(addDays(parseDate(state.lastLeftEnd) || new Date(), 1));
+    const item = itemById(state.itemId);
+    updateItemPhases(state.itemId, normalizePhases(item?.plannedStart, item?.plannedEnd, next));
   }
   refresh();
 }
@@ -1451,18 +1583,21 @@ function finishHourSeamDrag(): void {
   state.bar.classList.remove('is-resizing');
   hourPhaseSeamDragState = null;
   hidePhaseTooltip();
-  if (state.lastLeftEnd.getTime() !== state.leftEnd.getTime()) {
-    const next = state.phasesSnapshot.map((phase) => ({ ...phase }));
-    const left = next[state.seamIndex];
-    const right = next[state.seamIndex + 1];
-    const item = itemById(state.itemId);
-    if (left && right && item) {
-      left.end = fmtDate(state.lastLeftEnd);
-      left.endTime = hourKey(state.lastLeftEnd);
-      right.start = fmtDate(state.lastLeftEnd);
-      right.startTime = hourKey(state.lastLeftEnd);
-      updateItemPhases(state.itemId, normalizePhases(item.plannedStart, item.plannedEnd, next, item.plannedStartTime, item.plannedEndTime));
-    }
+  if (state.lastLeftEnd.getTime() === state.leftEnd.getTime()) {
+    // 同上：只点了一下分割线，打开左侧那一段的阶段编辑。
+    openPhaseEditor(state.itemId, state.phasesSnapshot[state.seamIndex]?.id);
+    return;
+  }
+  const next = state.phasesSnapshot.map((phase) => ({ ...phase }));
+  const left = next[state.seamIndex];
+  const right = next[state.seamIndex + 1];
+  const item = itemById(state.itemId);
+  if (left && right && item) {
+    left.end = fmtDate(state.lastLeftEnd);
+    left.endTime = hourKey(state.lastLeftEnd);
+    right.start = fmtDate(state.lastLeftEnd);
+    right.startTime = hourKey(state.lastLeftEnd);
+    updateItemPhases(state.itemId, normalizePhases(item.plannedStart, item.plannedEnd, next, item.plannedStartTime, item.plannedEndTime));
   }
   refresh();
 }
@@ -1477,6 +1612,8 @@ interface HourGanttDragState {
   rangeEnd: Date;
   originalStart: Date;
   originalEnd: Date;
+  // 同 GanttDragState.phaseId：抬手时排期没变就当作点击横条。
+  phaseId?: string;
 }
 
 let hourGanttDragState: HourGanttDragState | null = null;
@@ -1547,13 +1684,18 @@ function updateHourGanttDragPreview(clientX: number): void {
 
 function finishHourGanttDrag(): void {
   if (!hourGanttDragState) return;
-  const { bar, itemId, mode, originalStart } = hourGanttDragState;
+  const { bar, itemId, mode, originalStart, originalEnd, phaseId } = hourGanttDragState;
   const start = parseScheduledDateTime(bar.dataset.start, bar.dataset.startTime);
   const end = parseScheduledDateTime(bar.dataset.end, bar.dataset.endTime);
   bar.classList.remove('is-dragging', 'is-resizing');
   hourGanttDragState = null;
   if (!start || !end || end <= start) {
     refresh();
+    return;
+  }
+  // 同上：整点区间没动就是点了一下横条，打开阶段编辑。
+  if (start.getTime() === originalStart.getTime() && end.getTime() === originalEnd.getTime()) {
+    openPhaseEditor(itemId, phaseId);
     return;
   }
   updateItemSchedule(itemId, fmtDate(start), fmtDate(end), hourKey(start), hourKey(end));
@@ -1715,6 +1857,7 @@ document.addEventListener('pointerdown', (event) => {
       rangeEnd,
       originalStart,
       originalEnd,
+      phaseId: target.closest<HTMLElement>('[data-phase-id]')?.dataset.phaseId,
     };
     hourBar.classList.add(edge ? 'is-resizing' : 'is-dragging');
     event.preventDefault();
@@ -1753,6 +1896,7 @@ document.addEventListener('pointerdown', (event) => {
     rangeStart,
     originalStart,
     originalEnd,
+    phaseId: target.closest<HTMLElement>('[data-phase-id]')?.dataset.phaseId,
   };
   bar.classList.add('is-dragging');
   event.preventDefault();
@@ -1781,13 +1925,19 @@ document.addEventListener('pointermove', (event) => {
 
 function finishGanttDrag(): void {
   if (!ganttDragState) return;
-  const { bar, itemId, mode, originalStart, originalEnd } = ganttDragState;
+  const { bar, itemId, mode, originalStart, originalEnd, phaseId } = ganttDragState;
   const start = bar.dataset.start;
   const end = bar.dataset.end;
   bar.classList.remove('is-dragging');
   ganttDragState = null;
   if (!start || !end) {
     refresh();
+    return;
+  }
+  // 排期一点没动 = 这次只是「点了一下横条」，别当成拖拽：直接打开阶段编辑，
+  // 光标落在刚才点的那一段，改名字 / 改区间都不用再去点左边那个按钮。
+  if (start === fmtDate(originalStart) && end === fmtDate(originalEnd)) {
+    openPhaseEditor(itemId, phaseId);
     return;
   }
   // 在按天轴拖拽意味着回到日期级排期，清除具体时间，避免日期调整后出现倒置的小时区间。
@@ -2014,6 +2164,13 @@ document.addEventListener('click', (event) => {
     return;
   }
 
+  const convertToDayButton = target.closest<HTMLButtonElement>('[data-tb-hour-to-day]');
+  if (convertToDayButton) {
+    const itemId = convertToDayButton.dataset.tbHourToDay;
+    if (itemId) convertHourlyItemToDay(itemId);
+    return;
+  }
+
   const removeGanttButton = target.closest<HTMLButtonElement>('[data-tb-gantt-remove]');
   if (removeGanttButton) {
     const itemId = removeGanttButton.dataset.tbGanttRemove;
@@ -2037,11 +2194,8 @@ document.addEventListener('click', (event) => {
 
   const phaseOpenButton = target.closest<HTMLButtonElement>('[data-tb-gantt-phases]');
   if (phaseOpenButton) {
-    phaseItemId = phaseOpenButton.dataset.tbGanttPhases || null;
-    phaseDraft = null;
-    scheduleItemId = null;
-    completionItemId = null;
-    refresh();
+    const itemId = phaseOpenButton.dataset.tbGanttPhases;
+    if (itemId) openPhaseEditor(itemId);
     return;
   }
 
@@ -2070,11 +2224,14 @@ document.addEventListener('click', (event) => {
         const lastEnd = phaseDateTime(last, 'end') || endAt || addHours(lastStart, 1);
         const hours = Math.max(1, hourDiff(lastStart, lastEnd));
         const splitAt = hours >= 2 ? addHours(lastStart, Math.floor(hours / 2)) : lastEnd;
-        phaseDraft.push({ id: 'p' + Date.now(), title: '新阶段', start: fmtDate(splitAt), end: fmtDate(lastEnd), startTime: hourKey(splitAt), endTime: hourKey(lastEnd), status: 'todo' });
+        const added = { id: 'p' + Date.now(), title: '新阶段', start: fmtDate(splitAt), end: fmtDate(lastEnd), startTime: hourKey(splitAt), endTime: hourKey(lastEnd), status: 'todo' as TodoPhaseStatus };
+        phaseDraft.push(added);
         if (hours >= 2) {
           last.end = fmtDate(splitAt);
           last.endTime = hourKey(splitAt);
         }
+        // 新阶段的占位名直接全选，回车 / 输入就能改名，不用再点一次输入框。
+        phaseFocusPending = { id: added.id, mode: 'select' };
         refresh();
         return;
       }
@@ -2083,8 +2240,10 @@ document.addEventListener('click', (event) => {
       const days = Math.max(1, dateDiff(lastStart, lastEnd) + 1);
       // 把末阶段对半分，前面的阶段不受影响。
       const splitAt = days >= 2 ? addDays(lastStart, Math.floor(days / 2)) : lastEnd;
-      phaseDraft.push({ id: 'p' + Date.now(), title: '新阶段', start: fmtDate(splitAt), end: fmtDate(lastEnd), status: 'todo' });
+      const added = { id: 'p' + Date.now(), title: '新阶段', start: fmtDate(splitAt), end: fmtDate(lastEnd), status: 'todo' as TodoPhaseStatus };
+      phaseDraft.push(added);
       if (days >= 2) last.end = fmtDate(addDays(splitAt, -1));
+      phaseFocusPending = { id: added.id, mode: 'select' };
       refresh();
     }
     return;
@@ -2321,6 +2480,35 @@ document.addEventListener('submit', (event) => {
     phaseDraft = null;
     refresh();
   }
+});
+
+// 阶段名输入框跟着内容长高。
+document.addEventListener('input', (event) => {
+  const field = (event.target as HTMLElement).closest<HTMLTextAreaElement>('textarea[name="phaseTitle"]');
+  if (field) autosizePhaseTitleField(field);
+});
+
+// 窗口宽度一变，折行数就变了，得重新量一次高度，否则多出来的行会被 overflow: hidden 裁掉。
+window.addEventListener('resize', () => autosizePhaseTitles(document));
+
+// 阶段名是单行语义（会进甘特条标签和悬浮窗），回车不换行，直接结束这一段的编辑。
+document.addEventListener('keydown', (event) => {
+  const field = (event.target as HTMLElement).closest<HTMLTextAreaElement>('textarea[name="phaseTitle"]');
+  if (!field || event.key !== 'Enter') return;
+  // 中文输入法用回车确认候选词，这时候不能抢。
+  if (event.isComposing || event.keyCode === 229) return;
+  event.preventDefault();
+  field.blur();
+});
+
+// 键盘可达性：按天的横条本身是 button，聚焦后回车 / 空格也打开阶段编辑（鼠标走上面那条 pointerup 路径）。
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  const bar = (event.target as HTMLElement).closest<HTMLElement>('[data-tb-gantt-bar]');
+  const itemId = bar?.dataset.taskId;
+  if (!itemId) return;
+  event.preventDefault();
+  openPhaseEditor(itemId);
 });
 
 document.addEventListener('keydown', (event) => {
