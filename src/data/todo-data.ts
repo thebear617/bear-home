@@ -50,11 +50,11 @@ export const TODO_BOARDS: TodoBoard[] = [
     name: '编程',
     icon: '💻',
     items: [
-      { id: 'c24', title: "猫猫：完善猫猫网站", status: 'todo', date: '2026-09-10', createdAt: '2026-09-10', url: "", note: "财务集成价格参考-账目公示｜行动甘特图（绝育、疫苗、救助）｜猫猫编年史变成猪窝日程那样子｜猫猫知识增加分页逻辑等，引向公众号那边" },
+      { id: 'c24', title: "猫猫：完善猫猫网站", status: 'todo', date: '2026-09-10', createdAt: '2026-09-10', url: "", note: "财务集成价格参考-账目公示｜行动甘特图（绝育、疫苗、救助）｜猫猫编年史变成猪窝日程那样子｜猫猫知识增加分页逻辑等，引向公众号那边｜猫猫赞助可以尝试用 CRM 管理" },
+      { id: 'l41', title: "熊窝：CRM 初发搭建，视觉及逻辑建立，未完善数据字段", status: 'todo', date: '2026-09-04', createdAt: '2026-09-04', url: "", note: "" },
       { id: 'c10', title: "聊天站：基础功能搭建｜4328 和 4331 的网关调试", status: 'todo', date: '2026-08-22', createdAt: '2026-08-08', url: "https://www.bilibili.com/video/BV11mNA6vEJX", note: "顺序学习的时候， 一颗节点树（N 个节点=N 个卡片画布），逆序总结收敛的时候，一篇markdown（N 个悬浮窗=经过内容总结后的 N 个节点）-无限画布去做节点树，就是可以自己任意拖拽组织的" },
       { id: 'c23', title: "小米内测申请", status: 'todo', date: '2026-09-10', createdAt: '2026-09-09', url: "https://mimo.xiaomimimo.com/desktop/invite/apply/", note: "UID 为：2419851359" },
       { id: 'c11', title: "开发笔记，常识笔记：整理笔记内容，缩减非必要笔记，重构分类学", status: 'todo', date: '2026-09-04', createdAt: '2026-09-03', url: "", note: "1. 开发笔记：典型案例改为实现流程、SOP\n2. 常识笔记：领域大调整，按经济行业和非经济行业来分" },
-      { id: 'l41', title: "熊窝：CRM 搭建", status: 'todo', date: '2026-09-04', createdAt: '2026-09-04', url: "", note: "" },
     ]
   },
   {
@@ -62,7 +62,7 @@ export const TODO_BOARDS: TodoBoard[] = [
     name: '科研',
     icon: '🔍',
     items: [
-      { id: 'r6', title: "组内：完成调研，做个人情况PPT", status: 'todo', date: '2026-09-06', createdAt: '2026-09-06', url: "", note: "" },
+      { id: 'r6', title: "组内：科研，做大组会 PPT 以及个人情况PPT", status: 'todo', date: '2026-09-18', createdAt: '2026-09-06', url: "", note: "" },
       { id: 'r7', title: "CVPR 2027", status: 'todo', date: '2026-11-07', createdAt: '2026-09-13', url: "", note: "摘要 北京时间：2026-11-08 19:59｜全文 北京时间：2026-11-14 19:59" },
       { id: 'r5', title: "大组会工作总结准备", status: 'todo', date: '2026-09-06', createdAt: '2026-09-03', url: "", note: "周日早上九点：学期工作总结和计划汇报" },
     ]

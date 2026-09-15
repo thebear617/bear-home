@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-14T16:42:53.061Z",
+  "updatedAt": "2026-09-15T06:29:01.621Z",
   "items": {
     "l1": {
       "status": "todo"
@@ -149,7 +149,7 @@
     "l32": {
       "status": "doing",
       "plannedStart": "2026-09-07",
-      "plannedEnd": "2026-09-16",
+      "plannedEnd": "2026-09-18",
       "phases": [
         {
           "id": "p1",
@@ -176,7 +176,7 @@
           "id": "p1789365625421",
           "title": "等待反馈和下一轮讨论",
           "start": "2026-09-14",
-          "end": "2026-09-16",
+          "end": "2026-09-18",
           "status": "doing"
         }
       ]
@@ -269,7 +269,7 @@
     "c24": {
       "status": "doing",
       "plannedStart": "2026-09-10",
-      "plannedEnd": "2026-09-15",
+      "plannedEnd": "2026-09-18",
       "phases": [
         {
           "id": "p1",
@@ -294,17 +294,18 @@
         },
         {
           "id": "p1789366406786",
-          "title": "板块重构：财务板块重构",
+          "title": "开发暂停：受 CRM 需求及组会影响",
           "start": "2026-09-13",
-          "end": "2026-09-15",
-          "status": "doing"
+          "end": "2026-09-18",
+          "status": "todo"
         }
       ]
     },
     "l41": {
-      "status": "doing",
+      "status": "done",
       "plannedStart": "2026-09-11",
       "plannedEnd": "2026-09-15",
+      "completedAt": "2026-09-15",
       "phases": [
         {
           "id": "p1",
@@ -315,17 +316,38 @@
         },
         {
           "id": "p1789206551857",
-          "title": "微调：重构整体布局",
+          "title": "重构：整体布局变为 Bento 风",
           "start": "2026-09-13",
-          "end": "2026-09-13",
-          "status": "doing"
+          "end": "2026-09-14",
+          "status": "done"
         },
         {
           "id": "p1789367116583",
-          "title": "微调：重构具体容器卡片",
-          "start": "2026-09-14",
+          "title": "重构：调整数据看板视图，完善主视图交互逻辑",
+          "start": "2026-09-15",
           "end": "2026-09-15",
+          "status": "done"
+        }
+      ]
+    },
+    "r6": {
+      "status": "doing",
+      "plannedStart": "2026-09-15",
+      "plannedEnd": "2026-09-19",
+      "phases": [
+        {
+          "id": "p1",
+          "title": "PPT：先完成 本身内容",
+          "start": "2026-09-15",
+          "end": "2026-09-16",
           "status": "doing"
+        },
+        {
+          "id": "p1789453717171",
+          "title": "待确定",
+          "start": "2026-09-17",
+          "end": "2026-09-19",
+          "status": "todo"
         }
       ]
     }
