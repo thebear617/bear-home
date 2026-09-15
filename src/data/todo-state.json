@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-14T06:25:39.604Z",
+  "updatedAt": "2026-09-14T16:42:53.061Z",
   "items": {
     "l1": {
       "status": "todo"
@@ -269,7 +269,7 @@
     "c24": {
       "status": "doing",
       "plannedStart": "2026-09-10",
-      "plannedEnd": "2026-09-14",
+      "plannedEnd": "2026-09-15",
       "phases": [
         {
           "id": "p1",
@@ -296,7 +296,7 @@
           "id": "p1789366406786",
           "title": "板块重构：财务板块重构",
           "start": "2026-09-13",
-          "end": "2026-09-14",
+          "end": "2026-09-15",
           "status": "doing"
         }
       ]
@@ -304,7 +304,7 @@
     "l41": {
       "status": "doing",
       "plannedStart": "2026-09-11",
-      "plannedEnd": "2026-09-14",
+      "plannedEnd": "2026-09-15",
       "phases": [
         {
           "id": "p1",
@@ -324,7 +324,7 @@
           "id": "p1789367116583",
           "title": "微调：重构具体容器卡片",
           "start": "2026-09-14",
-          "end": "2026-09-14",
+          "end": "2026-09-15",
           "status": "doing"
         }
       ]
