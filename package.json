@@ -1,7 +1,7 @@
 {
   "name": "bear-home",
   "private": true,
-  "version": "0.30.3",
+  "version": "0.31.0",
   "type": "module",
   "scripts": {
     "dev": "astro dev --port 4321",

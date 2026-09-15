@@ -3,6 +3,7 @@ import {
   CRM_CONTACTS,
   CRM_TODAY,
   dateDistance,
+  getNextFollowUpAt,
   followupBucket,
   getCrmStats,
   isLongNoContact,
@@ -45,21 +46,6 @@ const reminderContacts = [...overdueFollowups, ...todayFollowups, ...next7Follow
   .filter((contact, index, list) => list.findIndex((item) => item.id === contact.id) === index)
   .slice(0, 3);
 
-const trendDays = [...new Set(contacts.flatMap((contact) => contact.interactions.map((interaction) => interaction.date)))]
-  .sort()
-  .slice(-8);
-const trendValues = trendDays.map((date) => contacts.reduce(
-  (total, contact) => total + contact.interactions.filter((interaction) => interaction.date === date).length,
-  0,
-));
-const trendMax = Math.max(...trendValues, 1);
-const trendCoordinates = trendValues.map((value, index) => ({
-  x: 14 + (index * 272) / Math.max(trendValues.length - 1, 1),
-  y: 78 - (value / trendMax) * 54,
-}));
-const trendPoints = trendCoordinates.map(({ x, y }) => `${x},${y}`).join(' ');
-const trendAreaPath = `M ${trendCoordinates[0]?.x || 14} 86 L ${trendCoordinates.map(({ x, y }) => `${x} ${y}`).join(' L ')} L ${trendCoordinates.at(-1)?.x || 286} 86 Z`;
-
 function relationshipCount(type: string): number {
   return contacts.filter((contact) => contact.relationshipType === type).length;
 }
@@ -74,12 +60,13 @@ function formatDate(value?: string): string {
 
 function followupText(contact: (typeof contacts)[number]): string {
   const bucket = followupBucket(contact);
+  const nextFollowUpAt = getNextFollowUpAt(contact);
   if (bucket === 'today') return '今天';
   if (bucket === 'overdue') {
-    const distance = Math.abs(dateDistance(CRM_TODAY, contact.nextFollowUpAt) || 0);
+    const distance = Math.abs(dateDistance(CRM_TODAY, nextFollowUpAt) || 0);
     return `逾期 ${distance} 天`;
   }
-  return formatDate(contact.nextFollowUpAt);
+  return formatDate(nextFollowUpAt);
 }
 
 function followupTone(contact: (typeof contacts)[number]): string {
@@ -122,26 +109,11 @@ function taskTone(status: string): string {
     <article class="crm-overview-card crm-activity-trend-card">
       <div class="crm-overview-card-heading">
         <div>
-          <h2 class="crm-overview-title"><span class="crm-overview-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4.5 17.5 9.2 12.8l3.2 3.1 6.8-7.4"></path><path d="M15.5 8.5h3.7v3.7"></path></svg></span>关系活跃度趋势</h2>
+          <h2 class="crm-overview-title"><span class="crm-overview-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4.5 17.5 9.2 12.8l3.2 3.1 6.8-7.4"></path><path d="M15.5 8.5h3.7v3.7"></path></svg></span>活跃度趋势</h2>
         </div>
         <button class="crm-overview-card-action crm-overview-entry-button" type="button" data-crm-view-dashboard>数据看板</button>
       </div>
-      <div class="crm-trend-chart" aria-label="关系活跃度趋势">
-        <svg viewBox="0 0 300 100" role="img" aria-label="关系活跃度折线图" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="crm-trend-fill" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0" stop-color="#ef7b37" stop-opacity=".28" />
-              <stop offset="1" stop-color="#ef7b37" stop-opacity="0" />
-            </linearGradient>
-          </defs>
-          <path d={trendAreaPath} fill="url(#crm-trend-fill)" />
-          <polyline points={trendPoints} fill="none" stroke="#e96b2c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-          {trendCoordinates.map(({ x, y }) => <circle cx={x} cy={y} r="2.8" fill="#e96b2c" stroke="#fffdf8" stroke-width="1.5" />)}
-        </svg>
-        <div class="crm-trend-labels">
-          {trendDays.map((date) => <span>{date.slice(5).replace('-', '/')}</span>)}
-        </div>
-      </div>
+      <div class="crm-trend-chart" data-crm-trend-chart aria-label="活跃度趋势"></div>
     </article>
 
     <article class="crm-overview-card crm-reminder-overview-card">
@@ -155,7 +127,7 @@ function taskTone(status: string): string {
         {reminderContacts.map((contact) => (
           <li>
             <span class:list={['crm-reminder-dot', `is-${followupTone(contact)}`]} aria-hidden="true"></span>
-            <time datetime={contact.nextFollowUpAt}>{formatDate(contact.nextFollowUpAt)}</time>
+            <time datetime={getNextFollowUpAt(contact)}>{formatDate(getNextFollowUpAt(contact))}</time>
             <strong>{contact.name}</strong>
             <span class="crm-reminder-status">{followupText(contact)}</span>
             <p data-crm-tooltip={contact.notes}>{contact.notes.split('\n')[0]}</p>
@@ -189,13 +161,7 @@ function taskTone(status: string): string {
 
     <aside class="crm-sidebar-panel crm-panel-card" aria-label="联系人筛选">
 
-      <div class="crm-filter-switcher" role="tablist" aria-label="筛选分类">
-        <button class="is-active" type="button" role="tab" aria-selected="true" data-crm-filter-panel="smart">智能筛选</button>
-        <button type="button" role="tab" aria-selected="false" data-crm-filter-panel="relationship">关系类型</button>
-        <button type="button" role="tab" aria-selected="false" data-crm-filter-panel="tags">标签筛选</button>
-      </div>
-
-      <section class="crm-filter-group" data-crm-filter-panel-content="smart" aria-labelledby="crm-smart-filter-title">
+      <section class="crm-filter-group" aria-labelledby="crm-smart-filter-title">
         <h3 id="crm-smart-filter-title">智能筛选</h3>
         <div class="crm-filter-list">
           {smartFilters.map((filter, index) => (
@@ -213,7 +179,7 @@ function taskTone(status: string): string {
         </div>
       </section>
 
-      <section class="crm-filter-group crm-relationship-group" data-crm-filter-panel-content="relationship" aria-labelledby="crm-relationship-title" hidden>
+      <section class="crm-filter-group crm-relationship-group" aria-labelledby="crm-relationship-title">
         <h3 id="crm-relationship-title">关系类型</h3>
         <div class="crm-filter-list">
           {relationshipTypes.map((type) => (
@@ -226,10 +192,9 @@ function taskTone(status: string): string {
         </div>
       </section>
 
-      <section class="crm-filter-group crm-tag-group" data-crm-filter-panel-content="tags" aria-labelledby="crm-tag-title" hidden>
+      <section class="crm-filter-group crm-tag-group" aria-labelledby="crm-tag-title">
         <div class="crm-tag-heading">
           <h3 id="crm-tag-title">标签筛选</h3>
-          <button class="crm-tag-add" type="button" data-crm-add-tag aria-label="添加标签">＋</button>
         </div>
         <div class="crm-tag-list">
           {customTags.map((tag) => (
@@ -247,21 +212,8 @@ function taskTone(status: string): string {
       </div>
     </aside>
 
-    <section class="crm-center-column" aria-labelledby="crm-contact-title">
-      <section class="crm-contact-panel crm-panel-card">
-        <div class="crm-content-heading">
-          <div>
-            <p class="crm-panel-kicker">PEOPLE IN YOUR CIRCLE</p>
-            <h2 id="crm-contact-title" data-crm-list-title>联系人 <span data-crm-contact-count>{contacts.length}</span></h2>
-          </div>
-          <div class="crm-content-heading-actions">
-            <button class="crm-primary-button" type="button" data-crm-add-contact>
-              <span aria-hidden="true">＋</span>
-              新增联系人
-            </button>
-          </div>
-        </div>
-
+    <section class="crm-center-column" aria-label="联系人列表">
+      <section class="crm-contact-panel crm-panel-card" aria-label="联系人列表">
         <div class="crm-contact-toolbar" aria-label="联系人列表工具栏">
           <label class="crm-list-search">
             <span class="crm-search-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><circle cx="10.8" cy="10.8" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg></span>
@@ -269,26 +221,31 @@ function taskTone(status: string): string {
             <input type="search" placeholder="搜索联系人" aria-label="搜索联系人" />
           </label>
           <div class="crm-toolbar-menu-wrap">
-            <button class="crm-select-button" type="button" data-crm-tag-filter aria-haspopup="menu" aria-expanded="false">全部标签 <span aria-hidden="true">⌄</span></button>
+            <button class="crm-select-button crm-toolbar-icon-button" type="button" data-crm-tag-filter aria-label="标签筛选" aria-haspopup="menu" aria-expanded="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16l-6.2 7v4.7l-3.6 1.8v-6.5Z"></path></svg>
+            </button>
             <div class="crm-toolbar-menu" data-crm-tag-menu role="menu" hidden>
               <button type="button" role="menuitem" data-crm-menu-tag="">全部标签</button>
               {customTags.map((tag) => <button type="button" role="menuitem" data-crm-menu-tag={tag.label}>{tag.label}</button>)}
             </div>
           </div>
           <div class="crm-toolbar-menu-wrap">
-            <button class="crm-select-button" type="button" data-crm-sort aria-haspopup="menu" aria-expanded="false">按最近联系 <span aria-hidden="true">⌄</span></button>
+            <button class="crm-select-button crm-toolbar-icon-button" type="button" data-crm-sort aria-label="排序" aria-haspopup="menu" aria-expanded="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14M7 5 4.5 7.5M7 5l2.5 2.5M17 19V5M17 19l-2.5-2.5M17 19l2.5-2.5"></path></svg>
+            </button>
             <div class="crm-toolbar-menu" data-crm-sort-menu role="menu" hidden>
               <button type="button" role="menuitem" data-crm-menu-sort="recent">按最近联系</button>
               <button type="button" role="menuitem" data-crm-menu-sort="followup">按下次跟进</button>
-              <button type="button" role="menuitem" data-crm-menu-sort="importance">按重要程度</button>
             </div>
           </div>
+          <button class="crm-primary-button crm-contact-add-button" type="button" data-crm-add-contact aria-label="新增联系人">
+            <span aria-hidden="true">＋</span>
+          </button>
         </div>
 
         <div class="crm-contact-column-heading" aria-hidden="true">
           <span>联系人</span>
           <span>关系类型</span>
-          <span>关系热度</span>
           <span>上次联系</span>
           <span>下次提醒</span>
         </div>
@@ -303,30 +260,18 @@ function taskTone(status: string): string {
             <article class:list={['crm-contact-card', { 'is-selected': index === 0 }, { 'is-long-no-contact': isLongNoContact(contact) }]} data-contact-id={contact.id} aria-selected={index === 0 ? 'true' : 'false'} role="button" tabindex="0">
               <div class="crm-contact-main">
                 <span class:list={['crm-contact-avatar', `tone-${contact.avatarTone}`]} aria-hidden="true">{initials(contact)}</span>
-                <div class="crm-contact-copy">
+                <div class="crm-contact-copy" data-crm-tooltip={contact.notes} data-crm-tooltip-always>
                   <div class="crm-contact-name-row">
                     <h3>{contact.name}</h3>
-                    <span class="crm-contact-role">{contact.role}</span>
+                    <span class="crm-contact-role" data-crm-tooltip={contact.role}>{contact.role}</span>
                   </div>
-                  <p class="crm-contact-note">{contact.notes.split('\n')[0]}</p>
                 </div>
                 <div class="crm-contact-relation">
                   <span class:list={['crm-badge', `relationship-${contact.relationshipType}`]}>{contact.relationshipType}</span>
-                  {contact.tags.slice(1, 2).map((tag) => <span class="crm-badge is-soft-green">{tag}</span>)}
                 </div>
-                <div class="crm-contact-heat" aria-label={`重要度 ${contact.importance} 星`}><b>{'♥'.repeat(contact.importance)}</b></div>
                 <div class="crm-contact-dates">
                   <span>最近联系 <b>{formatDate(contact.lastContactAt)}</b></span>
                   <span>下次跟进 <b class:list={[`is-${followupTone(contact)}`]}>{followupText(contact)}</b></span>
-                </div>
-              </div>
-              <div class="crm-contact-bottomline">
-                <span class:list={['crm-status-badge', `is-${statusTone(contact.relationshipStatus)}`]}>{contact.relationshipStatus}</span>
-                <span class="crm-contact-importance">重要度 <b>{'♥'.repeat(contact.importance)}</b></span>
-                <div class="crm-contact-actions" aria-label={`${contact.name}快捷操作`}>
-                  <button type="button" data-crm-log-interaction={contact.id}>▧ 记录互动</button>
-                  <button type="button" data-crm-followup={contact.id}>◷ 安排跟进</button>
-                  <button type="button" data-crm-edit-contact={contact.id}>⌕ 编辑</button>
                 </div>
               </div>
             </article>
@@ -339,10 +284,12 @@ function taskTone(status: string): string {
         </div>
 
         <nav class="crm-pagination" data-crm-pagination aria-label="联系人分页" hidden>
-          <button type="button" data-crm-page-prev aria-label="上一页">‹</button>
-          <div class="crm-pagination-pages" data-crm-page-items></div>
-          <button type="button" data-crm-page-next aria-label="下一页">›</button>
-          <span class="crm-pagination-status" data-crm-page-status>1 / 1</span>
+          <span class="crm-pagination-status" data-crm-page-status aria-live="polite">共 0 位联系人</span>
+          <div class="crm-pagination-controls" aria-label="分页切换">
+            <button type="button" data-crm-page-prev aria-label="上一页">‹</button>
+            <div class="crm-pagination-pages" data-crm-page-items></div>
+            <button type="button" data-crm-page-next aria-label="下一页">›</button>
+          </div>
         </nav>
       </section>
 
@@ -361,9 +308,8 @@ function taskTone(status: string): string {
             <div class="crm-detail-name">
               <div class="crm-detail-name-heading">
                 <h2 id="crm-detail-title">{selectedContact.name}</h2>
-                <span class="crm-detail-favorite" aria-label={`重要度 ${selectedContact.importance} 星`}>★</span>
               </div>
-              <p>{selectedContact.role} · {selectedContact.organization}</p>
+              <p>{selectedContact.role}</p>
               <p class="crm-detail-intro">{selectedContact.notes.split('\n')[0]}</p>
             </div>
             <button class="crm-detail-edit" type="button" data-crm-edit-contact={selectedContact.id} aria-label={`编辑${selectedContact.name}`}>
@@ -385,26 +331,24 @@ function taskTone(status: string): string {
           <div class="crm-detail-info-row"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 4.5 9 4l1.7 4.1-1.8 1.3a13 13 0 0 0 5.7 5.7l1.3-1.8L20 15l-.5 2.5c-.3 1.5-1.8 2.3-3.2 1.8A16.2 16.2 0 0 1 4.7 7.7C4.2 6.3 5 4.8 6.5 4.5Z"></path></svg></span><span class="crm-detail-info-label">手机</span><strong>{selectedContact.phone}</strong><button class="crm-detail-copy" type="button" data-crm-copy={selectedContact.phone} aria-label="复制手机号"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg></button></div>
           <div class="crm-detail-info-row"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8.5h14M6.5 5h11A2.5 2.5 0 0 1 20 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-9A2.5 2.5 0 0 1 6.5 5Z"></path><path d="M8 12h.01M12 12h.01M16 12h.01M8 15.5h.01M12 15.5h.01M16 15.5h.01"></path></svg></span><span class="crm-detail-info-label">关系</span><strong>{selectedContact.relationshipType}</strong><span class="crm-detail-info-action" aria-hidden="true"></span></div>
           <div class="crm-detail-info-row"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="13" rx="2"></rect><path d="m5 7 7 5 7-5"></path></svg></span><span class="crm-detail-info-label">邮箱</span><strong>{selectedContact.email}</strong><button class="crm-detail-copy" type="button" data-crm-copy={selectedContact.email} aria-label="复制邮箱"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg></button></div>
-          <div class="crm-detail-info-row"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19.5V6.8A1.8 1.8 0 0 1 6.8 5h10.4A1.8 1.8 0 0 1 19 6.8v12.7H5Z"></path><path d="M8.5 9h7M8.5 12.5h7M8.5 16h4"></path></svg></span><span class="crm-detail-info-label">身份</span><strong>{selectedContact.role} · {selectedContact.organization}</strong><span class="crm-detail-info-action" aria-hidden="true"></span></div>
+          <div class="crm-detail-info-row"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19.5V6.8A1.8 1.8 0 0 1 6.8 5h10.4A1.8 1.8 0 0 1 19 6.8v12.7H5Z"></path><path d="M8.5 9h7M8.5 12.5h7M8.5 16h4"></path></svg></span><span class="crm-detail-info-label">身份</span><strong>{selectedContact.role}</strong><span class="crm-detail-info-action" aria-hidden="true"></span></div>
           <div class="crm-detail-info-row"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2"></rect><path d="M8 3.5v4M16 3.5v4M4 10h16"></path></svg></span><span class="crm-detail-info-label">最近联系</span><strong>{formatDate(selectedContact.lastContactAt)}</strong><span class="crm-detail-info-action" aria-hidden="true"></span></div>
-          <div class="crm-detail-info-row"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4.5h12v15H6z"></path><path d="M8.5 9h7M8.5 12.5h5M8.5 16h4"></path></svg></span><span class="crm-detail-info-label">备注</span><strong>{selectedContact.notes.split('\n')[0]}</strong><button class="crm-detail-info-action crm-detail-edit-note" type="button" data-crm-edit-contact={selectedContact.id} aria-label="编辑备注"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 19 3.3-.7L18.5 8.1a2 2 0 0 0-2.8-2.8L5.5 15.5Z"></path></svg></button></div>
+          <div class="crm-detail-info-row"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4.5h12v15H6z"></path><path d="M8.5 9h7M8.5 12.5h5M8.5 16h4"></path></svg></span><span class="crm-detail-info-label">备注</span><strong>{selectedContact.notes.split('\n')[0]}</strong><span class="crm-detail-info-action" aria-hidden="true"></span></div>
         </section>
 
         <div class="crm-detail-actions" aria-label="联系人操作">
-          <button class="is-primary" type="button" data-crm-log-interaction={selectedContact.id}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18.5 6 14l9.8-9.8a2.1 2.1 0 0 1 3 3L9 17Z"></path><path d="m13.5 6.5 4 4"></path></svg>记录互动</button>
-          <button type="button" data-crm-add-note={selectedContact.id}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h9l3 3v12H6z"></path><path d="M14 4.5v4h4M9 13h6M9 16h5"></path></svg>添加备注</button>
-          <button type="button" data-crm-followup={selectedContact.id}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17.5h10l-1.1-1.8V11a3.9 3.9 0 0 0-7.8 0v4.7Z"></path><path d="M9.5 19.5h5"></path></svg>设置提醒</button>
+          <button type="button" data-crm-log-interaction={selectedContact.id}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18.5 6 14l9.8-9.8a2.1 2.1 0 0 1 3 3L9 17Z"></path><path d="m13.5 6.5 4 4"></path></svg>记录互动</button>
+          <button type="button" data-crm-add-task={selectedContact.id}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14v13H5z"></path><path d="M8.5 9h7M8.5 12h7M8.5 15h4"></path></svg>添加任务</button>
         </div>
       </article>
 
       <section class="crm-detail-activity crm-panel-card" data-crm-detail-activity aria-labelledby="crm-timeline-title">
         <div class="crm-detail-section crm-timeline-section">
           <div class="crm-section-title-row">
-            <h3 id="crm-timeline-title">最近互动记录</h3>
-            <button class="crm-inline-link" type="button" data-crm-view-timeline>查看全部</button>
+            <h3 id="crm-timeline-title">互动记录</h3>
           </div>
           <ol class="crm-timeline">
-            {selectedContact.interactions.map((interaction) => (
+            {selectedContact.interactions.slice(0, 4).map((interaction) => (
               <li>
                 <span class:list={['crm-timeline-icon', `is-${interactionTone(interaction.type)}`]} aria-hidden="true">{interaction.type.slice(0, 1)}</span>
                 <div>
@@ -420,30 +364,22 @@ function taskTone(status: string): string {
       <section class="crm-related-tasks crm-panel-card" aria-labelledby="crm-related-title">
         <div class="crm-section-title-row">
           <h2 id="crm-related-title">相关任务</h2>
-          <button class="crm-inline-link" type="button" data-crm-view-tasks>查看全部任务 <span aria-hidden="true">→</span></button>
         </div>
         <ul class="crm-task-list">
-          {selectedContact.linkedTasks.map((task) => (
+          {selectedContact.linkedTasks.filter((task) => !task.archived).map((task) => (
             <li>
-              <span class="crm-task-checkbox" aria-hidden="true"></span>
+              <button class="crm-task-checkbox" type="button" data-crm-archive-task={task.id} aria-label={`归档任务：${task.title}`}></button>
               <strong data-crm-tooltip={task.title}>{task.title}</strong>
               <span class:list={['crm-task-status', `is-${taskTone(task.status)}`]}>{task.status}</span>
               <time datetime={task.dueDate}>{formatDate(task.dueDate)}</time>
             </li>
           ))}
+          {!selectedContact.linkedTasks.some((task) => !task.archived) && <li class="crm-task-empty">暂无关联任务</li>}
         </ul>
       </section>
     </aside>
 
     <section class="crm-dashboard-row" data-crm-dashboard-row aria-label="关系数据看板">
-      <div class="crm-dashboard-heading">
-        <div>
-          <p class="crm-panel-kicker" data-crm-dashboard-kicker>RELATIONSHIP DASHBOARDS</p>
-          <h2 data-crm-dashboard-title>待跟进</h2>
-        </div>
-        <button class="crm-subtle-link" type="button" data-crm-view-contacts>回到联系人</button>
-      </div>
-
       <section class="crm-stats-panel" aria-label="关系管理概览">
         <section class="crm-stats-row">
         {statsConfig.map((stat) => (
@@ -467,7 +403,6 @@ function taskTone(status: string): string {
         <section class="crm-followup-board crm-panel-card" data-crm-secondary-panel="followups" aria-labelledby="crm-followup-title">
           <div class="crm-content-heading crm-followup-heading">
             <div>
-              <p class="crm-panel-kicker">NEXT ACTIONS</p>
               <h2 id="crm-followup-title">待跟进</h2>
             </div>
             <button class="crm-subtle-link" type="button" data-crm-view-followups>查看全部</button>
@@ -488,7 +423,7 @@ function taskTone(status: string): string {
             <section class="crm-followup-section is-next7" aria-labelledby="crm-next7-title">
               <h3 id="crm-next7-title">未来 7 天要联系的人 <span data-crm-followup-count="next7">{next7Followups.length}</span></h3>
               <div data-crm-followup-items="next7">
-                {next7Followups.map((contact) => <div class="crm-followup-item"><strong>{contact.name}</strong><span>{contact.role}</span><b>{formatDate(contact.nextFollowUpAt)}</b></div>)}
+                {next7Followups.map((contact) => <div class="crm-followup-item"><strong>{contact.name}</strong><span>{contact.role}</span><b>{formatDate(getNextFollowUpAt(contact))}</b></div>)}
               </div>
             </section>
           </div>
@@ -501,7 +436,6 @@ function taskTone(status: string): string {
         <section class="crm-interactions-panel crm-panel-card" data-crm-secondary-panel="dashboard" data-crm-timeline-view aria-labelledby="crm-global-timeline-title">
           <div class="crm-content-heading">
             <div>
-              <p class="crm-panel-kicker">ALL RECENT TOUCHPOINTS</p>
               <h2 id="crm-global-timeline-title">互动时间线 <span data-crm-timeline-count>0</span></h2>
             </div>
             <button class="crm-subtle-link" type="button" data-crm-view-contacts>回到联系人</button>
@@ -516,10 +450,9 @@ function taskTone(status: string): string {
 <div class="crm-overlay" data-crm-overlay hidden>
   <div class="crm-overlay-scrim" data-crm-close-overlay></div>
 
-  <aside class="crm-drawer" data-crm-surface="contact" role="dialog" aria-modal="true" aria-labelledby="crm-contact-form-title" hidden>
+  <div class="crm-modal crm-contact-modal" data-crm-surface="contact" role="dialog" aria-modal="true" aria-labelledby="crm-contact-form-title" hidden>
     <div class="crm-surface-heading">
       <div>
-        <p class="crm-panel-kicker">PEOPLE IN YOUR CIRCLE</p>
         <h2 id="crm-contact-form-title" data-crm-contact-form-title>新增联系人</h2>
       </div>
       <button class="crm-surface-close" type="button" data-crm-close-overlay aria-label="关闭">×</button>
@@ -561,30 +494,28 @@ function taskTone(status: string): string {
         <button type="submit" class="crm-primary-button" data-crm-contact-submit>保存联系人</button>
       </div>
     </form>
-  </aside>
+  </div>
 
   <div class="crm-modal" data-crm-surface="interaction" role="dialog" aria-modal="true" aria-labelledby="crm-interaction-form-title" hidden>
     <div class="crm-surface-heading">
       <div>
-        <p class="crm-panel-kicker">TOUCHPOINT LOG</p>
         <h2 id="crm-interaction-form-title">记录互动</h2>
       </div>
       <button class="crm-surface-close" type="button" data-crm-close-overlay aria-label="关闭">×</button>
     </div>
     <form class="crm-form crm-interaction-form" data-crm-interaction-form>
-      <p class="crm-form-context">正在为 <strong data-crm-interaction-contact>林晓</strong> 记录一次互动</p>
       <fieldset>
-        <legend>互动类型</legend>
+        <legend>类型</legend>
         <div class="crm-interaction-types">
           {['微信', '电话', '邮件', '见面', '其他'].map((type, index) => <button class:list={['crm-type-choice', { 'is-active': index === 0 }]} type="button" data-crm-interaction-type={type}>{type}</button>)}
         </div>
       </fieldset>
-      <label>
-        <span>互动时间</span>
+      <label class="crm-interaction-date">
+        <span>时间</span>
         <input name="date" type="date" value={CRM_TODAY} required />
       </label>
       <label>
-        <span>互动摘要</span>
+        <span>摘要</span>
         <textarea name="summary" rows="4" required placeholder="记录这次互动的主要内容"></textarea>
       </label>
       <div class="crm-form-actions">
@@ -594,28 +525,32 @@ function taskTone(status: string): string {
     </form>
   </div>
 
-  <div class="crm-modal" data-crm-surface="followup" role="dialog" aria-modal="true" aria-labelledby="crm-followup-form-title" hidden>
+  <div class="crm-modal" data-crm-surface="task" role="dialog" aria-modal="true" aria-labelledby="crm-task-form-title" hidden>
     <div class="crm-surface-heading">
       <div>
-        <p class="crm-panel-kicker">NEXT STEP</p>
-        <h2 id="crm-followup-form-title">设置下次跟进</h2>
+        <h2 id="crm-task-form-title">添加任务</h2>
       </div>
       <button class="crm-surface-close" type="button" data-crm-close-overlay aria-label="关闭">×</button>
     </div>
-    <form class="crm-form crm-followup-form" data-crm-followup-form>
-      <p class="crm-form-context">为 <strong data-crm-followup-contact>林晓</strong> 选择一个方便联系的时间。</p>
-      <div class="crm-quick-dates" aria-label="快捷日期">
-        <button type="button" data-crm-followup-quick="0">今天</button>
-        <button type="button" data-crm-followup-quick="3">3天后</button>
-        <button type="button" data-crm-followup-quick="7">下周</button>
-      </div>
+    <form class="crm-form crm-task-form" data-crm-task-form>
+      <label class="crm-form-full">
+        <span>任务名称</span>
+        <input name="title" required placeholder="例如：跟进合作方案" />
+      </label>
       <label>
-        <span>自定义日期</span>
-        <input name="date" type="date" value={CRM_TODAY} required />
+        <span>任务类型</span>
+        <select name="taskType">
+          <option value="跟进任务" selected>跟进任务</option>
+          <option value="普通任务">普通任务</option>
+        </select>
+      </label>
+      <label>
+        <span>截止日期</span>
+        <input name="dueDate" type="date" value={CRM_TODAY} required />
       </label>
       <div class="crm-form-actions">
         <button type="button" class="crm-secondary-button" data-crm-close-overlay>取消</button>
-        <button type="submit" class="crm-primary-button">安排跟进</button>
+        <button type="submit" class="crm-primary-button">添加任务</button>
       </div>
     </form>
   </div>
@@ -623,7 +558,6 @@ function taskTone(status: string): string {
   <div class="crm-modal crm-convert-modal" data-crm-surface="convert" role="dialog" aria-modal="true" aria-labelledby="crm-convert-title" hidden>
     <div class="crm-surface-heading">
       <div>
-        <p class="crm-panel-kicker">TASK BOARD BRIDGE</p>
         <h2 id="crm-convert-title">跳转任务看板</h2>
       </div>
       <button class="crm-surface-close" type="button" data-crm-close-overlay aria-label="关闭">×</button>
@@ -634,6 +568,22 @@ function taskTone(status: string): string {
       <div class="crm-convert-actions">
         <button type="button" class="crm-primary-button" data-crm-confirm-convert>转为任务看板任务 <span aria-hidden="true">→</span></button>
         <a href="/todo-board/" class="crm-secondary-button">前往任务看板 <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="crm-modal" data-crm-surface="archive" role="dialog" aria-modal="true" aria-labelledby="crm-archive-title" hidden>
+    <div class="crm-surface-heading">
+      <div>
+        <h2 id="crm-archive-title">归档任务</h2>
+      </div>
+      <button class="crm-surface-close" type="button" data-crm-close-overlay aria-label="关闭">×</button>
+    </div>
+    <div class="crm-convert-copy">
+      <p class="crm-archive-note">确认后该任务会标记为已完成并归档，不再显示在相关任务列表里。</p>
+      <div class="crm-form-actions">
+        <button type="button" class="crm-secondary-button" data-crm-close-overlay>取消</button>
+        <button type="button" class="crm-primary-button" data-crm-archive-confirm>确认归档</button>
       </div>
     </div>
   </div>
@@ -679,7 +629,8 @@ function taskTone(status: string): string {
     const showTooltip = (target) => {
       const text = target?.dataset.crmTooltip?.trim();
       if (!text) return;
-      if (target.scrollWidth <= target.clientWidth + 1 && target.scrollHeight <= target.clientHeight + 1) return;
+      const showWithoutOverflow = target.dataset.crmTooltipAlways !== undefined;
+      if (!showWithoutOverflow && target.scrollWidth <= target.clientWidth + 1 && target.scrollHeight <= target.clientHeight + 1) return;
       activeTooltipTarget = target;
       hoverTooltip.textContent = text;
       hoverTooltip.hidden = false;
@@ -717,16 +668,11 @@ function taskTone(status: string): string {
       sort: 'recent',
       primaryView: 'contacts',
       page: 1,
-      filterPanel: 'smart',
       selectedId: contacts[0]?.id || '',
     };
 
     const pageSize = 7;
     const primaryViews = ['contacts', 'dashboard'];
-    const primaryViewTitles = {
-      contacts: '联系人',
-      dashboard: '关系数据看板',
-    };
 
     const readPrimaryView = () => {
       const view = new URLSearchParams(window.location.search).get('view');
@@ -737,6 +683,15 @@ function taskTone(status: string): string {
 
     const query = (selector) => root.querySelector(selector);
     const queryAll = (selector) => [...root.querySelectorAll(selector)];
+    const trendChart = query('[data-crm-trend-chart]');
+    const trendTooltip = document.createElement('div');
+    trendTooltip.className = 'crm-trend-tooltip';
+    trendTooltip.dataset.crmTrendTooltip = '';
+    trendTooltip.setAttribute('role', 'status');
+    trendTooltip.setAttribute('aria-live', 'polite');
+    trendTooltip.hidden = true;
+    trendTooltip.innerHTML = '<div class="crm-trend-tooltip-head"><strong data-crm-trend-tooltip-month></strong><button type="button" data-crm-trend-tooltip-close aria-label="关闭互动详情">×</button></div><span data-crm-trend-tooltip-value></span><small data-crm-trend-tooltip-detail></small>';
+    document.body.append(trendTooltip);
     const list = query('[data-crm-contact-list]');
     let contactCards = queryAll('.crm-contact-card');
     const emptyState = query('[data-crm-list-empty]');
@@ -762,8 +717,6 @@ function taskTone(status: string): string {
     const listTitle = query('[data-crm-list-title]');
     const contactCount = query('[data-crm-contact-count]');
     const timelineCount = query('[data-crm-timeline-count]');
-    const dashboardTitle = query('[data-crm-dashboard-title]');
-    const dashboardKicker = query('[data-crm-dashboard-kicker]');
     const summary = query('[data-crm-filter-summary]');
     const summaryText = query('[data-crm-filter-summary-text]');
     const pagination = query('[data-crm-pagination]');
@@ -782,10 +735,9 @@ function taskTone(status: string): string {
     const contactSubmit = document.querySelector('[data-crm-contact-submit]');
     const contactFormError = document.querySelector('[data-crm-contact-form-error]');
     const interactionForm = document.querySelector('[data-crm-interaction-form]');
-    const interactionContact = document.querySelector('[data-crm-interaction-contact]');
-    const followupForm = document.querySelector('[data-crm-followup-form]');
-    const followupContact = document.querySelector('[data-crm-followup-contact]');
+    const taskForm = document.querySelector('[data-crm-task-form]');
     let activeSurfaceContactId = state.selectedId;
+    let activeArchiveTaskId = '';
     let selectedInteractionType = '微信';
     let toastTimer;
 
@@ -806,8 +758,14 @@ function taskTone(status: string): string {
       return Number.isFinite(difference) ? Math.round(difference / 86400000) : null;
     };
 
+    const getNextFollowUpTask = (contact) => [...(contact.linkedTasks || [])]
+      .filter((task) => task.taskType === '跟进任务' && task.status !== '已完成' && task.dueDate)
+      .sort((first, second) => dateValue(first.dueDate) - dateValue(second.dueDate))[0];
+
+    const getNextFollowUpAt = (contact) => getNextFollowUpTask(contact)?.dueDate;
+
     const followupBucket = (contact) => {
-      const distance = dateDistance(crmToday, contact.nextFollowUpAt);
+      const distance = dateDistance(crmToday, getNextFollowUpAt(contact));
       if (distance === 0) return 'today';
       if (distance !== null && distance < 0) return 'overdue';
       if (distance !== null && distance <= 7) return 'next7';
@@ -826,14 +784,164 @@ function taskTone(status: string): string {
 
     const formatDate = (value) => value ? value.replaceAll('-', '.') : '—';
 
+    const buildTrendPath = (points) => {
+      if (points.length < 2) return points.length ? `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}` : '';
+      const count = points.length;
+      const deltas = [];
+      const slopes = [];
+      for (let index = 0; index < count - 1; index += 1) {
+        const dx = points[index + 1].x - points[index].x;
+        deltas.push(dx);
+        slopes.push(dx === 0 ? 0 : (points[index + 1].y - points[index].y) / dx);
+      }
+      const tangents = new Array(count);
+      tangents[0] = slopes[0];
+      tangents[count - 1] = slopes[count - 2];
+      for (let index = 1; index < count - 1; index += 1) {
+        tangents[index] = (slopes[index - 1] + slopes[index]) / 2;
+      }
+      for (let index = 0; index < count - 1; index += 1) {
+        if (slopes[index] === 0) {
+          tangents[index] = 0;
+          tangents[index + 1] = 0;
+          continue;
+        }
+        const a = tangents[index] / slopes[index];
+        const b = tangents[index + 1] / slopes[index];
+        const magnitude = Math.hypot(a, b);
+        if (magnitude > 3) {
+          const scale = 3 / magnitude;
+          tangents[index] = scale * a * slopes[index];
+          tangents[index + 1] = scale * b * slopes[index];
+        }
+      }
+      let path = `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
+      for (let index = 0; index < count - 1; index += 1) {
+        const dx = deltas[index];
+        const control1x = points[index].x + dx / 3;
+        const control1y = points[index].y + (tangents[index] * dx) / 3;
+        const control2x = points[index + 1].x - dx / 3;
+        const control2y = points[index + 1].y - (tangents[index + 1] * dx) / 3;
+        path += ` C${control1x.toFixed(1)},${control1y.toFixed(1)} ${control2x.toFixed(1)},${control2y.toFixed(1)} ${points[index + 1].x.toFixed(1)},${points[index + 1].y.toFixed(1)}`;
+      }
+      return path;
+    };
+
+    const renderTrendChart = () => {
+      if (!trendChart) return;
+      const [todayYear, todayMonth] = crmToday.split('-').map(Number);
+      const todayMonthIndex = todayYear * 12 + todayMonth - 1;
+      const months = Array.from({ length: 6 }, (_, index) => {
+        const monthIndex = todayMonthIndex - (5 - index);
+        const year = Math.floor(monthIndex / 12);
+        const month = (monthIndex % 12) + 1;
+        return {
+          key: `${year}-${String(month).padStart(2, '0')}`,
+          label: `${month}月`,
+          fullLabel: `${year}年${month}月`,
+        };
+      });
+      const trendData = months.map((month) => {
+        const interactions = contacts.flatMap((contact) => contact.interactions || [])
+          .filter((interaction) => interaction.date.slice(0, 7) === month.key);
+        const typeCounts = interactions.reduce((counts, interaction) => {
+          counts.set(interaction.type, (counts.get(interaction.type) || 0) + 1);
+          return counts;
+        }, new Map());
+        return {
+          ...month,
+          value: interactions.length,
+          detail: typeCounts.size ? [...typeCounts.entries()].map(([type, count]) => `${type} ${count}`).join(' · ') : '暂无互动记录',
+        };
+      });
+      const width = Math.max(260, Math.round(trendChart.clientWidth || 360));
+      const height = Math.max(120, Math.round(trendChart.clientHeight || 160));
+      const padding = { top: 16, right: 14, bottom: 24, left: 28 };
+      const plotWidth = width - padding.left - padding.right;
+      const plotHeight = height - padding.top - padding.bottom;
+      const baseline = padding.top + plotHeight;
+      const dataMax = Math.max(...trendData.map((item) => item.value), 1);
+      const max = Math.max(4, Math.ceil(dataMax / 4) * 4);
+      const points = trendData.map((item, index) => ({
+        x: padding.left + (index * plotWidth) / Math.max(trendData.length - 1, 1),
+        y: padding.top + (1 - item.value / max) * plotHeight,
+      }));
+      const linePath = buildTrendPath(points);
+      const areaPath = `${linePath} L${points.at(-1).x.toFixed(1)},${baseline.toFixed(1)} L${points[0].x.toFixed(1)},${baseline.toFixed(1)} Z`;
+      const gridLines = Array.from({ length: 5 }, (_, index) => max - (index * max) / 4).map((value) => {
+        const y = padding.top + (1 - value / max) * plotHeight;
+        return `<line class="crm-trend-grid" x1="${padding.left}" x2="${(width - padding.right).toFixed(1)}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}"/><text class="crm-trend-y-label" x="${(padding.left - 8).toFixed(1)}" y="${(y + 3.2).toFixed(1)}">${value}</text>`;
+      }).join('');
+      const labels = trendData.map((item, index) => `<text class="crm-trend-x-label" x="${points[index].x.toFixed(1)}" y="${(height - 7).toFixed(1)}">${item.label}</text>`).join('');
+      const nodes = trendData.map((item, index) => {
+        const point = points[index];
+        const ariaLabel = `${item.fullLabel}，${item.value} 次互动`;
+        const isPeak = item.value === dataMax && item.value > 0;
+        return `<g class="crm-trend-point-group${isPeak ? ' is-peak' : ''}"><circle class="crm-trend-point-hit-area" data-crm-trend-point data-crm-trend-label="${escapeHtml(item.fullLabel)}" data-crm-trend-value="${item.value}" data-crm-trend-detail="${escapeHtml(item.detail)}" cx="${point.x.toFixed(1)}" cy="${point.y.toFixed(1)}" r="14" role="button" tabindex="0" aria-label="${escapeHtml(ariaLabel)}"/><circle class="crm-trend-point-halo" cx="${point.x.toFixed(1)}" cy="${point.y.toFixed(1)}" r="8"/><circle class="crm-trend-point" cx="${point.x.toFixed(1)}" cy="${point.y.toFixed(1)}" r="3.4"/><title>${escapeHtml(item.fullLabel)} · ${item.value} 次互动</title></g>`;
+      }).join('');
+      trendChart.innerHTML = `<svg class="crm-trend-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="按月互动次数折线图"><defs><linearGradient id="crm-trend-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c2410c" stop-opacity="0.24"/><stop offset="58%" stop-color="#c2410c" stop-opacity="0.08"/><stop offset="100%" stop-color="#c2410c" stop-opacity="0"/></linearGradient></defs>${gridLines}<path class="crm-trend-area" d="${areaPath}"/><path class="crm-trend-line" d="${linePath}"/>${nodes}${labels}</svg>`;
+    };
+
+    const hideTrendTooltip = () => {
+      queryAll('[data-crm-trend-point]').forEach((point) => point.closest('.crm-trend-point-group')?.classList.remove('is-selected'));
+      if (!trendTooltip) return;
+      trendTooltip.hidden = true;
+    };
+
+    const positionTrendTooltip = (point, tooltip) => {
+      if (!trendChart || !tooltip) return;
+      const pointRect = point.getBoundingClientRect();
+      const tooltipRect = tooltip.getBoundingClientRect();
+      const inset = 6;
+      const gap = 8;
+      const maxLeft = Math.max(inset, window.innerWidth - tooltipRect.width - inset);
+      let left = pointRect.left + (pointRect.width - tooltipRect.width) / 2;
+      left = Math.max(inset, Math.min(left, maxLeft));
+      let top = pointRect.top - tooltipRect.height - gap;
+      if (top < inset) top = pointRect.bottom + gap;
+      tooltip.style.left = `${Math.round(left)}px`;
+      tooltip.style.top = `${Math.round(top)}px`;
+    };
+
+    const showTrendTooltip = (point) => {
+      const month = trendTooltip?.querySelector('[data-crm-trend-tooltip-month]');
+      const value = trendTooltip?.querySelector('[data-crm-trend-tooltip-value]');
+      const detail = trendTooltip?.querySelector('[data-crm-trend-tooltip-detail]');
+      if (!trendTooltip || !month || !value || !detail) return;
+      queryAll('[data-crm-trend-point]').forEach((item) => item.closest('.crm-trend-point-group')?.classList.toggle('is-selected', item === point));
+      month.textContent = point.dataset.crmTrendLabel || '';
+      value.textContent = `${point.dataset.crmTrendValue || '0'} 次互动`;
+      detail.textContent = point.dataset.crmTrendDetail || '暂无互动记录';
+      if (trendTooltip.parentElement !== document.body) document.body.append(trendTooltip);
+      trendTooltip.hidden = false;
+      positionTrendTooltip(point, trendTooltip);
+    };
+
+    trendTooltip.querySelector('[data-crm-trend-tooltip-close]')?.addEventListener('click', () => hideTrendTooltip());
+
+    window.addEventListener('scroll', hideTrendTooltip, true);
+    window.addEventListener('resize', hideTrendTooltip);
+
+    if (trendChart && typeof ResizeObserver !== 'undefined') {
+      let lastTrendWidth = 0;
+      const trendResizeObserver = new ResizeObserver(() => {
+        const nextWidth = Math.round(trendChart.clientWidth);
+        if (!nextWidth || Math.abs(nextWidth - lastTrendWidth) < 2) return;
+        lastTrendWidth = nextWidth;
+        renderTrendChart();
+      });
+      trendResizeObserver.observe(trendChart);
+    }
+
     const statusTone = (status) => status === '良好' ? 'good' : status === '待维护' ? 'maintain' : 'normal';
     const interactionTone = (type) => type === '微信' ? 'wechat' : type === '邮件' ? 'mail' : type === '电话' ? 'phone' : type === '见面' ? 'meeting' : 'other';
     const taskTone = (status) => status === '进行中' ? 'doing' : status === '已完成' ? 'done' : 'todo';
     const followupText = (contact) => {
       const bucket = followupBucket(contact);
+      const nextFollowUpAt = getNextFollowUpAt(contact);
       if (bucket === 'today') return '今天';
-      if (bucket === 'overdue') return `逾期 ${Math.abs(dateDistance(crmToday, contact.nextFollowUpAt) || 0)} 天`;
-      return formatDate(contact.nextFollowUpAt);
+      if (bucket === 'overdue') return `逾期 ${Math.abs(dateDistance(crmToday, nextFollowUpAt) || 0)} 天`;
+      return formatDate(nextFollowUpAt);
     };
     const followupTone = (contact) => {
       const bucket = followupBucket(contact);
@@ -842,29 +950,16 @@ function taskTone(status: string): string {
     const initials = (contact) => contact.initials || contact.name.slice(0, 2);
 
     const renderContactCardMarkup = (contact) => {
-      const secondaryTag = contact.tags?.[1] || '';
-      const longBadge = isLongNoContact(contact) ? '<span class="crm-long-badge">超过 45 天未联系</span>' : '';
       return `<article class="crm-contact-card${contact.id === state.selectedId ? ' is-selected' : ''}${isLongNoContact(contact) ? ' is-long-no-contact' : ''}" data-contact-id="${escapeHtml(contact.id)}" aria-selected="${contact.id === state.selectedId}" role="button" tabindex="0">
         <div class="crm-contact-main">
           <span class="crm-contact-avatar tone-${escapeHtml(contact.avatarTone)}" aria-hidden="true">${escapeHtml(initials(contact))}</span>
-          <div class="crm-contact-copy">
-            <div class="crm-contact-name-row"><h3>${escapeHtml(contact.name)}</h3><span class="crm-contact-role">${escapeHtml(contact.role || '未填写身份')}</span></div>
-            <p class="crm-contact-note">${escapeHtml((contact.notes || '还没有备注').split('\n')[0])}</p>
+          <div class="crm-contact-copy" data-crm-tooltip="${escapeHtml(contact.notes || '还没有备注')}" data-crm-tooltip-always>
+            <div class="crm-contact-name-row"><h3>${escapeHtml(contact.name)}</h3><span class="crm-contact-role" data-crm-tooltip="${escapeHtml(contact.role || '未填写身份')}">${escapeHtml(contact.role || '未填写身份')}</span></div>
           </div>
-          <div class="crm-contact-relation">${relationshipBadge(contact)}${secondaryTag ? `<span class="crm-badge is-soft-green">${escapeHtml(secondaryTag)}</span>` : ''}${longBadge}</div>
-          <div class="crm-contact-heat" aria-label="重要度 ${contact.importance} 星"><b>${'♥'.repeat(contact.importance)}</b></div>
+          <div class="crm-contact-relation">${relationshipBadge(contact)}</div>
           <div class="crm-contact-dates">
-            <span>最近联系 <b>${formatDate(contact.lastContactAt)}</b></span>
-            <span>下次跟进 <b class="is-${followupTone(contact)}">${followupText(contact)}</b></span>
-          </div>
-        </div>
-        <div class="crm-contact-bottomline">
-          <span class="crm-status-badge is-${statusTone(contact.relationshipStatus)}">${escapeHtml(contact.relationshipStatus)}</span>
-          <span class="crm-contact-importance">重要度 <b>${'♥'.repeat(contact.importance)}</b></span>
-          <div class="crm-contact-actions" aria-label="${escapeHtml(contact.name)}快捷操作">
-            <button type="button" data-crm-log-interaction="${escapeHtml(contact.id)}">▧ 记录互动</button>
-            <button type="button" data-crm-followup="${escapeHtml(contact.id)}">◷ 安排跟进</button>
-            <button type="button" data-crm-edit-contact="${escapeHtml(contact.id)}">⌕ 编辑</button>
+          <span>最近联系 <b>${formatDate(contact.lastContactAt)}</b></span>
+          <span>下次跟进 <b class="is-${followupTone(contact)}">${followupText(contact)}</b></span>
           </div>
         </div>
       </article>`;
@@ -901,13 +996,9 @@ function taskTone(status: string): string {
     };
 
     const sortContacts = (items) => [...items].sort((first, second) => {
-      if (state.sort === 'importance') {
-        return second.importance - first.importance
-          || (dateValue(second.lastContactAt) || 0) - (dateValue(first.lastContactAt) || 0);
-      }
       if (state.sort === 'followup') {
-        const firstDate = dateValue(first.nextFollowUpAt);
-        const secondDate = dateValue(second.nextFollowUpAt);
+        const firstDate = dateValue(getNextFollowUpAt(first));
+        const secondDate = dateValue(getNextFollowUpAt(second));
         if (!Number.isFinite(firstDate) && !Number.isFinite(secondDate)) return 0;
         if (!Number.isFinite(firstDate)) return 1;
         if (!Number.isFinite(secondDate)) return -1;
@@ -920,24 +1011,11 @@ function taskTone(status: string): string {
       return contacts.filter(matchesFilter);
     };
 
-    const setFilterPanel = (panel) => {
-      const nextPanel = ['smart', 'relationship', 'tags'].includes(panel) ? panel : 'smart';
-      state.filterPanel = nextPanel;
-      queryAll('[data-crm-filter-panel]').forEach((button) => {
-        const isActive = button.dataset.crmFilterPanel === nextPanel;
-        button.classList.toggle('is-active', isActive);
-        button.setAttribute('aria-selected', String(isActive));
-      });
-      queryAll('[data-crm-filter-panel-content]').forEach((section) => {
-        section.hidden = section.dataset.crmFilterPanelContent !== nextPanel;
-      });
-    };
-
     const renderPagination = (total) => {
       if (!pagination) return;
       const totalPages = Math.max(1, Math.ceil(total / pageSize));
       state.page = Math.min(Math.max(1, state.page), totalPages);
-      pagination.hidden = total <= pageSize;
+      pagination.hidden = false;
       if (paginationItems) {
         paginationItems.innerHTML = Array.from({ length: totalPages }, (_, index) => {
           const page = index + 1;
@@ -946,7 +1024,7 @@ function taskTone(status: string): string {
       }
       if (paginationPrevious) paginationPrevious.disabled = state.page <= 1;
       if (paginationNext) paginationNext.disabled = state.page >= totalPages;
-      if (paginationStatus) paginationStatus.textContent = `${state.page} / ${totalPages}`;
+      if (paginationStatus) paginationStatus.textContent = `共 ${total} 位联系人`;
     };
 
     const goToPage = (page) => {
@@ -980,15 +1058,17 @@ function taskTone(status: string): string {
         return;
       }
 
-      const organization = [contact.role, contact.organization].filter(Boolean).join(' · ');
       const detailTags = [...new Set([contact.relationshipType, ...(contact.tags || [])].filter(Boolean))].slice(0, 4);
       const detailTagMarkup = detailTags.map((tag, index) => {
         const tone = index === 0 ? `relationship-${contact.relationshipType}` : index === 1 ? 'is-soft-green' : index === 2 ? 'is-soft-blue' : 'is-soft-yellow';
         return `<span class="crm-detail-tag-chip crm-badge ${escapeHtml(tone)}">${escapeHtml(tag)}<b aria-hidden="true">×</b></span>`;
       }).join('');
       const note = (contact.notes || '还没有备注').split('\n')[0];
-      const longNotice = isLongNoContact(contact) ? '<div class="crm-long-notice"><strong>超过 45 天未联系</strong><span>可以安排一次轻松的问候，保持关系的温度。</span></div>' : '';
-      const interactions = (contact.interactions || []).map((interaction) => `
+      const staleDays = isLongNoContact(contact) ? Math.abs(dateDistance(contact.lastContactAt || crmToday, crmToday) || 0) : 0;
+      const staleAdvice = '可以安排一次轻松的问候，保持关系的温度。';
+      const stalePill = staleDays ? `<span class="crm-stale-pill" data-crm-tooltip="${staleAdvice}" data-crm-tooltip-always><i aria-hidden="true"></i>${staleDays} 天未联系</span>` : '';
+      const staleChip = staleDays ? `<span class="crm-detail-stale-chip" data-crm-tooltip="${staleAdvice}" data-crm-tooltip-always>建议问候</span>` : '';
+      const interactions = (contact.interactions || []).slice(0, 4).map((interaction) => `
         <li>
           <span class="crm-timeline-icon is-${interactionTone(interaction.type)}" aria-hidden="true">${escapeHtml(interaction.type.slice(0, 1))}</span>
           <div>
@@ -1001,8 +1081,8 @@ function taskTone(status: string): string {
           <header class="crm-detail-identity">
             <span class="crm-detail-avatar tone-${escapeHtml(contact.avatarTone)}" aria-hidden="true">${escapeHtml(contact.initials || contact.name.slice(0, 2))}</span>
             <div class="crm-detail-name">
-              <div class="crm-detail-name-heading"><h2 id="crm-detail-title">${escapeHtml(contact.name)}</h2><span class="crm-detail-favorite" aria-label="重要联系人">★</span></div>
-              <p>${escapeHtml(organization)}</p>
+              <div class="crm-detail-name-heading"><h2 id="crm-detail-title">${escapeHtml(contact.name)}</h2>${stalePill}</div>
+              <p>${escapeHtml(contact.role || '未填写身份')}</p>
               <p class="crm-detail-intro">${escapeHtml(note)}</p>
             </div>
             <button class="crm-detail-edit" type="button" data-crm-edit-contact="${escapeHtml(contact.id)}" aria-label="编辑${escapeHtml(contact.name)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5.5 4 4M5 19l3.8-.8L19.3 7.7a2.1 2.1 0 0 1-3-3L5.8 15.2Z"></path></svg>编辑</button>
@@ -1016,16 +1096,14 @@ function taskTone(status: string): string {
           <div class="crm-detail-info-row"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 4.5 9 4l1.7 4.1-1.8 1.3a13 13 0 0 0 5.7 5.7l1.3-1.8L20 15l-.5 2.5c-.3 1.5-1.8 2.3-3.2 1.8A16.2 16.2 0 0 1 4.7 7.7C4.2 6.3 5 4.8 6.5 4.5Z"></path></svg></span><span class="crm-detail-info-label">手机</span><strong>${escapeHtml(contact.phone || '未填写')}</strong><button class="crm-detail-copy" type="button" data-crm-copy="${escapeHtml(contact.phone || '')}" aria-label="复制手机号"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg></button></div>
           <div class="crm-detail-info-row"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8.5h14M6.5 5h11A2.5 2.5 0 0 1 20 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-9A2.5 2.5 0 0 1 6.5 5Z"></path><path d="M8 12h.01M12 12h.01M16 12h.01M8 15.5h.01M12 15.5h.01M16 15.5h.01"></path></svg></span><span class="crm-detail-info-label">关系</span><strong>${escapeHtml(contact.relationshipType || '未填写')}</strong><span class="crm-detail-info-action" aria-hidden="true"></span></div>
           <div class="crm-detail-info-row"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="13" rx="2"></rect><path d="m5 7 7 5 7-5"></path></svg></span><span class="crm-detail-info-label">邮箱</span><strong>${escapeHtml(contact.email || '未填写')}</strong><button class="crm-detail-copy" type="button" data-crm-copy="${escapeHtml(contact.email || '')}" aria-label="复制邮箱"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg></button></div>
-          <div class="crm-detail-info-row"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19.5V6.8A1.8 1.8 0 0 1 6.8 5h10.4A1.8 1.8 0 0 1 19 6.8v12.7H5Z"></path><path d="M8.5 9h7M8.5 12.5h7M8.5 16h4"></path></svg></span><span class="crm-detail-info-label">身份</span><strong>${escapeHtml(organization || '未填写')}</strong><span class="crm-detail-info-action" aria-hidden="true"></span></div>
-          <div class="crm-detail-info-row"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2"></rect><path d="M8 3.5v4M16 3.5v4M4 10h16"></path></svg></span><span class="crm-detail-info-label">最近联系</span><strong>${formatDate(contact.lastContactAt)}</strong><span class="crm-detail-info-action" aria-hidden="true"></span></div>
-          <div class="crm-detail-info-row"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4.5h12v15H6z"></path><path d="M8.5 9h7M8.5 12.5h5M8.5 16h4"></path></svg></span><span class="crm-detail-info-label">备注</span><strong>${escapeHtml(note)}</strong><button class="crm-detail-info-action crm-detail-edit-note" type="button" data-crm-edit-contact="${escapeHtml(contact.id)}" aria-label="编辑备注"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 19 3.3-.7L18.5 8.1a2 2 0 0 0-2.8-2.8L5.5 15.5Z"></path></svg></button></div>
+          <div class="crm-detail-info-row"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19.5V6.8A1.8 1.8 0 0 1 6.8 5h10.4A1.8 1.8 0 0 1 19 6.8v12.7H5Z"></path><path d="M8.5 9h7M8.5 12.5h7M8.5 16h4"></path></svg></span><span class="crm-detail-info-label">身份</span><strong>${escapeHtml(contact.role || '未填写身份')}</strong><span class="crm-detail-info-action" aria-hidden="true"></span></div>
+          <div class="crm-detail-info-row${staleDays ? ' is-stale' : ''}"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2"></rect><path d="M8 3.5v4M16 3.5v4M4 10h16"></path></svg></span><span class="crm-detail-info-label">最近联系</span><strong>${formatDate(contact.lastContactAt)}</strong>${staleDays ? staleChip : '<span class="crm-detail-info-action" aria-hidden="true"></span>'}</div>
+          <div class="crm-detail-info-row"><span class="crm-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4.5h12v15H6z"></path><path d="M8.5 9h7M8.5 12.5h5M8.5 16h4"></path></svg></span><span class="crm-detail-info-label">备注</span><strong>${escapeHtml(note)}</strong><span class="crm-detail-info-action" aria-hidden="true"></span></div>
         </section>
-        ${longNotice}
 
         <div class="crm-detail-actions" aria-label="联系人操作">
-          <button class="is-primary" type="button" data-crm-log-interaction="${escapeHtml(contact.id)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18.5 6 14l9.8-9.8a2.1 2.1 0 0 1 3 3L9 17Z"></path><path d="m13.5 6.5 4 4"></path></svg>记录互动</button>
-          <button type="button" data-crm-add-note="${escapeHtml(contact.id)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h9l3 3v12H6z"></path><path d="M14 4.5v4h4M9 13h6M9 16h5"></path></svg>添加备注</button>
-          <button type="button" data-crm-followup="${escapeHtml(contact.id)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17.5h10l-1.1-1.8V11a3.9 3.9 0 0 0-7.8 0v4.7Z"></path><path d="M9.5 19.5h5"></path></svg>设置提醒</button>
+          <button type="button" data-crm-log-interaction="${escapeHtml(contact.id)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18.5 6 14l9.8-9.8a2.1 2.1 0 0 1 3 3L9 17Z"></path><path d="m13.5 6.5 4 4"></path></svg>记录互动</button>
+          <button type="button" data-crm-add-task="${escapeHtml(contact.id)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14v13H5z"></path><path d="M8.5 9h7M8.5 12h7M8.5 15h4"></path></svg>添加任务</button>
         </div>
 `;
 
@@ -1033,8 +1111,7 @@ function taskTone(status: string): string {
         detailActivity.hidden = false;
         detailActivity.innerHTML = `<div class="crm-detail-section crm-timeline-section">
           <div class="crm-section-title-row">
-            <h3 id="crm-timeline-title">最近互动记录</h3>
-            <button class="crm-inline-link" type="button" data-crm-view-timeline>查看全部</button>
+          <h3 id="crm-timeline-title">互动记录</h3>
           </div>
           <ol class="crm-timeline">${interactions || '<li class="crm-timeline-empty">还没有互动记录</li>'}</ol>
         </div>`;
@@ -1045,9 +1122,10 @@ function taskTone(status: string): string {
       if (!relatedTasks) return;
       const taskList = relatedTasks.querySelector('.crm-task-list');
       if (!taskList) return;
-      taskList.innerHTML = contact?.linkedTasks?.length ? contact.linkedTasks.map((task) => `
+      const visibleTasks = (contact?.linkedTasks || []).filter((task) => !task.archived);
+      taskList.innerHTML = visibleTasks.length ? visibleTasks.map((task) => `
         <li>
-          <span class="crm-task-checkbox" aria-hidden="true"></span>
+          <button class="crm-task-checkbox" type="button" data-crm-archive-task="${escapeHtml(task.id)}" aria-label="归档任务：${escapeHtml(task.title)}"></button>
           <strong data-crm-tooltip="${escapeHtml(task.title)}">${escapeHtml(task.title)}</strong>
           <span class="crm-task-status is-${taskTone(task.status)}">${escapeHtml(task.status)}</span>
           <time datetime="${escapeHtml(task.dueDate || '')}">${formatDate(task.dueDate)}</time>
@@ -1095,7 +1173,7 @@ function taskTone(status: string): string {
         const items = query(`[data-crm-followup-items="${key}"]`);
         if (count) count.textContent = String(group.length);
         if (items) items.innerHTML = group.length ? group.map((contact) => `<div class="crm-followup-item" data-contact-id="${escapeHtml(contact.id)}" tabindex="0" role="button">
-          <strong>${escapeHtml(contact.name)}</strong><span>${escapeHtml(contact.role || '未填写身份')}</span><b>${escapeHtml(key === 'next7' ? formatDate(contact.nextFollowUpAt) : (contact.notes || '还没有备注').split('\n')[0])}</b>${key === 'overdue' ? `<em>${followupText(contact)}</em>` : ''}
+          <strong>${escapeHtml(contact.name)}</strong><span>${escapeHtml(contact.role || '未填写身份')}</span><b>${escapeHtml(key === 'next7' ? formatDate(getNextFollowUpAt(contact)) : (contact.notes || '还没有备注').split('\n')[0])}</b>${key === 'overdue' ? `<em>${followupText(contact)}</em>` : ''}
         </div>`).join('') : '<div class="crm-followup-empty">暂无安排</div>';
       });
       if (noFollowups) noFollowups.hidden = Object.values(groups).some((group) => group.length);
@@ -1156,7 +1234,6 @@ function taskTone(status: string): string {
       if (!contactForm || !interactionForm || !contact) return;
       activeSurfaceContactId = contact.id;
       selectedInteractionType = '微信';
-      if (interactionContact) interactionContact.textContent = contact.name;
       getField(interactionForm, 'date').value = crmToday;
       getField(interactionForm, 'summary').value = '';
       [...document.querySelectorAll('[data-crm-interaction-type]')].forEach((button) => button.classList.toggle('is-active', button.dataset.crmInteractionType === selectedInteractionType));
@@ -1164,14 +1241,20 @@ function taskTone(status: string): string {
       getField(interactionForm, 'summary')?.focus();
     };
 
-    const openFollowupSurface = (contact) => {
-      if (!followupForm || !contact) return;
+    const openTaskSurface = (contact) => {
+      if (!taskForm || !contact) return;
       activeSurfaceContactId = contact.id;
-      if (followupContact) followupContact.textContent = contact.name;
-      getField(followupForm, 'date').value = contact.nextFollowUpAt || crmToday;
-      queryAll('[data-crm-followup-quick]').forEach((button) => button.classList.remove('is-active'));
-      openSurface('followup');
-      getField(followupForm, 'date')?.focus();
+      getField(taskForm, 'title').value = `跟进 ${contact.name}`;
+      getField(taskForm, 'taskType').value = '跟进任务';
+      getField(taskForm, 'dueDate').value = getNextFollowUpAt(contact) || crmToday;
+      openSurface('task');
+      getField(taskForm, 'title')?.focus();
+    };
+
+    const openArchiveSurface = (task) => {
+      if (!task) return;
+      activeArchiveTaskId = task.id;
+      openSurface('archive');
     };
 
     const openConvertSurface = (contact) => {
@@ -1194,13 +1277,46 @@ function taskTone(status: string): string {
       }, 3200);
     };
 
-    const addDays = (value, amount) => new Date(dateValue(value) + amount * 86400000).toISOString().slice(0, 10);
+    const copyTextToClipboard = async (value) => {
+      if (!value) return false;
+      if (navigator.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(value);
+          return true;
+        } catch {
+        }
+      }
+      try {
+        const helper = document.createElement('textarea');
+        helper.value = value;
+        helper.setAttribute('readonly', '');
+        helper.style.position = 'fixed';
+        helper.style.top = '-1000px';
+        helper.style.opacity = '0';
+        document.body.append(helper);
+        helper.select();
+        helper.setSelectionRange(0, value.length);
+        const ok = document.execCommand('copy');
+        helper.remove();
+        return ok;
+      } catch {
+        return false;
+      }
+    };
+
+    const completePendingFollowupTasks = (contact) => {
+      const today = dateValue(crmToday);
+      contact.linkedTasks = (contact.linkedTasks || []).map((task) => {
+        const isPendingFollowup = task.taskType === '跟进任务' && task.status !== '已完成' && task.dueDate;
+        return isPendingFollowup && dateValue(task.dueDate) <= today ? { ...task, status: '已完成' } : task;
+      });
+    };
 
     const markContacted = (contact) => {
       if (!contact) return;
       const wasPending = ['today', 'overdue'].includes(followupBucket(contact));
       contact.lastContactAt = crmToday;
-      if (wasPending) contact.nextFollowUpAt = undefined;
+      if (wasPending) completePendingFollowupTasks(contact);
       contact.relationshipStatus = contact.relationshipStatus === '待维护' ? '普通' : contact.relationshipStatus;
       if (!(contact.interactions || []).some((interaction) => interaction.date === crmToday && interaction.summary === '已标记为本次联系完成。')) {
         contact.interactions = contact.interactions || [];
@@ -1211,8 +1327,8 @@ function taskTone(status: string): string {
       showToast(`已记录 ${contact.name}，本次跟进已完成`);
     };
 
-    const setControlLabel = (button, label) => {
-      if (button) button.innerHTML = `${escapeHtml(label)} <span aria-hidden="true">⌄</span>`;
+    const setControlLabel = (button, label, prefix) => {
+      if (button) button.setAttribute('aria-label', prefix ? `${prefix}：${label}` : label);
     };
 
     const closeMenus = () => queryAll('.crm-toolbar-menu').forEach((menu) => {
@@ -1281,6 +1397,7 @@ function taskTone(status: string): string {
     };
 
     const render = () => {
+      renderTrendChart();
       renderStats();
       renderFollowupBoard();
       const visibleContacts = getVisibleContacts();
@@ -1298,15 +1415,15 @@ function taskTone(status: string): string {
         const isVisible = visibleIds.has(card.dataset.contactId);
         card.hidden = !isVisible;
         const isSelected = card.dataset.contactId === state.selectedId;
+        const isLastVisible = isVisible && card.dataset.contactId === pageContacts[pageContacts.length - 1]?.id;
         card.classList.toggle('is-selected', isSelected);
+        card.classList.toggle('is-last-visible', isLastVisible);
         card.setAttribute('aria-selected', String(isSelected));
       });
       if (emptyState) emptyState.hidden = visibleContacts.length !== 0;
       if (contactCount) contactCount.textContent = String(visibleContacts.length);
       if (listTitle) listTitle.firstChild.textContent = '联系人 ';
       renderPagination(visibleContacts.length);
-      setFilterPanel(state.filterPanel);
-
       queryAll('[data-crm-filter]').forEach((button) => {
         const isActive = button.dataset.crmFilter === state.smart && !state.relationship && !state.tag;
         button.classList.toggle('is-active', isActive);
@@ -1319,8 +1436,8 @@ function taskTone(status: string): string {
 
       const tagButton = query('[data-crm-tag-filter]');
       const sortButton = query('[data-crm-sort]');
-      setControlLabel(tagButton, state.tag || '全部标签');
-      setControlLabel(sortButton, { recent: '按最近联系', followup: '按下次跟进', importance: '按重要程度' }[state.sort]);
+      setControlLabel(tagButton, state.tag || '全部标签', '标签筛选');
+      setControlLabel(sortButton, { recent: '按最近联系', followup: '按下次跟进' }[state.sort], '排序');
       queryAll('[data-crm-menu-sort]').forEach((button) => button.classList.toggle('is-active', button.dataset.crmMenuSort === state.sort));
 
       queryAll('[data-crm-view]').forEach((button) => {
@@ -1338,8 +1455,6 @@ function taskTone(status: string): string {
       dashboardRow?.classList.toggle('is-dashboard-view', isDashboardView);
       workspace?.classList.toggle('is-contacts-view', isContactsView);
       workspace?.classList.toggle('is-dashboard-view', isDashboardView);
-      if (dashboardTitle) dashboardTitle.textContent = primaryViewTitles[state.primaryView];
-      if (dashboardKicker) dashboardKicker.textContent = 'RELATIONSHIP DASHBOARDS';
       centerColumn?.classList.remove('is-crm-activity-view');
       contactPanel.hidden = false;
       followupBoard.hidden = !isDashboardView;
@@ -1418,7 +1533,6 @@ function taskTone(status: string): string {
           avatarTone: relationshipTones[values.relationshipType] || 'amber',
           createdAt: crmToday,
           relationshipStatus: '普通',
-          importance: 3,
           interactions: [],
           linkedTasks: [],
           ...values,
@@ -1448,22 +1562,27 @@ function taskTone(status: string): string {
       showToast(`已记录与 ${contact.name} 的互动`);
     });
 
-    followupForm?.addEventListener('submit', (event) => {
+    taskForm?.addEventListener('submit', (event) => {
       event.preventDefault();
       const contact = getContact(activeSurfaceContactId);
       if (!contact) return;
-      contact.nextFollowUpAt = getField(followupForm, 'date').value || crmToday;
+      const title = getField(taskForm, 'title').value.trim();
+      const taskType = getField(taskForm, 'taskType').value || '跟进任务';
+      const dueDate = getField(taskForm, 'dueDate').value || crmToday;
+      if (!title) return;
+      contact.linkedTasks = contact.linkedTasks || [];
+      contact.linkedTasks.unshift({
+        id: `task-${Date.now()}`,
+        title,
+        taskType,
+        status: '待开始',
+        dueDate,
+      });
       selectContact(contact);
       closeOverlay();
       render();
-      showToast(`已为 ${contact.name} 安排跟进`);
+      showToast(`已为 ${contact.name} 添加任务`);
     });
-
-    [...document.querySelectorAll('[data-crm-followup-quick]')].forEach((button) => button.addEventListener('click', () => {
-      const date = addDays(crmToday, Number(button.dataset.crmFollowupQuick));
-      getField(followupForm, 'date').value = date;
-      [...document.querySelectorAll('[data-crm-followup-quick]')].forEach((choice) => choice.classList.toggle('is-active', choice === button));
-    }));
 
     overlay?.addEventListener('click', (event) => {
       const target = event.target.closest('button, [data-crm-close-overlay]');
@@ -1482,17 +1601,44 @@ function taskTone(status: string): string {
         if (!contact) return;
         contact.linkedTasks = contact.linkedTasks || [];
         if (!contact.linkedTasks.some((task) => task.title === `跟进 ${contact.name}`)) {
-          contact.linkedTasks.unshift({ id: `task-${Date.now()}`, title: `跟进 ${contact.name}`, status: '待开始', dueDate: contact.nextFollowUpAt || crmToday });
+          contact.linkedTasks.unshift({ id: `task-${Date.now()}`, title: `跟进 ${contact.name}`, taskType: '跟进任务', status: '待开始', dueDate: getNextFollowUpAt(contact) || crmToday });
         }
         state.selectedId = contact.id;
         closeOverlay();
         render();
         showToast(`已生成任务：跟进 ${contact.name}`);
+        return;
+      }
+      if (target.matches('[data-crm-archive-confirm]')) {
+        const contact = getContact(state.selectedId);
+        const task = contact?.linkedTasks?.find((item) => item.id === activeArchiveTaskId);
+        activeArchiveTaskId = '';
+        closeOverlay();
+        if (!contact || !task) return;
+        task.archived = true;
+        if (task.status !== '已完成') task.status = '已完成';
+        render();
+        showToast(`已归档：${task.title}`);
+        return;
       }
     });
 
     root.addEventListener('click', (event) => {
-      const target = event.target.closest('button, [data-contact-id], [data-crm-close-overlay], [data-crm-mobile-filter-close], [data-crm-mobile-detail-close]');
+      const source = event.target;
+      if (!(source instanceof Element)) return;
+      const trendPoint = source.closest('[data-crm-trend-point]');
+      if (trendPoint && root.contains(trendPoint)) {
+        showTrendTooltip(trendPoint);
+        return;
+      }
+      const trendTooltipClose = source.closest('[data-crm-trend-tooltip-close]');
+      if (trendTooltipClose && root.contains(trendTooltipClose)) {
+        hideTrendTooltip();
+        return;
+      }
+      if (!source.closest('[data-crm-trend-tooltip]')) hideTrendTooltip();
+
+      const target = source.closest('button, [data-contact-id], [data-crm-close-overlay], [data-crm-mobile-filter-close], [data-crm-mobile-detail-close]');
       if (!target || !root.contains(target)) return;
 
       if (target.matches('[data-crm-mobile-filter-sheet]')) {
@@ -1512,10 +1658,6 @@ function taskTone(status: string): string {
         closeOverlay();
         return;
       }
-      if (target.matches('[data-crm-filter-panel]')) {
-        setFilterPanel(target.dataset.crmFilterPanel);
-        return;
-      }
       if (target.matches('[data-crm-add-contact]')) {
         openContactSurface();
         return;
@@ -1526,23 +1668,18 @@ function taskTone(status: string): string {
           showToast('暂无可复制的内容');
           return;
         }
-        if (navigator.clipboard?.writeText) {
-          navigator.clipboard.writeText(value)
-            .then(() => showToast('已复制到剪贴板'))
-            .catch(() => showToast('复制失败，请手动选择文本'));
-        } else {
-          showToast('浏览器暂不支持复制，请手动选择文本');
-        }
+        copyTextToClipboard(value).then((ok) => {
+          showToast(ok ? '已复制到剪贴板' : '复制失败，请手动选择文本');
+          if (!ok) return;
+          target.classList.add('is-copied');
+          window.setTimeout(() => target.classList.remove('is-copied'), 1400);
+        });
         return;
       }
-      if (target.matches('[data-crm-add-note]')) {
-        const contact = getContact(target.dataset.crmAddNote);
-        if (contact) {
-          state.selectedId = contact.id;
-          render();
-          openContactSurface(contact);
-          getField(contactForm, 'notes')?.focus();
-        }
+      if (target.matches('[data-crm-archive-task]')) {
+        const contact = getContact(state.selectedId);
+        const task = contact?.linkedTasks?.find((item) => item.id === target.dataset.crmArchiveTask);
+        if (task) openArchiveSurface(task);
         return;
       }
       if (target.matches('[data-crm-edit-contact]')) {
@@ -1559,9 +1696,9 @@ function taskTone(status: string): string {
         if (contact) openInteractionSurface(contact);
         return;
       }
-      if (target.matches('[data-crm-followup]')) {
-        const contact = getContact(target.dataset.crmFollowup);
-        if (contact) openFollowupSurface(contact);
+      if (target.matches('[data-crm-add-task]')) {
+        const contact = getContact(target.dataset.crmAddTask);
+        if (contact) openTaskSurface(contact);
         return;
       }
       if (target.matches('[data-crm-mark-contacted]')) {
@@ -1582,7 +1719,7 @@ function taskTone(status: string): string {
         if (!contact) return;
         contact.linkedTasks = contact.linkedTasks || [];
         if (!contact.linkedTasks.some((task) => task.title === `跟进 ${contact.name}`)) {
-          contact.linkedTasks.unshift({ id: `task-${Date.now()}`, title: `跟进 ${contact.name}`, status: '待开始', dueDate: contact.nextFollowUpAt || crmToday });
+        contact.linkedTasks.unshift({ id: `task-${Date.now()}`, title: `跟进 ${contact.name}`, taskType: '跟进任务', status: '待开始', dueDate: getNextFollowUpAt(contact) || crmToday });
         }
         state.selectedId = contact.id;
         closeOverlay();
@@ -1685,7 +1822,7 @@ function taskTone(status: string): string {
         setPrimaryView('contacts');
         return;
       }
-      if (target.matches('[data-crm-view-dashboard], [data-crm-view-followups], [data-crm-view-timeline]')) {
+      if (target.matches('[data-crm-view-dashboard], [data-crm-view-followups]')) {
         setPrimaryView('dashboard');
         return;
       }
@@ -1703,8 +1840,16 @@ function taskTone(status: string): string {
 
     root.addEventListener('keydown', (event) => {
       if (!['Enter', ' '].includes(event.key)) return;
-      const item = event.target.closest('[data-contact-id]');
-      if (!item || event.target.matches('button, input')) return;
+      const source = event.target;
+      if (!(source instanceof Element)) return;
+      const trendPoint = source.closest('[data-crm-trend-point]');
+      if (trendPoint && root.contains(trendPoint)) {
+        event.preventDefault();
+        showTrendTooltip(trendPoint);
+        return;
+      }
+      const item = source.closest('[data-contact-id]');
+      if (!item || source.matches('button, input')) return;
       event.preventDefault();
       const contact = getContact(item.dataset.contactId);
       openMobileDetail(contact);
@@ -1715,7 +1860,10 @@ function taskTone(status: string): string {
     });
 
     document.addEventListener('click', (event) => {
-      if (!event.target.closest('.crm-toolbar-menu-wrap')) closeMenus();
+      const source = event.target;
+      if (!(source instanceof Element)) return;
+      if (!source.closest('[data-crm-trend-point], [data-crm-trend-tooltip]')) hideTrendTooltip();
+      if (!source.closest('.crm-toolbar-menu-wrap')) closeMenus();
     });
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;
@@ -1724,6 +1872,7 @@ function taskTone(status: string): string {
       closeMobileFilterSheet();
       closeMobileDetail();
       hideTooltip();
+      hideTrendTooltip();
     });
 
     window.addEventListener('popstate', () => {

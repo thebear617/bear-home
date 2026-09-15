@@ -2,6 +2,7 @@ export type RelationshipType = '家人' | '朋友' | '同学' | '合作伙伴' |
 export type RelationshipStatus = '良好' | '普通' | '待维护';
 export type InteractionType = '微信' | '电话' | '邮件' | '见面' | '其他';
 export type LinkedTaskStatus = '待开始' | '进行中' | '已完成';
+export type LinkedTaskType = '跟进任务' | '普通任务';
 
 export interface Interaction {
   id: string;
@@ -13,8 +14,10 @@ export interface Interaction {
 export interface LinkedTask {
   id: string;
   title: string;
+  taskType: LinkedTaskType;
   status: LinkedTaskStatus;
   dueDate?: string;
+  archived?: boolean;
 }
 
 export interface Contact {
@@ -30,9 +33,7 @@ export interface Contact {
   phone?: string;
   email?: string;
   lastContactAt?: string;
-  nextFollowUpAt?: string;
   relationshipStatus: RelationshipStatus;
-  importance: 1 | 2 | 3 | 4 | 5;
   notes: string;
   interactions: Interaction[];
   linkedTasks: LinkedTask[];
@@ -55,9 +56,7 @@ export const CRM_CONTACTS: Contact[] = [
     phone: '138****2741',
     email: 'linxiao***@mail.com',
     lastContactAt: '2026-09-10',
-    nextFollowUpAt: '2026-09-11',
     relationshipStatus: '待维护',
-    importance: 5,
     notes: '很专业靠谱，审美在线，沟通顺畅。\n喜欢猫，家里有两只布偶。\n合作过两个项目，期待长期合作。',
     interactions: [
       { id: 'lin-i1', date: '2026-09-10', type: '微信', summary: '讨论了猫猫项目封面方案，确定了主色调方向。' },
@@ -67,9 +66,10 @@ export const CRM_CONTACTS: Contact[] = [
       { id: 'lin-i5', date: '2026-09-04', type: '微信', summary: '分享了灵感收集资料。' },
     ],
     linkedTasks: [
-      { id: 'lin-t1', title: '整理猫猫项目需求', status: '进行中', dueDate: '2026-09-12' },
-      { id: 'lin-t2', title: '周五前发送参考图', status: '待开始', dueDate: '2026-09-13' },
-      { id: 'lin-t3', title: '确认封面最终方案', status: '待开始', dueDate: '2026-09-16' },
+      { id: 'lin-followup', title: '跟进 林晓', taskType: '跟进任务', status: '待开始', dueDate: '2026-09-11' },
+      { id: 'lin-t1', title: '整理猫猫项目需求', taskType: '普通任务', status: '进行中', dueDate: '2026-09-12' },
+      { id: 'lin-t2', title: '周五前发送参考图', taskType: '普通任务', status: '待开始', dueDate: '2026-09-13' },
+      { id: 'lin-t3', title: '确认封面最终方案', taskType: '普通任务', status: '待开始', dueDate: '2026-09-16' },
     ],
   },
   {
@@ -84,14 +84,12 @@ export const CRM_CONTACTS: Contact[] = [
     phone: '139****1842',
     email: 'zhoun***@mail.com',
     lastContactAt: '2026-09-10',
-    nextFollowUpAt: '2026-09-15',
     relationshipStatus: '普通',
-    importance: 3,
     notes: '最近在准备秋招，偶尔交流学校和工作近况。',
     interactions: [
       { id: 'zhou-i1', date: '2026-09-10', type: '微信', summary: '聊了聊秋招和最近的生活安排。' },
     ],
-    linkedTasks: [],
+    linkedTasks: [{ id: 'zhou-followup', title: '跟进 周宁', taskType: '跟进任务', status: '待开始', dueDate: '2026-09-15' }],
   },
   {
     id: 'chen-a-yi',
@@ -105,15 +103,13 @@ export const CRM_CONTACTS: Contact[] = [
     phone: '137****6208',
     email: 'chena***@mail.com',
     lastContactAt: '2026-09-09',
-    nextFollowUpAt: '2026-09-17',
     relationshipStatus: '良好',
-    importance: 4,
     notes: '关心家里的近况，喜欢分享家常菜和周末安排。',
     interactions: [
       { id: 'chen-i1', date: '2026-09-09', type: '电话', summary: '聊了家里的近况和周末回家的安排。' },
       { id: 'chen-i2', date: '2026-09-06', type: '微信', summary: '分享了最近做的新菜和周末安排。' },
     ],
-    linkedTasks: [],
+    linkedTasks: [{ id: 'chen-followup', title: '跟进 陈阿姨', taskType: '跟进任务', status: '待开始', dueDate: '2026-09-17' }],
   },
   {
     id: 'xu-dan',
@@ -128,14 +124,12 @@ export const CRM_CONTACTS: Contact[] = [
     phone: '136****9015',
     email: 'xudan***@mail.com',
     lastContactAt: '2026-09-08',
-    nextFollowUpAt: '2026-09-11',
     relationshipStatus: '待维护',
-    importance: 4,
     notes: '最近在推进新产品，喜欢聊产品体验和工作方法。',
     interactions: [
       { id: 'xu-i1', date: '2026-09-08', type: '微信', summary: '聊了最近的产品进展和准备中的新功能。' },
     ],
-    linkedTasks: [],
+    linkedTasks: [{ id: 'xu-followup', title: '跟进 许丹', taskType: '跟进任务', status: '待开始', dueDate: '2026-09-11' }],
   },
   {
     id: 'tang-ke',
@@ -150,14 +144,12 @@ export const CRM_CONTACTS: Contact[] = [
     phone: '135****4470',
     email: 'tangke***@mail.com',
     lastContactAt: '2026-09-07',
-    nextFollowUpAt: '2026-09-08',
     relationshipStatus: '待维护',
-    importance: 4,
     notes: '正在等待秋季联名方案反馈，沟通需要留出确认时间。',
     interactions: [
       { id: 'tang-i1', date: '2026-09-07', type: '邮件', summary: '发送了秋季联名方案和报价说明。' },
     ],
-    linkedTasks: [],
+    linkedTasks: [{ id: 'tang-followup', title: '跟进 唐可', taskType: '跟进任务', status: '待开始', dueDate: '2026-09-08' }],
   },
   {
     id: 'zhao-yi-fan',
@@ -170,14 +162,12 @@ export const CRM_CONTACTS: Contact[] = [
     phone: '133****5186',
     email: 'zhaoy***@mail.com',
     lastContactAt: '2026-09-06',
-    nextFollowUpAt: '2026-09-18',
     relationshipStatus: '待维护',
-    importance: 3,
     notes: '很久没联系，可以问候一下最近的拍摄计划。',
     interactions: [
       { id: 'zhao-i1', date: '2026-09-06', type: '见面', summary: '聊过近期拍摄和合作安排。' },
     ],
-    linkedTasks: [],
+    linkedTasks: [{ id: 'zhao-followup', title: '跟进 赵一帆', taskType: '跟进任务', status: '待开始', dueDate: '2026-09-18' }],
   },
   {
     id: 'sun-yue',
@@ -191,14 +181,12 @@ export const CRM_CONTACTS: Contact[] = [
     phone: '132****3619',
     email: 'suny***@mail.com',
     lastContactAt: '2026-09-05',
-    nextFollowUpAt: '2026-09-22',
     relationshipStatus: '普通',
-    importance: 3,
     notes: '可以交流新功能页面和设计系统的实践。',
     interactions: [
       { id: 'sun-i1', date: '2026-09-05', type: '微信', summary: '确认了新功能页面的设计方向。' },
     ],
-    linkedTasks: [],
+    linkedTasks: [{ id: 'sun-followup', title: '跟进 孙悦', taskType: '跟进任务', status: '待开始', dueDate: '2026-09-22' }],
   },
   {
     id: 'wang-lei',
@@ -212,7 +200,6 @@ export const CRM_CONTACTS: Contact[] = [
     email: 'wangle***@mail.com',
     lastContactAt: '2026-07-20',
     relationshipStatus: '普通',
-    importance: 3,
     notes: '偶尔约着见面，保持轻松联系。',
     interactions: [
       { id: 'wang-i1', date: '2026-08-05', type: '微信', summary: '约了下次见面和一起吃饭的时间。' },
@@ -231,8 +218,18 @@ export function dateDistance(from: string, to?: string): number | null {
   return Number.isFinite(difference) ? Math.round(difference / 86400000) : null;
 }
 
+export function getNextFollowUpTask(contact: Contact): LinkedTask | undefined {
+  return [...contact.linkedTasks]
+    .filter((task) => task.taskType === '跟进任务' && task.status !== '已完成' && task.dueDate)
+    .sort((first, second) => dateValue(first.dueDate) - dateValue(second.dueDate))[0];
+}
+
+export function getNextFollowUpAt(contact: Contact): string | undefined {
+  return getNextFollowUpTask(contact)?.dueDate;
+}
+
 export function followupBucket(contact: Contact): 'today' | 'overdue' | 'next7' | 'none' {
-  const distance = dateDistance(CRM_TODAY, contact.nextFollowUpAt);
+  const distance = dateDistance(CRM_TODAY, getNextFollowUpAt(contact));
   if (distance === 0) return 'today';
   if (distance !== null && distance < 0) return 'overdue';
   if (distance !== null && distance <= 7) return 'next7';

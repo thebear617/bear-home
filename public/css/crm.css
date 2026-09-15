@@ -125,12 +125,10 @@
 .crm-select-button,
 .crm-filter-row,
 .crm-tag-chip,
-.crm-contact-actions button,
 .crm-detail-actions button,
 .crm-subtle-link,
 .crm-inline-link,
-.crm-more-button,
-.crm-tag-add {
+.crm-more-button {
   font: inherit;
   cursor: pointer;
 }
@@ -168,12 +166,10 @@
 .crm-filter-row:focus-visible,
 .crm-tag-chip:focus-visible,
 .crm-contact-card:focus-visible,
-.crm-contact-actions button:focus-visible,
 .crm-detail-actions button:focus-visible,
 .crm-subtle-link:focus-visible,
 .crm-inline-link:focus-visible,
 .crm-more-button:focus-visible,
-.crm-tag-add:focus-visible,
 .crm-mobile-filter-trigger:focus-visible,
 .crm-mobile-filter-chip:focus-visible,
 .crm-mobile-filter-close:focus-visible,
@@ -461,8 +457,7 @@
   font-weight: 600;
 }
 
-.crm-more-button,
-.crm-tag-add {
+.crm-more-button {
   border: 0;
   background: transparent;
   color: var(--crm-text-muted);
@@ -598,17 +593,6 @@
 .crm-tag-heading {
   align-items: center;
 }
-
-.crm-tag-add {
-  width: 1.7rem;
-  height: 1.7rem;
-  border: 1px dashed rgba(111, 101, 93, .32);
-  border-radius: 50%;
-  font-size: 1rem;
-  line-height: 1;
-}
-
-.crm-tag-add:hover { border-color: var(--crm-accent); color: var(--crm-accent); }
 
 .crm-tag-list {
   display: flex;
@@ -893,18 +877,6 @@
 .relationship-客户 { background: #f8e7cf; color: #8b673d; }
 .crm-badge.is-soft-green { background: #e8efdf; color: #527044; }
 
-.crm-long-badge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.3rem;
-  padding: .2rem .48rem;
-  border-radius: 999px;
-  background: var(--crm-red-soft);
-  color: var(--crm-red);
-  font-size: .61rem;
-  font-weight: 750;
-}
-
 .crm-contact-note {
   display: -webkit-box;
   margin-top: .25rem;
@@ -932,15 +904,6 @@
 .crm-contact-dates b.is-overdue { color: var(--crm-red); }
 .crm-contact-dates b.is-next7 { color: var(--crm-green); }
 
-.crm-contact-bottomline {
-  display: flex;
-  align-items: center;
-  gap: .6rem;
-  min-width: 0;
-  margin-top: .45rem;
-  padding-left: 3.5rem;
-}
-
 .crm-status-badge {
   min-height: 1.35rem;
   padding: .2rem .55rem;
@@ -951,32 +914,6 @@
 .crm-status-badge.is-good { background: var(--crm-green-soft); color: var(--crm-green); }
 .crm-status-badge.is-normal { background: #eef0e8; color: #69705f; }
 .crm-status-badge.is-maintain { background: #fbe9d8; color: #bd641f; }
-
-.crm-contact-importance {
-  color: var(--crm-text-muted);
-  font-size: .65rem;
-  white-space: nowrap;
-}
-
-.crm-contact-importance b { color: #c2762f; letter-spacing: -.1em; }
-
-.crm-contact-actions {
-  display: flex;
-  align-items: center;
-  gap: .4rem;
-  margin-left: auto;
-}
-
-.crm-contact-actions button {
-  padding: .15rem .2rem;
-  border: 0;
-  background: transparent;
-  color: var(--crm-text-secondary);
-  font-size: .68rem;
-  white-space: nowrap;
-}
-
-.crm-contact-actions button:hover { color: var(--crm-accent); }
 
 .crm-contact-list.is-compact {
   gap: .22rem;
@@ -998,8 +935,7 @@
   font-size: .7rem;
 }
 
-.crm-contact-list.is-compact .crm-contact-note,
-.crm-contact-list.is-compact .crm-contact-bottomline {
+.crm-contact-list.is-compact .crm-contact-note {
   display: none;
 }
 
@@ -1150,7 +1086,7 @@
   position: relative;
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: .15rem .35rem;
+  gap: .3rem .4rem;
   margin-top: .65rem;
   padding-top: .55rem;
   border-top: 1px solid rgba(74, 57, 45, .08);
@@ -1159,7 +1095,8 @@
 .crm-followup-item strong { font-size: .72rem; }
 .crm-followup-item span { overflow: hidden; color: var(--crm-text-secondary); font-size: .64rem; text-overflow: ellipsis; white-space: nowrap; }
 .crm-followup-item b { grid-column: 1 / -1; overflow: hidden; color: var(--crm-text-secondary); font-size: .64rem; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
-.crm-followup-item em { position: absolute; top: .48rem; right: 0; padding: .18rem .35rem; border-radius: 5px; background: #f8ddd8; color: var(--crm-red); font-size: .58rem; font-style: normal; font-weight: 750; }
+.crm-followup-item em { position: absolute; top: .46rem; right: 0; padding: .18rem .4rem; border-radius: 5px; background: #f8ddd8; color: var(--crm-red); font-size: .58rem; font-style: normal; font-weight: 750; line-height: 1.2; }
+.crm-followup-section.is-overdue .crm-followup-item span { padding-right: 3.7rem; }
 
 .crm-detail-column { align-items: start; }
 
@@ -1267,19 +1204,50 @@
 .crm-notes-section p { margin-top: .5rem; color: var(--crm-text-secondary); font-size: .75rem; line-height: 1.7; white-space: pre-line; }
 .crm-section-title-row { align-items: center; }
 
-.crm-long-notice {
-  display: grid;
-  gap: .2rem;
-  margin: 0 0 .1rem;
-  padding: .6rem .7rem;
-  border: 1px solid #edc2b9;
-  border-radius: 9px;
-  background: var(--crm-red-soft);
+.crm-detail-info-row.is-stale {
+  grid-template-columns: 1rem 3rem minmax(0, 1fr) auto;
+}
+
+.crm-detail-info-row.is-stale strong {
   color: var(--crm-red);
 }
 
-.crm-long-notice strong { font-size: .7rem; }
-.crm-long-notice span { color: #94635b; font-size: .66rem; }
+.crm-detail-stale-chip {
+  flex-shrink: 0;
+  padding: .1rem .42rem;
+  border: 1px solid #edc2b9;
+  border-radius: 999px;
+  background: var(--crm-red-soft);
+  color: var(--crm-red);
+  font-size: .58rem;
+  font-weight: 750;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.crm-stale-pill {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: .28rem;
+  padding: .14rem .48rem;
+  border: 1px solid #edc2b9;
+  border-radius: 999px;
+  background: var(--crm-red-soft);
+  color: var(--crm-red);
+  font-size: .6rem;
+  font-weight: 750;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.crm-stale-pill i {
+  width: .34rem;
+  height: .34rem;
+  border-radius: 50%;
+  background: var(--crm-red);
+  box-shadow: 0 0 0 3px rgba(182, 83, 67, .14);
+}
 
 .crm-timeline {
   position: relative;
@@ -1397,11 +1365,35 @@
 }
 
 .crm-task-checkbox {
+  position: relative;
   width: .95rem;
   height: .95rem;
+  padding: 0;
   border: 1px solid #bcae9f;
   border-radius: 4px;
   background: #fffdf8;
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease;
+}
+
+.crm-task-checkbox:hover,
+.crm-task-checkbox:focus-visible {
+  border-color: var(--crm-accent);
+  background: #fff4e9;
+  outline: none;
+}
+
+.crm-task-checkbox:hover::after,
+.crm-task-checkbox:focus-visible::after {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--crm-accent);
+  font-size: .62rem;
+  font-weight: 800;
+  line-height: 1;
+  content: '✓';
 }
 
 .crm-task-list strong { overflow: hidden; color: var(--crm-text-primary); font-size: .7rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
@@ -1410,6 +1402,12 @@
 .crm-task-status.is-todo { background: #e8edf5; color: #5e78a2; }
 .crm-task-status.is-done { background: var(--crm-green-soft); color: var(--crm-green); }
 .crm-task-list time { color: var(--crm-text-secondary); font-size: .66rem; white-space: nowrap; }
+
+.crm-task-list .crm-task-empty {
+  grid-column: 1 / -1;
+  width: 100%;
+  white-space: nowrap;
+}
 
 .crm-overlay {
   position: fixed;
@@ -1424,8 +1422,21 @@
 .crm-overlay-scrim {
   position: absolute;
   inset: 0;
-  background: rgba(47, 41, 36, .22);
-  backdrop-filter: blur(2px);
+  background: rgba(47, 41, 36, .3);
+  backdrop-filter: blur(3px);
+}
+
+.crm-overlay:not([hidden]) .crm-overlay-scrim {
+  animation: crm-scrim-in .22s ease;
+}
+
+@keyframes crm-scrim-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crm-overlay:not([hidden]) .crm-overlay-scrim { animation: none; }
 }
 
 .crm-drawer,
@@ -1448,10 +1459,28 @@
   width: min(30rem, calc(100vw - 2rem));
   max-height: min(42rem, calc(100vh - 2rem));
   margin: auto;
-  padding: 1.25rem;
+  padding: 1.35rem 1.4rem 1.25rem;
+  border: 1px solid rgba(153, 115, 70, .2);
   border-radius: var(--crm-radius-lg);
-  box-shadow: var(--crm-shadow-md);
+  background-color: #fffdf9;
+  background-image: radial-gradient(135% 100% at 100% 0, rgba(248, 228, 213, .62), rgba(248, 228, 213, 0) 62%);
+  box-shadow: 0 26px 60px -22px rgba(70, 48, 31, .32), 0 4px 14px rgba(70, 48, 31, .07);
   overflow-y: auto;
+}
+
+.crm-contact-modal { width: min(34rem, calc(100vw - 2rem)); }
+
+.crm-overlay:not([hidden]) .crm-modal {
+  animation: crm-modal-in .22s cubic-bezier(.2, .8, .25, 1);
+}
+
+@keyframes crm-modal-in {
+  from { opacity: 0; transform: translateY(12px) scale(.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crm-overlay:not([hidden]) .crm-modal { animation: none; }
 }
 
 .crm-convert-modal { width: min(38rem, calc(100vw - 2rem)); }
@@ -1499,6 +1528,7 @@
 .crm-form label,
 .crm-form fieldset {
   display: grid;
+  align-content: start;
   gap: .35rem;
   min-width: 0;
   margin: 0;
@@ -1542,11 +1572,13 @@
 .crm-form-full,
 .crm-form-error,
 .crm-form-actions,
-.crm-form-context,
-.crm-interaction-form fieldset,
-.crm-followup-form .crm-quick-dates {
+.crm-interaction-form fieldset {
   grid-column: 1 / -1;
 }
+
+.crm-interaction-form > label { grid-column: 1 / -1; }
+
+.crm-interaction-form > label.crm-interaction-date { grid-column: 1 / 2; }
 
 .crm-form-error {
   margin: -.3rem 0 0;
@@ -1555,14 +1587,6 @@
 }
 
 .crm-form-error[hidden] { display: none; }
-
-.crm-form-context {
-  color: var(--crm-text-secondary);
-  font-size: .76rem;
-  line-height: 1.5;
-}
-
-.crm-form-context strong { color: var(--crm-text-primary); }
 
 .crm-form-actions {
   display: flex;
@@ -1594,16 +1618,14 @@
 
 .crm-form-actions .crm-primary-button { min-height: 2.4rem; }
 
-.crm-interaction-types,
-.crm-quick-dates {
+.crm-interaction-types {
   display: flex;
   flex-wrap: wrap;
   gap: .45rem;
   margin-top: .1rem;
 }
 
-.crm-type-choice,
-.crm-quick-dates button {
+.crm-type-choice {
   min-height: 2.2rem;
   padding: .35rem .75rem;
   border: 1px solid rgba(74, 57, 45, .12);
@@ -1616,9 +1638,7 @@
 }
 
 .crm-type-choice:hover,
-.crm-type-choice.is-active,
-.crm-quick-dates button:hover,
-.crm-quick-dates button.is-active {
+.crm-type-choice.is-active {
   border-color: #e7a981;
   background: #fff1e5;
   color: var(--crm-accent);
@@ -1898,8 +1918,6 @@
   .crm-contact-toolbar .crm-toolbar-menu-wrap { display: none; }
   .crm-contact-panel > .crm-content-heading .crm-subtle-link { display: none; }
 
-  .crm-contact-actions { display: none; }
-
   .crm-contact-main {
     grid-template-columns: 2.75rem minmax(0, 1fr) 7.6rem;
     gap: .6rem;
@@ -1926,10 +1944,6 @@
 
   .crm-contact-dates b {
     font-size: .65rem;
-  }
-
-  .crm-contact-bottomline {
-    padding-left: 3.35rem;
   }
 
   .crm-followup-columns { grid-template-columns: 1fr; }
@@ -2054,12 +2068,6 @@
 .crm-contact-column-heading,
 .crm-detail-activity {
   display: none;
-}
-
-.crm-contact-heat {
-  color: #ed6426;
-  letter-spacing: -.08em;
-  white-space: nowrap;
 }
 
 @media (min-width: 1236px) {
@@ -2214,7 +2222,7 @@
 
   .crm-contact-column-heading {
     display: grid;
-    grid-template-columns: 2.35rem minmax(0, 1fr) 5.8rem 5.6rem 6.7rem 6.7rem;
+    grid-template-columns: 2.35rem minmax(0, 1fr) 5.8rem 6.7rem 6.7rem;
     align-items: center;
     min-height: 1.85rem;
     padding: .3rem .65rem .15rem;
@@ -2265,7 +2273,7 @@
 
   .crm-contact-main,
   .crm-contact-list.is-compact .crm-contact-main {
-    grid-template-columns: 2.35rem minmax(0, 1fr) 5.8rem 5.6rem 6.7rem 6.7rem;
+    grid-template-columns: 2.35rem minmax(0, 1fr) 5.8rem 6.7rem 6.7rem;
     gap: .55rem;
     align-items: center;
   }
@@ -2316,16 +2324,8 @@
     font-size: .62rem;
   }
 
-  .crm-contact-heat {
-    min-width: 0;
-    color: #ed6426;
-    font-size: .72rem;
-    letter-spacing: -.08em;
-    white-space: nowrap;
-  }
-
   .crm-contact-dates {
-    grid-column: 5 / 7;
+    grid-column: 4 / 6;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: .45rem;
@@ -2347,54 +2347,6 @@
 
   .crm-contact-dates b {
     font-size: .64rem;
-  }
-
-  .crm-contact-bottomline,
-  .crm-contact-list.is-compact .crm-contact-bottomline {
-    position: absolute;
-    right: .45rem;
-    bottom: .22rem;
-    display: flex;
-    align-items: center;
-    gap: .35rem;
-    margin: 0;
-    padding: 0;
-    pointer-events: none;
-  }
-
-  .crm-contact-bottomline > .crm-status-badge,
-  .crm-contact-importance {
-    display: none;
-  }
-
-  .crm-contact-actions {
-    gap: .25rem;
-    margin: 0;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .16s ease;
-  }
-
-  .crm-contact-card:hover .crm-contact-actions,
-  .crm-contact-card:focus-within .crm-contact-actions {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .crm-contact-actions button {
-    padding: .1rem .15rem;
-    font-size: .6rem;
-  }
-
-  .crm-contact-card::after {
-    position: absolute;
-    top: 50%;
-    right: .12rem;
-    color: #aa998c;
-    content: '›';
-    font-size: 1.15rem;
-    line-height: 1;
-    transform: translateY(-50%);
   }
 
   .crm-contact-list:not(.is-compact) .crm-contact-card {
@@ -2587,13 +2539,12 @@
     grid-template-columns: 2.75rem minmax(0, 1fr) 7.6rem;
     grid-template-areas:
       "avatar copy dates"
-      "avatar relation heat";
+      "avatar relation dates";
   }
 
   .crm-contact-avatar { grid-area: avatar; }
   .crm-contact-copy { grid-area: copy; }
   .crm-contact-relation { grid-area: relation; }
-  .crm-contact-heat { grid-area: heat; text-align: right; }
   .crm-contact-dates {
     display: grid;
     grid-area: dates;
@@ -2654,8 +2605,7 @@
     grid-template-columns: 2.75rem minmax(0, 1fr) 7.6rem;
   }
 
-  .crm-contact-relation,
-  .crm-contact-heat {
+  .crm-contact-relation {
     display: none;
   }
 }
@@ -3044,45 +2994,6 @@
   }
 }
 
-/* CRM workspace v4: compact filter tabs and a five-item address-book page. */
-.crm-filter-switcher {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: .2rem;
-  margin-top: .1rem;
-  padding: .2rem;
-  border: 1px solid rgba(74, 57, 45, .09);
-  border-radius: 10px;
-  background: rgba(247, 239, 226, .62);
-}
-
-.crm-filter-switcher button {
-  min-width: 0;
-  min-height: 1.9rem;
-  padding: .25rem .18rem;
-  border: 0;
-  border-radius: 7px;
-  background: transparent;
-  color: var(--crm-text-muted);
-  font: inherit;
-  font-size: .66rem;
-  font-weight: 700;
-  line-height: 1.2;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.crm-filter-switcher button:hover,
-.crm-filter-switcher button.is-active {
-  background: #fffaf3;
-  color: var(--crm-accent);
-  box-shadow: 0 1px 4px rgba(70, 48, 31, .07);
-}
-
-.crm-sidebar-panel [data-crm-filter-panel-content][hidden] {
-  display: none !important;
-}
-
 .crm-pagination {
   display: flex;
   align-items: center;
@@ -3091,7 +3002,6 @@
   min-height: 2.2rem;
   margin-top: .35rem;
   padding: .45rem .2rem 0;
-  border-top: 1px solid rgba(74, 57, 45, .08);
 }
 
 .crm-pagination[hidden] {
@@ -3170,10 +3080,6 @@
 }
 
 @media (max-width: 719px) {
-  .crm-filter-switcher {
-    margin-top: .65rem;
-  }
-
   .crm-pagination {
     justify-content: center;
   }
@@ -3469,15 +3375,10 @@
 }
 
 .crm-detail-name-heading h2 {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.crm-detail-favorite {
-  color: #eeb23e;
-  font-size: 1.3rem;
-  line-height: 1;
 }
 
 .crm-detail-name .crm-detail-intro {
@@ -3675,8 +3576,14 @@
 .crm-detail-copy { cursor: pointer; }
 .crm-detail-copy:hover { color: var(--crm-accent); }
 .crm-detail-copy svg { width: 1rem; height: 1rem; }
-.crm-detail-info-action.crm-detail-edit-note { cursor: pointer; }
-.crm-detail-info-action.crm-detail-edit-note:hover { color: var(--crm-accent); }
+.crm-detail-copy.is-copied { color: var(--crm-green); }
+.crm-detail-copy.is-copied svg { display: none; }
+.crm-detail-copy.is-copied::after {
+  content: '✓';
+  font-size: .82rem;
+  font-weight: 800;
+  line-height: 1;
+}
 
 .crm-detail-secondary-actions {
   display: flex;
@@ -4142,15 +4049,14 @@
 .crm-trend-chart {
   min-width: 0;
   margin-top: auto;
-  padding-top: .45rem;
 }
 
 .crm-trend-chart svg {
   display: block;
   width: 100%;
-  height: 4.05rem;
+  height: 100%;
   overflow: visible;
-  border-bottom: 1px solid rgba(74, 57, 45, .08);
+  border-bottom: 0;
 }
 
 .crm-trend-labels {
@@ -4512,7 +4418,7 @@
   }
 
   .crm-workspace.is-contacts-view .crm-detail-activity .crm-timeline {
-    max-height: 10.5rem;
+    max-height: none;
     margin-top: .45rem;
   }
 
@@ -4708,8 +4614,642 @@
   display: none;
 }
 
+.crm-contact-copy[data-crm-tooltip-always] {
+  cursor: default;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .crm-floating-tooltip {
     transition: none;
   }
+}
+
+/* CRM workspace v22: keep every filter group visible without switching views. */
+.crm-sidebar-panel > .crm-filter-group {
+  position: relative;
+}
+
+.crm-sidebar-panel > .crm-filter-group > .crm-filter-list,
+.crm-sidebar-panel > .crm-filter-group > .crm-tag-list {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-color: rgba(194, 65, 12, .24) transparent;
+  scrollbar-width: thin;
+}
+
+.crm-sidebar-panel > .crm-filter-group > .crm-filter-list {
+  max-height: calc(4 * 2.5rem + 3 * .18rem);
+}
+
+.crm-sidebar-panel > .crm-filter-group > .crm-tag-list {
+  max-height: calc(5 * 1.9rem + 4 * .06rem);
+  overflow-x: hidden;
+}
+
+@media (min-width: 720px) {
+  .crm-left-list-layout > .crm-sidebar-panel > .crm-tag-group {
+    margin-top: .9rem;
+  }
+}
+
+@media (min-width: 1236px) {
+  .crm-sidebar-panel > .crm-filter-group > .crm-filter-list {
+    max-height: calc(4 * 2.15rem + 3 * .08rem);
+  }
+
+  .crm-sidebar-panel > .crm-filter-group > .crm-tag-list {
+    max-height: calc(5 * 1.82rem + 4 * .06rem);
+  }
+}
+
+/* CRM workspace v23: align the filter area with the contacts panel and match heading scale. */
+@media (min-width: 720px) and (max-width: 1235px) {
+  .crm-left-list-layout > .crm-sidebar-panel {
+    padding-top: 1.1rem;
+  }
+
+  .crm-left-list-layout > .crm-sidebar-panel > .crm-filter-group:first-child {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  .crm-left-list-layout > .crm-sidebar-panel > .crm-filter-group h3,
+  .crm-left-list-layout > .crm-sidebar-panel > .crm-tag-heading h3 {
+    font-size: 1.05rem;
+    font-weight: 750;
+    line-height: 1.3;
+  }
+}
+
+@media (min-width: 1236px) {
+  .crm-left-list-layout > .crm-sidebar-panel {
+    padding-top: .15rem;
+  }
+
+  .crm-left-list-layout > .crm-sidebar-panel > .crm-filter-group h3,
+  .crm-left-list-layout > .crm-sidebar-panel > .crm-tag-heading h3 {
+    font-size: .82rem;
+  }
+}
+
+/* CRM workspace v38: give all sidebar filter groups more room and slightly stronger headings. */
+@media (min-width: 1236px) {
+  .crm-left-list-layout > .crm-sidebar-panel > .crm-filter-group h3,
+  .crm-left-list-layout > .crm-sidebar-panel > .crm-tag-heading h3 {
+    font-size: .9rem;
+  }
+
+  .crm-left-list-layout > .crm-sidebar-panel > .crm-filter-group > .crm-filter-list,
+  .crm-left-list-layout > .crm-sidebar-panel > .crm-filter-group > .crm-tag-list {
+    margin-top: .7rem;
+  }
+
+  .crm-left-list-layout > .crm-sidebar-panel > .crm-filter-group + .crm-filter-group,
+  .crm-left-list-layout > .crm-sidebar-panel > .crm-tag-group {
+    margin-top: 1rem;
+  }
+}
+
+/* CRM workspace v25: give filter icons more breathing room and keep them centered with their labels. */
+.crm-sidebar-panel .crm-filter-row {
+  column-gap: .7rem;
+  align-items: center;
+}
+
+.crm-sidebar-panel .crm-filter-row > .crm-filter-icon {
+  align-self: center;
+}
+
+.crm-sidebar-panel .crm-filter-row > span:not(.crm-filter-icon) {
+  line-height: 1.3;
+}
+
+/* CRM workspace v26: add breathing room between the footer card headings and their records. */
+@media (min-width: 1236px) {
+  .crm-workspace.is-contacts-view .crm-detail-activity .crm-timeline,
+  .crm-workspace.is-contacts-view .crm-related-tasks .crm-task-list {
+    margin-top: .8rem;
+  }
+}
+
+/* CRM workspace v24: stretch the detail footer to the address-book boundary without distorting its lists. */
+@media (min-width: 1236px) {
+  .crm-workspace.is-contacts-view .crm-detail-column {
+    align-self: stretch;
+    min-height: 0;
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .crm-workspace.is-contacts-view .crm-detail-column > .crm-detail-activity,
+  .crm-workspace.is-contacts-view .crm-detail-column > .crm-related-tasks {
+    display: flex;
+    min-height: 0;
+    height: 100%;
+    flex-direction: column;
+  }
+
+  .crm-workspace.is-contacts-view .crm-detail-activity .crm-detail-section {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+  }
+
+  .crm-workspace.is-contacts-view .crm-detail-activity .crm-timeline,
+  .crm-workspace.is-contacts-view .crm-related-tasks .crm-task-list {
+    min-height: 0;
+    flex: 1;
+    max-height: none;
+    overflow-y: auto;
+    align-content: start;
+  }
+}
+
+/* CRM workspace v27: keep the contact toolbar self-contained after removing the low-information heading. */
+.crm-contact-toolbar {
+  margin-top: 0;
+}
+
+.crm-toolbar-icon-button {
+  width: 2.25rem;
+  flex: 0 0 2.25rem;
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+}
+
+.crm-toolbar-icon-button svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.crm-contact-add-button {
+  width: 2.25rem;
+  height: 2.25rem;
+  min-height: 2.25rem;
+  flex: 0 0 2.25rem;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+@media (min-width: 1236px) {
+  .crm-toolbar-icon-button,
+  .crm-contact-add-button {
+    width: 2.35rem;
+    height: 2.35rem;
+    min-height: 2.35rem;
+    flex-basis: 2.35rem;
+  }
+}
+
+/* CRM workspace v28: pin the contact count to the lower-left and keep pagination on the lower-right. */
+@media (min-width: 720px) {
+  .crm-contact-panel {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .crm-contact-list {
+    min-height: 0;
+  }
+}
+
+.crm-pagination {
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: auto;
+  padding: .65rem .2rem .1rem;
+  border-top: 1px solid rgba(74, 57, 45, .08);
+}
+
+.crm-pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .3rem;
+  margin-left: auto;
+}
+
+.crm-pagination-status {
+  min-width: 0;
+  margin-left: 0;
+  color: var(--crm-text-muted);
+  font-size: .64rem;
+  line-height: 1.7rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+@media (max-width: 719px) {
+  .crm-pagination {
+    justify-content: space-between;
+  }
+}
+
+/* CRM workspace v29: remove the redundant vertical separators from the contact workbench. */
+@media (min-width: 720px) {
+  .crm-left-list-layout > .crm-sidebar-panel,
+  .crm-left-list-layout > .crm-center-column {
+    border-right: 0;
+  }
+}
+
+/* CRM workspace v30: keep the remaining contact actions equal in width and weight. */
+.crm-detail-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 720px) {
+  .crm-workspace.is-contacts-view .crm-detail-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* CRM workspace v31: give the relationship and date columns more breathing room; identity stays hover-expandable. */
+.crm-contact-name-row h3,
+.crm-contact-role {
+  min-width: 0;
+}
+
+@media (min-width: 1236px) {
+  .crm-contact-column-heading,
+  .crm-contact-main,
+  .crm-contact-list.is-compact .crm-contact-main {
+    grid-template-columns: 2.35rem minmax(0, 1fr) 6.8rem 7.6rem 7.6rem;
+    column-gap: .7rem;
+  }
+
+  .crm-contact-name-row {
+    gap: .5rem;
+  }
+}
+
+/* CRM workspace v33: make the contact table headers more legible and visually authoritative. */
+.crm-contact-column-heading {
+  color: var(--crm-text-secondary);
+  font-size: .75rem;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+/* CRM workspace v34: match both remaining action labels to their icons and keep them centered. */
+.crm-detail-actions [data-crm-log-interaction],
+.crm-detail-actions [data-crm-add-task] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* CRM workspace v35: separate the table header from the first row while keeping the original row rhythm. */
+@media (min-width: 1236px) {
+  .crm-contact-list {
+    margin-top: .55rem;
+  }
+
+  .crm-contact-card,
+  .crm-contact-list.is-compact .crm-contact-card {
+    min-height: 4.15rem;
+    padding-block: .55rem .5rem;
+  }
+}
+
+/* CRM workspace v36: let the pagination divider close the list without a duplicate last-row line. */
+.crm-contact-card.is-last-visible {
+  border-bottom-color: transparent;
+}
+
+/* CRM workspace v37: let the column headers sit without a top boundary line. */
+@media (min-width: 720px) {
+  .crm-contact-toolbar {
+    border-bottom: 0;
+  }
+}
+
+/* CRM workspace v39: shift the contact surface down slightly while keeping its lower edge tight. */
+@media (min-width: 720px) {
+  .crm-left-list-layout .crm-contact-panel {
+    padding-top: .6rem;
+    padding-bottom: 0;
+  }
+}
+
+/* CRM workspace v40: keep the detail footer cards content-sized so short lists are never clipped. */
+@media (min-width: 1236px) {
+  .crm-workspace.is-contacts-view .crm-detail-column {
+    align-self: start;
+    grid-template-rows: auto auto;
+    align-items: start;
+  }
+
+  .crm-workspace.is-contacts-view .crm-detail-column > .crm-detail-activity,
+  .crm-workspace.is-contacts-view .crm-detail-column > .crm-related-tasks {
+    height: auto;
+    min-height: 0;
+    align-self: stretch;
+  }
+}
+
+/* CRM workspace v41: lift the left workbench above the decorative bear and let both columns share the same row height. */
+@media (min-width: 720px) {
+  .crm-left-list-layout > .crm-sidebar-panel {
+    position: relative;
+    overflow: visible;
+  }
+
+  .crm-left-list-layout > .crm-sidebar-panel > .crm-filter-group {
+    position: relative;
+    z-index: 1;
+  }
+
+  .crm-left-list-layout > .crm-sidebar-panel > .crm-sidebar-illustration {
+    position: absolute;
+    right: 2rem;
+    bottom: -.15rem;
+    z-index: 0;
+    display: block;
+    width: 7.6rem;
+    min-height: 0;
+    height: auto;
+    margin: 0;
+    opacity: .72;
+    pointer-events: none;
+  }
+}
+
+@media (min-width: 1236px) {
+  .crm-left-list-layout > .crm-sidebar-panel > .crm-sidebar-illustration {
+    right: 2.2rem;
+    width: 6.5rem;
+  }
+}
+
+/* CRM workspace v42: align the count column and type scale across all sidebar filter groups. */
+@media (min-width: 720px) {
+  .crm-left-list-layout > .crm-sidebar-panel .crm-filter-row,
+  .crm-left-list-layout > .crm-sidebar-panel .crm-tag-row {
+    padding-right: .45rem;
+  }
+
+  .crm-left-list-layout > .crm-sidebar-panel .crm-filter-row b,
+  .crm-left-list-layout > .crm-sidebar-panel .crm-tag-row b {
+    min-width: 1.15rem;
+    font-size: .68rem;
+    line-height: 1.3;
+    text-align: right;
+  }
+}
+
+/* CRM workspace v76: proportional viewBox, smooth line and gradient area for the monthly activity chart. */
+.crm-trend-chart {
+  position: relative;
+  isolation: isolate;
+  height: 10rem;
+}
+
+.crm-trend-chart svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  border-bottom: 0;
+}
+
+.crm-trend-axis,
+.crm-trend-grid {
+  stroke: rgba(74, 57, 45, .1);
+  stroke-width: 1;
+}
+
+.crm-trend-axis {
+  stroke: rgba(74, 57, 45, .16);
+}
+
+.crm-trend-grid {
+  stroke-dasharray: 3 5;
+  stroke: rgba(74, 57, 45, .11);
+}
+
+.crm-trend-y-label,
+.crm-trend-x-label {
+  fill: var(--crm-text-muted);
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.crm-trend-y-label {
+  text-anchor: end;
+}
+
+.crm-trend-x-label {
+  text-anchor: middle;
+}
+
+.crm-trend-area {
+  fill: url(#crm-trend-fill);
+}
+
+.crm-trend-line {
+  fill: none;
+  stroke: var(--crm-accent);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.crm-trend-point-group {
+  cursor: pointer;
+  outline: none;
+}
+
+.crm-trend-point-hit-area {
+  fill: transparent;
+  outline: none;
+  pointer-events: all;
+}
+
+.crm-trend-point-hit-area:focus,
+.crm-trend-point-hit-area:focus-visible {
+  outline: none;
+}
+
+.crm-trend-point-halo {
+  fill: var(--crm-accent-soft);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .16s ease, r .16s ease;
+}
+
+.crm-trend-point {
+  fill: #fffdf8;
+  stroke: var(--crm-accent);
+  stroke-width: 2;
+  pointer-events: none;
+  transition: r .16s ease, fill .16s ease, stroke-width .16s ease;
+}
+
+.crm-trend-point-group.is-peak .crm-trend-point {
+  fill: var(--crm-accent);
+  stroke: #fffdf8;
+  stroke-width: 2.4;
+}
+
+.crm-trend-point-group:hover .crm-trend-point-halo,
+.crm-trend-point-group:focus-within .crm-trend-point-halo,
+.crm-trend-point-group.is-selected .crm-trend-point-halo {
+  opacity: .95;
+  r: 9px;
+}
+
+.crm-trend-point-group:hover .crm-trend-point,
+.crm-trend-point-group:focus-within .crm-trend-point,
+.crm-trend-point-group.is-selected .crm-trend-point {
+  fill: var(--crm-accent);
+  stroke: #fffdf8;
+  stroke-width: 2.4;
+  r: 4.6px;
+}
+
+.crm-trend-tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  min-width: 7.1rem;
+  max-width: calc(100vw - .75rem);
+  padding: .5rem .62rem .55rem;
+  border: 1px solid rgba(194, 65, 12, .2);
+  border-radius: 9px;
+  background: rgba(255, 253, 248, .98);
+  box-shadow: 0 8px 20px rgba(70, 48, 31, .12);
+  color: var(--crm-text-secondary);
+  font-size: .62rem;
+  pointer-events: auto;
+}
+
+.crm-trend-tooltip-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .65rem;
+}
+
+.crm-trend-tooltip-head strong {
+  color: var(--crm-text-primary);
+  font-size: .66rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.crm-trend-tooltip-head button {
+  display: inline-grid;
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 1rem;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--crm-text-muted);
+  font: inherit;
+  font-size: .85rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.crm-trend-tooltip-head button:hover,
+.crm-trend-tooltip-head button:focus-visible {
+  color: var(--crm-accent);
+}
+
+.crm-trend-tooltip > span {
+  display: block;
+  margin-top: .2rem;
+  color: var(--crm-accent);
+  font-weight: 750;
+}
+
+.crm-trend-tooltip > small {
+  display: block;
+  margin-top: .16rem;
+  color: var(--crm-text-muted);
+  font-size: .56rem;
+  line-height: 1.35;
+}
+
+@media (max-width: 719px) {
+  .crm-trend-chart {
+    height: 9.5rem;
+  }
+
+  .crm-trend-tooltip {
+    min-width: 6.6rem;
+    padding: .42rem .52rem .46rem;
+    font-size: .56rem;
+  }
+
+  .crm-trend-tooltip-head strong {
+    font-size: .6rem;
+  }
+
+  .crm-trend-tooltip > small {
+    font-size: .52rem;
+  }
+}
+
+/* CRM workspace v86: dashboard view — KPI strip on the first row, bordered 待跟进 and 互动时间线 cards on the second row. */
+.crm-workspace.is-dashboard-view .crm-dashboard-grid {
+  align-items: start;
+}
+
+.crm-workspace.is-dashboard-view .crm-followup-columns {
+  align-items: start;
+}
+
+.crm-workspace.is-dashboard-view .crm-global-timeline {
+  max-height: 8.5rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.crm-workspace.is-dashboard-view .crm-followup-board,
+.crm-workspace.is-dashboard-view .crm-interactions-panel {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  padding: 1rem;
+  border: 1px solid rgba(74, 57, 45, .09);
+  border-radius: var(--crm-radius-lg);
+  background: rgba(255, 253, 248, .86);
+  box-shadow: var(--crm-shadow-sm);
+}
+
+/* CRM workspace v89: align the sidebar's 智能筛选 heading with the contacts search field. */
+@media (min-width: 720px) {
+  .crm-left-list-layout > .crm-sidebar-panel {
+    padding-top: .6rem;
+  }
+
+  .crm-left-list-layout > .crm-sidebar-panel > .crm-filter-group:first-child {
+    margin-top: 0;
+    padding-top: 0;
+  }
+}
+
+/* CRM workspace v90: drop the extra divider above the archive dialog actions. */
+.crm-modal[data-crm-surface="archive"] .crm-form-actions {
+  margin-top: 1rem;
+  padding-top: 0;
+  border-top: 0;
 }
