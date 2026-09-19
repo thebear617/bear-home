@@ -47,6 +47,8 @@ export const routeCategories = [
       { name: '西电智课平台', desc: '西安电子科技大学智课平台', url: 'https://xdspoc.xidian.edu.cn/', tags: ['校园', '课程'], addedAt: '2026-07-29', icon: '/assets/routes/西电智课平台.png' },
       { name: '西电信息网络技术中心', desc: '西电信息网络技术中心官网,网络问题可在该网站查找', url: 'https://xxzx.xidian.edu.cn/', tags: ['校园', '网络'], addedAt: '2026-07-30', icon: '/assets/routes/西电信息网络技术中心.png' },
       { name: '西电研究生系统', desc: '西安电子科技大学研究生信息管理系统（培养/选课/成绩/导师互选）', url: 'https://yjspt.xidian.edu.cn/', tags: ['校园', '研究生'], addedAt: '2026-09-01', icon: '/assets/routes/西电研究生系统.png' },
+      { name: '党委研究生工作部', desc: '真正的研究生官网，查研究生相关政策的入口', url: 'https://ygb.xidian.edu.cn/', tags: ['校园', '研究生'], addedAt: '2026-09-19', icon: '/assets/routes/西电研究生系统.png' },
+      { name: '校园学费住宿费缴纳入口', desc: '平时的医保缴费，学费缴费入口', url: 'https://tysfpt.xidian.edu.cn/', tags: ['校园', '缴费'], addedAt: '2026-09-19', icon: '/assets/routes/西电研究生系统.png' },
       { name: '阿里云学生服务中心', desc: '阿里云高校学生权益中心，学生专享云资源与优惠；现在有 300 元代金券，于 26 年 8 月 19 日领取，效期截止 27 年 8 月 19 日', url: 'https://university.aliyun.com/buycenter/', tags: ['校园', '云'], addedAt: '2026-08-19', icon: '/assets/routes/阿里云.png' },
     ]
   },
