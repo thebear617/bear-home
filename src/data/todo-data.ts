@@ -33,6 +33,10 @@ export const TODO_BOARDS: TodoBoard[] = [
     name: '生活',
     icon: '🏠',
     items: [
+      { id: 'l49', title: "学费：学期注册｜缴纳 11200 元", status: 'todo', date: '2026-09-19', createdAt: '2026-09-19', url: "", note: "住宿费 1200元，学费 10000 元" },
+      { id: 'l50', title: "聚会：和同门聚会", status: 'todo', date: '2026-09-19', createdAt: '2026-09-19', url: "", note: "潮汕牛肉火锅｜铁锅炖｜重庆火锅｜湘菜｜烧烤烤肉｜江西菜" },
+      { id: 'l48', title: "成长数据库-录入数据｜｜论文｜会议参加｜研究生活动", status: 'todo', date: '2026-09-21', createdAt: '2026-09-18', url: "https://ygb.xidian.edu.cn/info/1036/13523.htm", note: "请所有同学先尽快进行成长数据库的录入｜系统将于2026年9月21日截止，之后本人不能新增成果或进行修改，未录入的成果不能评奖使用。" },
+      { id: 'l47', title: "医院：3 点去校医院皮肤科看皮肤疣", status: 'todo', date: '2026-09-16', createdAt: '2026-09-15', url: "", note: "确诊 HPV 引起的皮肤疣——已用激光治疗" },
       { id: 'l32', title: "猫猫：给 1931 商量周边", status: 'todo', date: '2026-09-09', createdAt: '2026-09-01', url: "", note: "增加价格“账目公示”板块，分析他的多维表格" },
       { id: 'l42', title: "和梓健哥他们聚一聚——田、董、赵、郑、陆、张、我、马、吴", status: 'todo', date: '2026-09-03', createdAt: '2026-09-03', url: "", note: "下周六（9 月 12 日）和他们约着聚一聚，郑炟、董传天、田均恺、陆才、梓健哥、马钰程、赵钰彬、韩耀文" },
       { id: 'l43', title: "猪窝：日程和财务", status: 'todo', date: '2026-09-03', createdAt: '2026-09-03', url: "", note: "把每日追踪、支出记录（攒钱计划、定期支出）、会员订阅看能否集成到一块" },
@@ -50,6 +54,7 @@ export const TODO_BOARDS: TodoBoard[] = [
     name: '编程',
     icon: '💻',
     items: [
+      { id: 'c25', title: "校招会：腾讯南校区宣讲会", status: 'todo', date: '2026-09-15', createdAt: '2026-09-15', url: "", note: "19-21：00 ｜B101 报告厅" },
       { id: 'c24', title: "猫猫：完善猫猫网站", status: 'todo', date: '2026-09-10', createdAt: '2026-09-10', url: "", note: "财务集成价格参考-账目公示｜行动甘特图（绝育、疫苗、救助）｜猫猫编年史变成猪窝日程那样子｜猫猫知识增加分页逻辑等，引向公众号那边｜猫猫赞助可以尝试用 CRM 管理" },
       { id: 'l41', title: "熊窝：CRM 初发搭建，视觉及逻辑建立，未完善数据字段", status: 'todo', date: '2026-09-04', createdAt: '2026-09-04', url: "", note: "" },
       { id: 'c10', title: "聊天站：基础功能搭建｜4328 和 4331 的网关调试", status: 'todo', date: '2026-08-22', createdAt: '2026-08-08', url: "https://www.bilibili.com/video/BV11mNA6vEJX", note: "顺序学习的时候， 一颗节点树（N 个节点=N 个卡片画布），逆序总结收敛的时候，一篇markdown（N 个悬浮窗=经过内容总结后的 N 个节点）-无限画布去做节点树，就是可以自己任意拖拽组织的" },
@@ -62,8 +67,8 @@ export const TODO_BOARDS: TodoBoard[] = [
     name: '科研',
     icon: '🔍',
     items: [
-      { id: 'r6', title: "组内：科研，做大组会 PPT 以及个人情况PPT", status: 'todo', date: '2026-09-18', createdAt: '2026-09-06', url: "", note: "" },
-      { id: 'r7', title: "CVPR 2027", status: 'todo', date: '2026-11-07', createdAt: '2026-09-13', url: "", note: "摘要 北京时间：2026-11-08 19:59｜全文 北京时间：2026-11-14 19:59" },
+      { id: 'r7', title: "CVPR 2027：粒度细化｜模态对齐｜prompt 改进", status: 'todo', date: '2026-11-07', createdAt: '2026-09-13', url: "", note: "摘要 北京时间：2026-11-08 19:59｜全文 北京时间：2026-11-14 19:59" },
+      { id: 'r6', title: "组内：科研，做大组会 PPT", status: 'todo', date: '2026-09-18', createdAt: '2026-09-06', url: "", note: "" },
       { id: 'r5', title: "大组会工作总结准备", status: 'todo', date: '2026-09-06', createdAt: '2026-09-03', url: "", note: "周日早上九点：学期工作总结和计划汇报" },
     ]
   }

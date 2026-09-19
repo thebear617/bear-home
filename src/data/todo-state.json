@@ -1,9 +1,11 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-15T06:29:01.621Z",
+  "updatedAt": "2026-09-19T08:21:23.304Z",
   "items": {
     "l1": {
-      "status": "todo"
+      "status": "doing",
+      "plannedStart": "2026-09-19",
+      "plannedEnd": "2026-09-23"
     },
     "c21": {
       "status": "doing",
@@ -269,7 +271,7 @@
     "c24": {
       "status": "doing",
       "plannedStart": "2026-09-10",
-      "plannedEnd": "2026-09-18",
+      "plannedEnd": "2026-09-21",
       "phases": [
         {
           "id": "p1",
@@ -296,7 +298,7 @@
           "id": "p1789366406786",
           "title": "开发暂停：受 CRM 需求及组会影响",
           "start": "2026-09-13",
-          "end": "2026-09-18",
+          "end": "2026-09-21",
           "status": "todo"
         }
       ]
@@ -333,20 +335,70 @@
     "r6": {
       "status": "doing",
       "plannedStart": "2026-09-15",
-      "plannedEnd": "2026-09-19",
+      "plannedEnd": "2026-09-26",
       "phases": [
         {
           "id": "p1",
-          "title": "PPT：先完成 本身内容",
+          "title": "PPT：先实验-再方法-再背景-再总结",
           "start": "2026-09-15",
-          "end": "2026-09-16",
-          "status": "doing"
+          "end": "2026-09-17",
+          "status": "done"
         },
         {
           "id": "p1789453717171",
-          "title": "待确定",
+          "title": "小组会汇报：发现方法部分的逻辑还不够清晰，应该和任务贴紧",
+          "start": "2026-09-18",
+          "end": "2026-09-18",
+          "status": "done"
+        },
+        {
+          "id": "p1789788004826",
+          "title": "PPT：按照意见进行修改",
+          "start": "2026-09-19",
+          "end": "2026-09-26",
+          "status": "doing"
+        }
+      ]
+    },
+    "c25": {
+      "status": "done",
+      "completedAt": "2026-09-15"
+    },
+    "l47": {
+      "status": "done",
+      "completedAt": "2026-09-16"
+    },
+    "l48": {
+      "status": "done",
+      "completedAt": "2026-09-19"
+    },
+    "l49": {
+      "status": "todo"
+    },
+    "l50": {
+      "status": "doing",
+      "plannedStart": "2026-09-17",
+      "plannedEnd": "2026-09-20",
+      "phases": [
+        {
+          "id": "p1",
+          "title": "组织：私聊摇人",
           "start": "2026-09-17",
+          "end": "2026-09-18",
+          "status": "done"
+        },
+        {
+          "id": "p1789805349089",
+          "title": "商定：商定具体安排",
+          "start": "2026-09-19",
           "end": "2026-09-19",
+          "status": "doing"
+        },
+        {
+          "id": "p1789805361038",
+          "title": "出发：出发去玩",
+          "start": "2026-09-20",
+          "end": "2026-09-20",
           "status": "todo"
         }
       ]
