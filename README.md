@@ -20,8 +20,9 @@
 | URL | 页面 | Astro 入口 |
 |-----|------|------------|
 | `/` | 路由表 | `src/pages/index.astro` |
+| `/home/` | 首页 · 生活概览 | `src/pages/home/index.astro` |
 | `/routes/` | 路由表 | `src/pages/routes/index.astro` |
-| `/dashboard/` | 生活仪表盘 | `src/pages/dashboard/index.astro` |
+| `/dashboard/` | 生活仪表盘（想做清单 + 追踪看板） | `src/pages/dashboard/index.astro` |
 | `/todo-board/` | 任务看板 | `src/pages/todo-board/index.astro` |
 
 根路径和 `/routes/` 当前渲染同一个路由表。侧栏导航使用显式的 `index.html` 相对链接，以兼容本地静态路由和 GitHub Pages 子路径环境。
@@ -41,6 +42,7 @@ personal/
 │   ├── layouts/SiteLayout.astro       # 通用布局：侧栏 + 主区
 │   ├── pages/
 │   │   ├── index.astro                # 根路径路由表
+│   │   ├── home/index.astro           # /home/ 首页 · 生活概览
 │   │   ├── routes/index.astro         # /routes/ 路由表
 │   │   ├── dashboard/index.astro      # /dashboard/ 生活仪表盘
 │   │   └── todo-board/index.astro     # /todo-board/ 任务看板
@@ -48,13 +50,16 @@ personal/
 │   │   ├── SiteSidebar.astro          # 侧栏导航与移动端抽屉
 │   │   ├── RouteTable.astro            # 路由表组件入口
 │   │   ├── RouteGroupView.astro       # 分组 / 列表 / 瀑布流视图
-│   │   ├── LifeDashboard.astro        # 天气、日历、音乐、GitHub 等模块
+│   │   ├── LifeOverview.astro         # 首页：天气、日历、音乐、GitHub 等模块
+│   │   ├── LifeDashboard.astro        # 仪表盘：想做清单 + 追踪看板
+│   │   ├── WantList.astro             # 想做清单（无期限轻清单）
 │   │   ├── TrackingBoard.astro         # 习惯、工作、番茄钟、长期目标
 │   │   ├── SearchBox.astro             # Google / 百度 / Bing 搜索
 │   │   └── GithubProfileCard.astro     # GitHub 主页卡片
 │   └── data/
 │       ├── site.js               # routeCategories 路由数据
 │       ├── tracker-config.js     # 追踪目标的唯一配置源
+│       ├── want-data.ts          # 想做清单数据
 │       ├── todo-data.ts          # 活跃任务看板数据
 │       └── archived-todo-data.ts  # 已完成任务归档
 ├── public/
@@ -89,19 +94,25 @@ personal/
 - 分类和标签筛选；
 - 手机端自动避免使用横向列表视图。
 
-## 生活仪表盘
+## 首页 · 生活概览
 
-[LifeDashboard.astro](src/components/LifeDashboard.astro) 当前包含：
+[LifeOverview.astro](src/components/LifeOverview.astro) 承载信息密度不高的日常概览：
 
 - 西安、南宁、威海天气；
 - 点击城市天气卡片查看未来 5 天的天气、温度、降雨概率和最大风速；
 - 随时间变化的渐变天空；
 - 可翻月日历；
 - GitHub 主页及常用仓库；
-- 网易云歌单：桌面端嵌入播放器，手机端跳转网易云歌单页面；
-- 内嵌追踪看板。
+- 网易云歌单：桌面端嵌入播放器，手机端跳转网易云歌单页面。
 
-即时天气、渐变天空和日历使用外部 widget iframe；5 日预报通过 Open-Meteo API 按城市坐标请求，并在当前页面缓存 15 分钟；歌单和封面数据直接维护在 `LifeDashboard.astro`。
+即时天气、渐变天空和日历使用外部 widget iframe；5 日预报通过 Open-Meteo API 按城市坐标请求，并在当前页面缓存 15 分钟；歌单和封面数据直接维护在 `LifeOverview.astro`。
+
+## 生活仪表盘
+
+[LifeDashboard.astro](src/components/LifeDashboard.astro) 只保留需要长期跟进的两块：
+
+- 想做清单（`src/data/want-data.ts`）：无期限、无状态的轻清单，想起来就做，做完直接删；
+- 内嵌追踪看板。
 
 ## 任务看板
 
@@ -226,7 +237,8 @@ npm run install-hooks
 ## 添加内容
 
 - **路由表**：修改 `src/data/site.js` 的 `routeCategories`，新增条目的 `addedAt` 使用添加当天日期。
-- **生活仪表盘**：修改 `src/components/LifeDashboard.astro`；外部 widget、歌单和 GitHub 卡片均在组件中维护。
+- **首页 · 生活概览**：修改 `src/components/LifeOverview.astro`；外部 widget、歌单和 GitHub 卡片均在组件中维护。
+- **想做清单**：修改 `src/data/want-data.ts`，每条只有 `{ text, tag?, added? }`，不设日期与状态。
 - **追踪看板**：修改 `src/components/TrackingBoard.astro`；发布数据遵循上面的快照同步流程。
 - **任务看板**：修改 `src/data/todo-data.ts`；推进状态 / 排期 / 划阶段在本地 dev 看板上操作（写回 `src/data/todo-state.json`），或直接编辑该文件；新增 / 删除任务也可以用看板的「➕ 新增任务」按钮和卡片「删除」按钮（dev 下直接写回 `todo-data.ts`）；完成任务移入 `src/data/archived-todo-data.ts`。
 - **长期目标**：修改 `src/data/tracker-config.js`，然后运行 `npm run tracker:migrate` 和 `npm run tracker:validate`。

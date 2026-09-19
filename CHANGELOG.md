@@ -1,5 +1,15 @@
 # 熊窝 personal 更新日志
 
+## v0.32.0 — 2026-09-19
+
+feat: 首页与仪表盘拆分 —— 首页改生活概览，仪表盘只留想做清单 + 追踪看板
+
+- feat: 新增首页生活概览 [LifeOverview.astro](src/components/LifeOverview.astro)，承载信息密度不高的日常模块：渐变天空、三城天气（点击查看未来 5 天）、可翻月日历、GitHub 主页、网易云歌单；首页画布宽度与 CRM 页面统一为 `min(1400px, 100vw - 20px)`
+- feat: 生活仪表盘 [LifeDashboard.astro](src/components/LifeDashboard.astro) 瘦身为「想做清单 + 追踪看板」两块，天气 / 日历 / GitHub / 歌单等模块全部移出
+- feat: 新增「想做清单」[WantList.astro](src/components/WantList.astro) + [want-data.ts](src/data/want-data.ts)——无期限、无状态的轻清单，每条只有 `{ text, tag?, added? }`，与任务看板（有排期 / 状态机 / 归档）刻意区分，挂在仪表盘顶部
+- refactor: 删除旧首页轨道式画布 `HomeCanvas.astro` 及其全部专属样式，`SiteLayout` 移除 `hideSidebar` / `home-shell` / `home-layout` 分支
+- fix: 首页 `.app-shell` 改用独立的 `home-shell` 类，不再复用 `dashboard-shell`，避免两页宽度耦合
+
 ## v0.31.0 — 2026-09-15
 
 feat(crm): 关系管理页整体重构与体验收敛

@@ -1,0 +1,17 @@
+---
+import { WANT_ITEMS } from '../data/want-data';
+---
+
+{WANT_ITEMS.length === 0 ? (
+  <p class="want-empty">还没想到什么，想到了说一声就行。</p>
+) : (
+  <ul class="want-items">
+    {WANT_ITEMS.map((item) => (
+      <li class="want-item">
+        <span class="want-item-dot" aria-hidden="true"></span>
+        <span class="want-item-text">{item.text}</span>
+        {item.tag && <span class="want-item-tag">{item.tag}</span>}
+      </li>
+    ))}
+  </ul>
+)}

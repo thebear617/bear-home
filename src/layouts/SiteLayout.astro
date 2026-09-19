@@ -1,6 +1,6 @@
 ---
 import FloatingNav from '../components/FloatingNav.astro';
-const { title = '熊窝', active = 'routes', hideSidebar = false, navVariant = 'default' } = Astro.props;
+const { title = '熊窝', active = 'routes', navVariant = 'default' } = Astro.props;
 ---
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -14,10 +14,10 @@ const { title = '熊窝', active = 'routes', hideSidebar = false, navVariant = '
     {active === 'crm' && <link rel="stylesheet" href="/css/crm.css?v=crm-v94">}
 </head>
 <body class="sidebar-collapsed">
-  <div class:list={['layout', { 'home-layout': hideSidebar, 'capsule-layout': !hideSidebar }]}>
-    {!hideSidebar && <FloatingNav active={active} variant={navVariant} />}
+  <div class="layout capsule-layout">
+    <FloatingNav active={active} variant={navVariant} />
     <div class="main-area">
-      <main class:list={['app-shell', { 'home-shell': active === 'home', 'dashboard-shell': active === 'dashboard', 'routes-shell': active === 'routes', 'todo-shell': active === 'todo-board', 'crm-shell': active === 'crm' }]}>
+        <main class:list={['app-shell', { 'home-shell': active === 'home', 'dashboard-shell': active === 'dashboard', 'routes-shell': active === 'routes', 'todo-shell': active === 'todo-board', 'crm-shell': active === 'crm' }]}>
         <slot />
       </main>
     </div>
