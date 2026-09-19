@@ -7,7 +7,7 @@ cd "$repo_root"
 snapshot="public/data/tracker-snapshot.json"
 
 if [ ! -f "$snapshot" ]; then
-  echo "错误：缺少 $snapshot，请先在 localhost 点击同步按钮。" >&2
+  echo "错误：缺少 ${snapshot}，请先在 localhost 点击同步按钮。" >&2
   exit 1
 fi
 
@@ -22,14 +22,14 @@ if ! node scripts/validate-tracker-snapshot.mjs; then
 fi
 
 if ! git diff --quiet HEAD -- "$snapshot"; then
-  echo "错误：追踪快照尚未提交，请先 git add/commit $snapshot。" >&2
+  echo "错误：追踪快照尚未提交，请先 git add/commit ${snapshot}。" >&2
   exit 1
 fi
 
 state_file="src/data/todo-state.json"
 
 if [ ! -f "$state_file" ]; then
-  echo "错误：缺少 $state_file。" >&2
+  echo "错误：缺少 ${state_file}。" >&2
   exit 1
 fi
 
@@ -44,6 +44,6 @@ if ! node scripts/validate-todo-state.mjs; then
 fi
 
 if ! git diff --quiet HEAD -- "$state_file"; then
-  echo "错误：任务看板状态尚未提交，请先 git add/commit $state_file。" >&2
+  echo "错误：任务看板状态尚未提交，请先 git add/commit ${state_file}。" >&2
   exit 1
 fi
