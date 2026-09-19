@@ -67,7 +67,7 @@ export const TODO_BOARDS: TodoBoard[] = [
     name: '科研',
     icon: '🔍',
     items: [
-      { id: 'r7', title: "CVPR 2027：粒度细化｜模态对齐｜prompt 改进", status: 'todo', date: '2026-11-07', createdAt: '2026-09-13', url: "", note: "摘要 北京时间：2026-11-08 19:59｜全文 北京时间：2026-11-14 19:59" },
+      { id: 'r7', title: "CVPR 2027：粒度细化｜模态对齐｜prompt 改进", status: 'todo', date: '2026-11-07', createdAt: '2026-09-13', url: "", note: "摘要 北京时间：2026-11-08 19:59｜全文 北京时间：2026-11-14 19:59\n模态对齐：多模态对齐，知识图谱\n粒度细化： 语义分割-  实例分割｜ 细粒度" },
       { id: 'r6', title: "组内：科研，做大组会 PPT", status: 'todo', date: '2026-09-18', createdAt: '2026-09-06', url: "", note: "" },
       { id: 'r5', title: "大组会工作总结准备", status: 'todo', date: '2026-09-06', createdAt: '2026-09-03', url: "", note: "周日早上九点：学期工作总结和计划汇报" },
     ]
