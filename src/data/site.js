@@ -59,6 +59,7 @@ export const routeCategories = [
     items: [
       { name: 'AI Paper Notes', desc: 'AI 顶会论文中文速读速查，23000+ 篇覆盖 12 会议 55 领域', url: 'https://papernotes.org/', tags: ['科研', '论文'], addedAt: '2026-08-27', icon: '/assets/routes/PaperNotes.png' },
       { name: '考研单词2026', desc: 'B 站考研最全分类单词 2026 版，没事看两眼复习', url: 'https://www.bilibili.com/video/BV1Ng396xEZK/', tags: ['学习', '单词'], addedAt: '2026-09-01', icon: '/assets/routes/英语单词本.png' },
+      { name: 'TypeWords 打字背单词', desc: '电脑上打字背单词 + 跟读练发音，科学间隔复习；内置 50+ 词库（CET-4/6、GRE、IELTS 等），免费开源', url: 'https://typewords.cc/', tags: ['学习', '英语'], addedAt: '2026-09-22', icon: '/assets/routes/TypeWords.png' },
     ]
   },
   {
