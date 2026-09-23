@@ -478,23 +478,17 @@
       ]
     },
     "c29": {
-      "status": "doing",
+      "status": "done",
       "plannedStart": "2026-09-23",
-      "plannedEnd": "2026-09-24",
+      "plannedEnd": "2026-09-23",
+      "completedAt": "2026-09-23",
       "phases": [
         {
           "id": "p1",
-          "title": "模型显示｜标签交互｜APP名字图标",
+          "title": "模型显示｜标签交互｜UI / UX 优化｜APP 名字图标",
           "start": "2026-09-23",
           "end": "2026-09-23",
           "status": "done"
-        },
-        {
-          "id": "p1790186400000",
-          "title": "UI / UX 优化",
-          "start": "2026-09-24",
-          "end": "2026-09-24",
-          "status": "todo"
         }
       ]
     },
