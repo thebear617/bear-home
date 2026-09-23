@@ -5,6 +5,10 @@ declare global {
     __TODO_BOARDS?: TodoBoard[];
     __ARCHIVED_TODO_BOARDS?: TodoBoard[];
     __TODO_STATE?: { version: 1; items: Record<string, TodoStatePatch> };
+    // 各站点当前版本（构建时从兄弟仓库 package.json 读入），用于「新增任务」弹窗的版本提示。
+    __SITE_VERSIONS?: Record<string, string>;
+    // 站点下拉的候选清单（构建时由 index.astro 的 SITE_REPOS 生成）。
+    __TODO_SITES?: string[];
   }
 }
 
@@ -20,6 +24,8 @@ type BoardItem = TodoItem & {
   phases?: TodoPhase[];
   // 来自 archived-todo-data.ts 的归档条目：不可删除、永远视为已完成。
   archived?: boolean;
+  // 搁置（等待中）：任务从甘特图轴上下线，排期与阶段全部保留，值为搁置起始日。
+  pausedAt?: string;
 };
 
 type TodoPhaseStatus = 'todo' | 'doing' | 'done';
@@ -37,6 +43,8 @@ interface TodoPhase {
 
 type TodoStatePatch = Partial<Pick<TodoItem, 'status' | 'plannedStart' | 'plannedEnd' | 'plannedStartTime' | 'plannedEndTime' | 'completedAt'>> & {
   phases?: TodoPhase[];
+  // 搁置（等待中）起始日：从甘特图下线但排期 / 阶段全部保留，恢复时原样生效。
+  pausedAt?: string;
 };
 
 interface TodoLocalState {
@@ -53,8 +61,10 @@ const LEGACY_TODO_STORAGE_KEY = 'bear-home.todo-board.v1';
 let activeTabId = 'summary';
 // 默认落在甘特图：进站第一眼是「现在正在推进什么、排到哪一天」，比看板更贴近当天的工作焦点。
 // 每次进站都从甘特图开始，不记住上次的视图切换。
-let currentView: 'board' | 'gantt' = 'gantt';
-let historyOpen = false;
+// 三个视图各司其职：看板＝当下（卡片）、甘特图＝计划（时间轴）、复盘＝过去（热力图 + 已完成清单）。
+let currentView: 'board' | 'gantt' | 'review' = 'gantt';
+// 「进行中」列底部的搁置区默认收起：搁置中的任务先下线，点开才铺出卡片。
+let pausedOpen = false;
 let selectedHeatmapDate: string | null = null;
 let heatmapPage = 0;
 let scheduleItemId: string | null = null;
@@ -65,7 +75,11 @@ let editItemId: string | null = null;
 // 阶段弹窗的编辑草稿。弹窗内所有增删改都先落在草稿上，保存时才写回状态文件。
 // 因为 refresh() 会重建整个看板（含弹窗 DOM），必须靠草稿保留用户正在输入的内容。
 let phaseDraft: TodoPhase[] | null = null;
-let ganttShowCompleted = false;
+// 已完成任务不再上甘特图轴（甘特图的语义是相对位置），统一由「复盘」视图的清单承载。
+// 复盘清单分页：每页目标 20 条，但以「周」为最小分页单位（不把一周切到两页）。
+// 历史是无上限增长的，一次全铺会把页面拉得很高。
+let doneReviewPage = 0;
+const DONE_REVIEW_PAGE_SIZE = 20;
 let ganttGranularity: 'day' | 'hour' = 'day';
 const boardPages: Record<string, number> = {};
 
@@ -132,18 +146,9 @@ async function pushTodoState(): Promise<void> {
   }
 }
 
-// 阶段名平铺最多 4 个字符（按字符数计，不区分中日/ASCII），超出截断。
-// 悬浮窗始终展示完整名字，所以截断不丢信息。
-const PHASE_TITLE_MAX = 4;
-
-function truncatePhaseTitle(title: string): string {
-  const chars = Array.from(String(title || ''));
-  if (chars.length <= PHASE_TITLE_MAX) return title || '';
-  return chars.slice(0, PHASE_TITLE_MAX).join('') + '…';
-}
-
-function applyTodoState(item: TodoItem, phases?: TodoPhase[]): BoardItem {
-  return { ...item, ...(todoState.items[item.id] || {}), phases };
+function applyTodoState(item: TodoItem, phases?: TodoPhase[], patch?: TodoStatePatch): BoardItem {
+  // patch 显式传空对象代表「这条不许吃状态补丁」（归档条目撞号时用），传 undefined 才是走默认。
+  return { ...item, ...(patch === undefined ? todoState.items[item.id] || {} : patch), phases };
 }
 
 function hourKey(date: Date): string {
@@ -546,13 +551,16 @@ function relativeTime(dateStr?: string): string {
   const today = currentDate();
   today.setHours(0, 0, 0, 0);
   const diff = Math.round((today.getTime() - d.getTime()) / 86400000);
-  if (diff < 0) return d.getMonth() + 1 + '月' + d.getDate() + '日';
+  // 一个月以上（或跨年）就不再算「几周前」，直接给「7月19日」/「2025年7月19日」——
+  // 比原来直接吐原始 ISO 串（2026-07-19）好读，也不会和目标日期看起来像重复。
+  const absolute = (d.getFullYear() === today.getFullYear() ? '' : d.getFullYear() + '年') + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+  if (diff < 0) return absolute;
   if (diff === 0) return '今天';
   if (diff === 1) return '昨天';
   if (diff >= 2 && diff <= 6) return diff + ' 天前';
   if (diff >= 7 && diff <= 13) return '1 周前';
   if (diff >= 14 && diff <= 30) return Math.round(diff / 7) + ' 周前';
-  return dateStr;
+  return absolute;
 }
 
 function escape(value: unknown): string {
@@ -591,13 +599,19 @@ function allItems(): BoardItem[] {
 
 function archivedItems(): BoardItem[] {
   const merged: BoardItem[] = [];
+  // 同一个 id 可能同时出现在活动与归档两份文件里（历史撞号：l32 是「猫猫：合作-1931 商量周边」与
+  // 「过马路去校医院看牙齿」，c10 是「聊天站…」与「猪窝的美食地图…」）。
+  // 状态补丁是按 id 存的、写的是活动任务的状态，撞号时归档条目一律不吃补丁，
+  // 否则活动任务的排期 / 阶段 / 搁置标记会串到一条早已完成的历史记录上。
+  const activeIds = new Set(allItems().map((entry) => entry.id));
   archivedBoards()
     .filter((board) => SUMMARY_BOARD_IDS.includes(board.id))
     .forEach((board) => {
       board.items.forEach((item) => {
-        const local = todoState.items[item.id] || {};
+        const collided = activeIds.has(item.id);
+        const local = collided ? {} : todoState.items[item.id] || {};
         merged.push({
-          ...applyTodoState(item, normalizePhases(item.plannedStart, item.plannedEnd, local.phases, item.plannedStartTime, item.plannedEndTime)),
+          ...applyTodoState(item, normalizePhases(item.plannedStart, item.plannedEnd, local.phases, item.plannedStartTime, item.plannedEndTime), local),
           // 归档任务的状态以归档文件为准（永远视为已完成）。
           // 状态补丁里残留的 status（如曾经的 'doing'）不允许把归档项标回进行中。
           status: 'done',
@@ -614,12 +628,13 @@ function archivedItems(): BoardItem[] {
 function todoItems(): BoardItem[] {
   const today = todayStr();
   return allItems()
-    .filter((item) => (item.status || 'todo') === 'todo')
+    // 搁置中的任务不在待办 / 进行中列里占位，它们统一归到底部的搁置区。
+    .filter((item) => (item.status || 'todo') === 'todo' && !item.pausedAt)
     .sort((a, b) => (a.date || today).localeCompare(b.date || today));
 }
 
 function doingItems(): BoardItem[] {
-  return allItems().filter((item) => (item.status || 'todo') === 'doing');
+  return allItems().filter((item) => (item.status || 'todo') === 'doing' && !item.pausedAt);
 }
 
 function doneItems(): BoardItem[] {
@@ -744,7 +759,11 @@ function ganttItems(): BoardItem[] {
     const end = parseDate(item.plannedEnd);
     const status = item.status || 'todo';
     if (!start || !end || dateDiff(start, end) < 0) return;
-    if (status === 'doing' || (ganttShowCompleted && status === 'done')) items.set(item.id, item);
+    // 搁置中的任务不上轴：等待期在时间轴上留白，记录与进度仍留在看板卡片里。
+    if (item.pausedAt) return;
+    // 已完成的任务也不上轴：甘特图只回答「接下来怎么排」，历史回顾交给下方的复盘清单
+    // （已结束的事挂在同一根时间轴上会像还占着日程，而且历史无限增长会把图越撑越长）。
+    if (status === 'doing') items.set(item.id, item);
   });
   return Array.from(items.values()).sort((a, b) => (a.plannedStart || '').localeCompare(b.plannedStart || ''));
 }
@@ -842,7 +861,7 @@ function renderHeatmap(): string {
   const completedItems = Array.from(data.values()).reduce((total, items) => total + items.length, 0);
   return '<section class="todo-board-history" aria-label="已完成历史">' +
     '<div class="todo-board-history-heading">' +
-      '<h3 class="todo-board-history-title">📜 已完成历史</h3>' +
+      '<h3 class="todo-board-history-title">📜 完成热力图</h3>' +
       '<span class="hm-summary">过去一年 · ' + completedDays + ' 天 · ' + completedItems + ' 项</span>' +
     '</div>' +
     '<div class="hm-outer">' +
@@ -895,9 +914,20 @@ function renderCard(item: BoardItem): string {
   const boardIcon = item.sourceBoard
     ? '<span class="todo-card-badge" role="img" aria-label="' + escape(item.sourceBoard.name) + '" title="' + escape(item.sourceBoard.name) + '">' + escape(item.sourceBoard.icon) + ' ' + escape(item.sourceBoard.name) + '</span>'
     : '';
-  const scheduleAction = isEditable() && (item.status === 'todo' || item.status === 'doing')
+  // 搁置中的任务不再挂徽章（折叠区标题已经说明这些是搁置项），
+  // 搁置起点 / 天数 / 恢复后会怎么排，都放进「恢复」按钮的悬停提示里。
+  const paused = Boolean(item.pausedAt);
+  const scheduleAction = isEditable() && !paused && (item.status === 'todo' || item.status === 'doing')
     ? '<button type="button" class="todo-card-action" data-tb-schedule="' + escape(item.id) + '">' + (item.status === 'doing' ? '调整排期' : '开始排期') + '</button>'
     : '';
+  // 「搁置」只在已经上了甘特图的任务上有意义（进行中 + 有完整排期）；归档项不给入口。
+  // 恢复是一键的：若原计划已过期，按钮会连排期一起顺延到今天（按钮文案自己说明会不会顺延）。
+  const resumeShift = paused ? resumeShiftDays(item) : 0;
+  const pauseAction = isEditable() && !item.archived && (paused
+    ? '<button type="button" class="todo-card-action todo-card-action-resume" data-tb-resume="' + escape(item.id) + '" title="' + escape(resumeTip(item, resumeShift)) + '">' + (resumeShift > 0 ? '恢复并顺延' : '恢复排期') + '</button>'
+    : (item.status === 'doing' && item.plannedStart && item.plannedEnd
+      ? '<button type="button" class="todo-card-action" data-tb-pause="' + escape(item.id) + '" title="从甘特图下线，排期与阶段记录保留">搁置</button>'
+      : ''));
   const completionAction = isEditable()
     ? (item.status === 'done'
       ? '<button type="button" class="todo-card-action" data-tb-edit-completed="' + escape(item.id) + '">修改完成日期</button>'
@@ -914,7 +944,7 @@ function renderCard(item: BoardItem): string {
   const deleteAction = isEditable() && !item.archived
     ? '<button type="button" class="todo-card-action todo-card-action-danger" data-tb-delete="' + escape(item.id) + '">删除</button>'
     : '';
-  const actions = scheduleAction || editAction || completionAction || returnToTodoAction || deleteAction ? '<div class="todo-card-actions">' + scheduleAction + editAction + completionAction + returnToTodoAction + deleteAction + '</div>' : '';
+  const actions = pauseAction || scheduleAction || editAction || completionAction || returnToTodoAction || deleteAction ? '<div class="todo-card-actions">' + pauseAction + scheduleAction + editAction + completionAction + returnToTodoAction + deleteAction + '</div>' : '';
   const title = item.url
     ? '<a href="' + escape(item.url) + '" target="_blank" rel="noopener" class="todo-card-link"><h3 class="todo-card-title">' + escape(item.title) + '</h3></a>'
     : '<h3 class="todo-card-title">' + escape(item.title) + '</h3>';
@@ -936,23 +966,37 @@ function renderCard(item: BoardItem): string {
         (currentPhase ? '<span class="todo-card-phase-label">' + escape(currentPhase.title) + '</span>' : '') +
       '</div>'
     : '';
-  const dateValue = item.status === 'done' ? (item.completedAt || item.date) : item.date;
-  const dateIcon = item.status === 'done' ? '✅' : '📅';
-  const due = dateValue ? '<span class="todo-card-meta-item"><span class="todo-card-meta-icon">' + dateIcon + '</span> ' + escape(relativeTime(dateValue)) + '</span>' : '';
+  // 目标日期只表示「打算什么时候做」：有排期时排期才是真正的时间承诺，就不重复显示；
+  // 没排期时写成中性的「计划 x/x」；留空则整块不出现（不再出现「2 个月前 / 原始日期」这种像逾期的写法）。
+  const scheduled = Boolean(item.plannedStart && item.plannedEnd);
+  const doneDate = item.completedAt || item.date;
+  const dateMeta = item.status === 'done'
+    ? (doneDate ? '<span class="todo-card-meta-item"><span class="todo-card-meta-icon">✅</span> ' + escape(relativeTime(doneDate)) + '</span>' : '')
+    : (!scheduled && item.date ? '<span class="todo-card-meta-item"><span class="todo-card-meta-icon">📅</span> 计划 ' + escape(shortDate(item.date)) + '</span>' : '');
   const schedule = item.status === 'doing' && item.plannedStart && item.plannedEnd
-    ? '<span class="todo-card-meta-item"><span class="todo-card-meta-icon">⏱</span> ' + escape(schedulePeriod(item)) + '</span>'
+    ? '<span class="todo-card-meta-item"><span class="todo-card-meta-icon">⏱</span> ' + escape((paused ? '原计划 ' : '') + schedulePeriod(item)) + '</span>'
     : '';
   const created = item.createdAt ? '<span class="todo-card-meta-item"><span class="todo-card-meta-icon">🕒</span> ' + escape(relativeTime(item.createdAt)) + '</span>' : '';
-  const meta = due || schedule || created ? '<div class="todo-card-meta">' + due + schedule + created + '</div>' : '';
+  const meta = dateMeta || schedule || created ? '<div class="todo-card-meta">' + dateMeta + schedule + created + '</div>' : '';
   const className = 'todo-card' + (item.status === 'doing' ? ' todo-card-doing' : '') + (item.status === 'done' ? ' todo-card-done' : '');
   return '<article class="' + className + '"><div class="todo-card-topline">' + boardIcon + actions + '</div>' + title + meta + phaseStrip + note + '</article>';
 }
 
 function renderViewSwitch(): string {
+  // 三个视图 = 三种时间取向：看板（当下要做什么）、甘特图（怎么排期）、复盘（过去做完了什么）。
+  const tabs: { id: 'board' | 'gantt' | 'review'; label: string }[] = [
+    { id: 'board', label: '看板视图' },
+    { id: 'gantt', label: '甘特图' },
+    { id: 'review', label: '复盘' },
+  ];
   return '<div class="todo-board-view-switch" role="tablist" aria-label="任务视图">' +
-    '<button type="button" class="todo-board-view-button' + (currentView === 'board' ? ' active' : '') + '" data-tb-view="board" aria-selected="' + (currentView === 'board' ? 'true' : 'false') + '">看板视图</button>' +
-    '<button type="button" class="todo-board-view-button' + (currentView === 'gantt' ? ' active' : '') + '" data-tb-view="gantt" aria-selected="' + (currentView === 'gantt' ? 'true' : 'false') + '">甘特图</button>' +
+    tabs.map((tab) => '<button type="button" class="todo-board-view-button' + (currentView === tab.id ? ' active' : '') + '" data-tb-view="' + tab.id + '" aria-selected="' + (currentView === tab.id ? 'true' : 'false') + '">' + tab.label + '</button>').join('') +
   '</div>';
+}
+
+// 「复盘」视图：过去一年的完成热力图 + 已完成任务清单（两张都只读，天然适合放在一起看）。
+function renderReview(): string {
+  return renderHeatmap() + renderDoneReview();
 }
 
 interface HourGanttRange {
@@ -978,6 +1022,168 @@ function hourGanttRange(items: BoardItem[]): HourGanttRange | null {
   return { start, end, hours };
 }
 
+// —— 已完成 · 复盘清单 ————————————————————————————————————————————————————
+// 甘特图回答的是「接下来怎么排」（相对位置、并行、这周排不排得下），已完成的任务不需要这个；
+// 复盘要的是「什么时候做的、分了哪几段、每段多久」。所以已完成走下面这份按周分组的清单：
+// 不参与时间轴 → 不会被 33 天的窗口挤压、行数再多也不会把甘特图撑长。
+
+// 完成日：优先手动改过的 completedAt，其次末阶段结束日，再退回排期结束日 / 目标日期。
+function doneDateOf(item: BoardItem): string {
+  if (item.completedAt) return item.completedAt;
+  const phaseEnds = (item.phases || []).map((phase) => phase.end).filter(Boolean).sort();
+  if (phaseEnds.length > 0) return phaseEnds[phaseEnds.length - 1];
+  return item.plannedEnd || item.date || '';
+}
+
+// 有排期的条目才算时长（无排期的只显示标题与完成日）。
+function reviewDays(item: BoardItem): number {
+  const start = parseDate(item.plannedStart);
+  const end = parseDate(item.plannedEnd);
+  return start && end ? dateDiff(start, end) + 1 : 0;
+}
+
+// 复盘清单的数据源：活动 + 归档（归档只算生活 / 开发 / 科研三个汇总看板），按完成日倒序。
+function doneReviewItems(): BoardItem[] {
+  const seen = new Set<string>();
+  const merged: BoardItem[] = [];
+  [...allItems(), ...archivedItems()].forEach((item) => {
+    if ((item.status || 'todo') !== 'done') return;
+    // 归档与活动会撞 id（见 archivedItems 的说明），这里用「来源 + id + 标题」去重，两条不同的任务都保留。
+    const key = (item.archived ? 'a:' : 'n:') + item.id + '@' + item.title;
+    if (seen.has(key)) return;
+    seen.add(key);
+    merged.push(item);
+  });
+  return merged.sort((a, b) => {
+    const byDate = doneDateOf(b).localeCompare(doneDateOf(a));
+    return byDate !== 0 ? byDate : a.title.localeCompare(b.title);
+  });
+}
+
+// 周一算一周的第一天。
+function weekStartOf(dateStr: string): string {
+  const date = parseDate(dateStr);
+  if (!date) return '';
+  return fmtDate(addDays(date, -((date.getDay() + 6) % 7)));
+}
+
+// 阶段缩略条：段宽 = 该阶段时长占比（有整点端点按小时算，否则按天算），段名与耗时放悬停里。
+function reviewPhaseStrip(item: BoardItem): string {
+  const phases = item.phases || [];
+  if (phases.length === 0) return '';
+  const segments = phases.map((phase) => {
+    const phaseStart = phaseDateTime(phase, 'start');
+    const phaseEnd = phaseDateTime(phase, 'end');
+    const weight = phaseStart && phaseEnd ? Math.max(1, hourDiff(phaseStart, phaseEnd)) : (() => {
+      const start = parseDate(phase.start);
+      const end = parseDate(phase.end);
+      return start && end ? Math.max(1, dateDiff(start, end) + 1) : 1;
+    })();
+    return '<span class="todo-review-phase is-' + phase.status + '" style="--phase-weight: ' + weight + '"></span>';
+  }).join('');
+  // 悬停明细：① 阶段名（8/29—8/30 · 2 天）→ ② …，复用甘特图那套悬浮提示（按 ' → ' 分段）。
+  const list = phases.map((phase, index) => {
+    const start = parseDate(phase.start);
+    const end = parseDate(phase.end);
+    const days = start && end ? dateDiff(start, end) + 1 : 1;
+    const period = phase.startTime && phase.endTime
+      ? shortDate(phase.start) + ' ' + phase.startTime + '—' + shortDate(phase.end) + ' ' + phase.endTime
+      : shortDate(phase.start) + '—' + shortDate(phase.end);
+    return String.fromCharCode(0x2460 + index) + ' ' + phase.title + '（' + period + ' · ' + days + ' 天）';
+  }).join(' → ');
+  const names = phases.map((phase, index) => String.fromCharCode(0x2460 + index) + ' ' + escape(phase.title)).join(' · ');
+  return '<div class="todo-review-phases" data-tb-phase-tooltip data-phase-list="' + escape(list) + '">' +
+    '<span class="todo-review-phase-track">' + segments + '</span>' +
+    '<span class="todo-review-phase-names">' + names + '</span>' +
+  '</div>';
+}
+
+function renderDoneReview(): string {
+  const items = doneReviewItems();
+  if (items.length === 0) return '';
+  const thisWeek = weekStartOf(todayStr());
+
+  // 按周分组：items 已按完成日倒序，所以第一组就是最近的一周。
+  const groups: { week: string; items: BoardItem[] }[] = [];
+  items.forEach((item) => {
+    const week = weekStartOf(doneDateOf(item));
+    const last = groups[groups.length - 1];
+    if (last && last.week === week) last.items.push(item);
+    else groups.push({ week, items: [item] });
+  });
+
+  // 再切页：一周整体放进同一页（不把一周切成两页），累加超过每页条数才开新页，
+  // 所以实际每页条数会在目标值附近浮动（当前数据是 16 / 17 / 18 条一页）。
+  const pages: { week: string; items: BoardItem[] }[][] = [];
+  let currentGroups: { week: string; items: BoardItem[] }[] = [];
+  let filled = 0;
+  groups.forEach((group) => {
+    if (filled > 0 && filled + group.items.length > DONE_REVIEW_PAGE_SIZE) {
+      pages.push(currentGroups);
+      currentGroups = [];
+      filled = 0;
+    }
+    currentGroups.push(group);
+    filled += group.items.length;
+  });
+  if (currentGroups.length > 0) pages.push(currentGroups);
+
+  const pageCount = Math.max(1, pages.length);
+  const currentPage = Math.max(0, Math.min(doneReviewPage, pageCount - 1));
+  // 页码夹回合法范围：删任务 / 取消勾选后条数变少时，不能停在空页上。
+  doneReviewPage = currentPage;
+  const pageGroups = pages[currentPage];
+  const pageItems = pageGroups.reduce((sum, group) => sum + group.items.length, 0);
+  const pageStart = pages.slice(0, currentPage).reduce((sum, groupsOfPage) => sum + groupsOfPage.reduce((count, group) => count + group.items.length, 0), 0);
+
+  const groupsHtml = pageGroups.map((group) => {
+    const days = group.items.reduce((sum, item) => sum + reviewDays(item), 0);
+    const weekStartDate = parseDate(group.week);
+    const label = weekStartDate
+      ? shortDate(group.week) + '—' + shortDate(fmtDate(addDays(weekStartDate, 6)))
+      : '完成日未记录';
+    const rows = group.items.map((item) => {
+      const done = doneDateOf(item);
+      const itemDays = reviewDays(item);
+      const period = itemDays > 0 ? shortDate(item.plannedStart) + '—' + shortDate(item.plannedEnd) + ' · ' + itemDays + ' 天' : '';
+      return '<li class="todo-review-row">' +
+        '<span class="todo-review-date" title="' + escape(done ? done + '（' + relativeTime(done) + '）' : '完成日未记录') + '">' + escape(shortDate(done) || '—') + '</span>' +
+        '<div class="todo-review-main">' +
+          '<div class="todo-review-topline">' +
+            (item.sourceBoard ? '<span class="todo-review-board" title="' + escape(item.sourceBoard.name) + '">' + escape(item.sourceBoard.icon) + '</span>' : '') +
+            '<span class="todo-review-task">' + escape(item.title) + '</span>' +
+            (period ? '<span class="todo-review-period">' + escape(period) + '</span>' : '') +
+          '</div>' +
+          reviewPhaseStrip(item) +
+        '</div>' +
+      '</li>';
+    }).join('');
+    return '<div class="todo-review-group">' +
+      '<div class="todo-review-group-head"><strong>' + escape(label) + '</strong>' +
+        (group.week === thisWeek ? '<span class="todo-review-badge">本周</span>' : '') +
+        '<span>完成 ' + group.items.length + ' 项' + (days > 0 ? ' · 共 ' + days + ' 天' : '') + '</span></div>' +
+      '<ul class="todo-review-list">' + rows + '</ul>' +
+    '</div>';
+  }).join('');
+
+  // 分页器沿用看板那套（同一组 class），多一页才出现。
+  const footer = pageCount > 1
+    ? '<div class="todo-board-pagination todo-review-pagination">' +
+        '<button type="button" data-tb-review-page="prev"' + (currentPage === 0 ? ' disabled' : '') + '>上一页</button>' +
+        '<span>' + (currentPage + 1) + ' / ' + pageCount + '</span>' +
+        '<button type="button" data-tb-review-page="next"' + (currentPage === pageCount - 1 ? ' disabled' : '') + '>下一页</button>' +
+      '</div>'
+    : '';
+
+  return '<section class="todo-review" aria-label="已完成复盘">' +
+    '<div class="todo-review-head">' +
+      '<h2 class="todo-review-title">已完成 · 复盘</h2>' +
+      '<span class="todo-review-summary">共 ' + items.length + ' 项 · 按完成日倒序 · 第 ' + (pageStart + 1) + '—' + (pageStart + pageItems) + ' 条</span>' +
+    '</div>' +
+    groupsHtml + footer +
+  '</section>';
+}
+
 function renderGantt(): string {
   const scheduledItems = ganttItems();
   // 两种排期精度互斥：有完整小时范围的短任务只在小时轴显示，其他任务才在日期轴显示。
@@ -994,10 +1200,17 @@ function renderGantt(): string {
     ? '点横条编辑阶段，拖分割线按小时调边界，任务行的「转为按天」可改回日期排期。'
       + (dateOnlyCount > 0 ? '另有 ' + dateOnlyCount + ' 项仅按日期排期的任务，请切到「按天」查看。' : '')
     : '拖动整条移动计划，拖动两端调整日期，点横条即可编辑阶段；1–2 天的小任务可填整点时间切到「按小时」。';
+  const pausedOnes = pausedItems();
+  const pausedNotice = pausedOnes.length > 0
+    ? '<p class="todo-gantt-paused">⏸ ' + pausedOnes.length + ' 项搁置中未上轴：'
+      + pausedOnes.slice(0, 3).map((item) => escape(item.title) + '（自 ' + shortDate(item.pausedAt) + '）').join('　·　')
+      + (pausedOnes.length > 3 ? '　等 ' + pausedOnes.length + ' 项' : '')
+      + ' —— 在看板卡片上点「恢复排期」即可放回时间轴</p>'
+    : '';
   const toolbar = '<div class="todo-gantt-toolbar">' +
-    '<div><h2 class="todo-gantt-title">任务甘特图</h2><p class="todo-gantt-subtitle">' + subtitle + '</p></div>' +
+    '<div><h2 class="todo-gantt-title">任务甘特图</h2><p class="todo-gantt-subtitle">' + subtitle + '</p>' + pausedNotice + '</div>' +
     '<div class="todo-gantt-side">' +
-      '<div class="todo-gantt-controls"><span class="todo-gantt-scale" role="group" aria-label="甘特图精度"><button type="button" class="todo-gantt-scale-button' + (ganttGranularity === 'day' ? ' is-active' : '') + '" data-tb-gantt-scale="day" aria-pressed="' + (ganttGranularity === 'day' ? 'true' : 'false') + '">按天</button><button type="button" class="todo-gantt-scale-button' + (ganttGranularity === 'hour' ? ' is-active' : '') + '" data-tb-gantt-scale="hour" aria-pressed="' + (ganttGranularity === 'hour' ? 'true' : 'false') + '">按小时</button></span><label><input type="checkbox" data-tb-gantt-completed' + (ganttShowCompleted ? ' checked' : '') + '> 显示已完成</label></div>' +
+      '<div class="todo-gantt-controls"><span class="todo-gantt-scale" role="group" aria-label="甘特图精度"><button type="button" class="todo-gantt-scale-button' + (ganttGranularity === 'day' ? ' is-active' : '') + '" data-tb-gantt-scale="day" aria-pressed="' + (ganttGranularity === 'day' ? 'true' : 'false') + '">按天</button><button type="button" class="todo-gantt-scale-button' + (ganttGranularity === 'hour' ? ' is-active' : '') + '" data-tb-gantt-scale="hour" aria-pressed="' + (ganttGranularity === 'hour' ? 'true' : 'false') + '">按小时</button></span></div>' +
       '<span class="todo-gantt-window">' + windowLabel + '</span>' +
     '</div>' +
   '</div>';
@@ -1050,8 +1263,9 @@ const phaseButton = isEditable()
       const phasePeriod = shortDate(phase.start) + '—' + shortDate(phase.end);
       const phaseStatusLabel = phase.status === 'done' ? '已完成' : phase.status === 'doing' ? '进行中' : '未开始';
       const cell = '<span class="todo-gantt-phase is-' + phase.status + '" data-phase-index="' + index + '" data-phase-id="' + escape(phase.id) + '" style="--phase-start: ' + phaseStartColumn + '; --phase-span: ' + phaseSpan + '" data-tb-phase-tooltip data-phase-title="' + escape(phase.title) + '" data-phase-period="' + escape(phasePeriod) + '" data-phase-status="' + phase.status + '" data-phase-status-label="' + escape(phaseStatusLabel) + '">' +
-        // 阶段平铺最多 4 个字符，超出截断；悬浮窗始终展示完整名字。
-        (phase.title ? '<span class="todo-gantt-phase-copy">' + escape(truncatePhaseTitle(phase.title)) + '</span>' : '') +
+        // 名字不再按字数硬截断：够宽就显示全名，窄了由 CSS 省略；窄到放不下字时只留序号（和左侧进度点、阶段弹窗的编号一一对应）。
+        '<span class="todo-gantt-phase-index" aria-hidden="true">' + (index + 1) + '</span>' +
+        (phase.title ? '<span class="todo-gantt-phase-copy">' + escape(phase.title) + '</span>' : '') +
       '</span>';
       // 相邻阶段之间的分割缝：拖动它在左右两个阶段之间重新分配天数，下游阶段不受影响。
       const isLast = index === phases.length - 1;
@@ -1081,7 +1295,7 @@ const phaseButton = isEditable()
       '<div class="todo-gantt-axis-row"><span class="todo-gantt-axis-label">任务 / 计划</span><div class="todo-gantt-axis-track">' + axis + '</div></div>' + rows +
     '</div></div>' +
     // 操作提示统一挪到标题下的副标题，这里只留颜色图例。
-    '<div class="todo-gantt-legend"><span><i class="todo-gantt-legend-swatch"></i>进行中</span><span><i class="todo-gantt-legend-swatch is-done"></i>已完成</span><span><i class="todo-gantt-legend-swatch is-todo"></i>未开始阶段</span></div>' +
+    '<div class="todo-gantt-legend"><span><i class="todo-gantt-legend-swatch"></i>进行中</span><span><i class="todo-gantt-legend-swatch is-done"></i>已完成阶段</span><span><i class="todo-gantt-legend-swatch is-todo"></i>未开始阶段</span></div>' +
   '</section>';
 }
 
@@ -1132,7 +1346,9 @@ function renderHourGantt(items: BoardItem[], range: HourGanttRange | null, toolb
       const phasePeriod = shortDate(phase.start) + ' ' + (phase.startTime || '') + '—' + shortDate(phase.end) + ' ' + (phase.endTime || '');
       const phaseStatusLabel = phase.status === 'done' ? '已完成' : phase.status === 'doing' ? '进行中' : '未开始';
       const cell = '<span class="todo-gantt-phase is-' + phase.status + '" data-phase-index="' + index + '" data-phase-id="' + escape(phase.id) + '" style="--phase-start: ' + phaseStartColumn + '; --phase-span: ' + phaseSpan + '" data-tb-phase-tooltip data-phase-title="' + escape(phase.title) + '" data-phase-period="' + escape(phasePeriod) + '" data-phase-status="' + phase.status + '" data-phase-status-label="' + escape(phaseStatusLabel) + '">' +
-        (phase.title ? '<span class="todo-gantt-phase-copy">' + escape(truncatePhaseTitle(phase.title)) + '</span>' : '') +
+        // 同按天视图：宽度够就显示全名，太窄只留序号。
+        '<span class="todo-gantt-phase-index" aria-hidden="true">' + (index + 1) + '</span>' +
+        (phase.title ? '<span class="todo-gantt-phase-copy">' + escape(phase.title) + '</span>' : '') +
       '</span>';
       if (index === phases.length - 1 || !isEditable()) return cell;
       const seamLeft = ((phaseStartColumn + phaseSpan - 1) / span) * 100;
@@ -1149,7 +1365,7 @@ function renderHourGantt(items: BoardItem[], range: HourGanttRange | null, toolb
   // 操作提示都在标题下的副标题里，图例只留色块含义。
   return '<section class="todo-gantt todo-hour-gantt" aria-label="任务甘特图（按小时）">' + toolbar +
     '<div class="todo-gantt-scroll"><div class="todo-hour-gantt-grid" data-gantt-hours="' + range.hours.length + '" data-range-start="' + escape(fmtDate(range.start)) + '" data-range-start-time="' + escape(hourKey(range.start)) + '" data-range-end="' + escape(fmtDate(range.end)) + '" data-range-end-time="' + escape(hourKey(range.end)) + '" style="' + gridStyle + '"><div class="todo-gantt-axis-row"><span class="todo-gantt-axis-label">任务 / 时间</span><div class="todo-hour-gantt-axis-track">' + axis + '</div></div>' + rows + '</div></div>' +
-    '<div class="todo-gantt-legend"><span><i class="todo-gantt-legend-swatch"></i>进行中</span><span><i class="todo-gantt-legend-swatch is-done"></i>已完成</span><span><i class="todo-gantt-legend-swatch is-todo"></i>未开始阶段</span></div>' +
+    '<div class="todo-gantt-legend"><span><i class="todo-gantt-legend-swatch"></i>进行中</span><span><i class="todo-gantt-legend-swatch is-done"></i>已完成阶段</span><span><i class="todo-gantt-legend-swatch is-todo"></i>未开始阶段</span></div>' +
   '</section>';
 }
 
@@ -1182,10 +1398,215 @@ function renderCompletionModal(): string {
     '</section>';
 }
 
+// 任务标题规范：{站点} {v版本}：{需求名称}。站点与版本都留空时退化成纯需求名称，
+// 生活、科研这类叙述式任务照旧不受影响；两段都在时用全角冒号分隔，方便一处 grep 串起
+// 看板标题 → commit → CHANGELOG → DevNotes 时间线。
+function composeTodoTitle(site: string, version: string, name: string): string {
+  const prefix = [site.trim(), version.trim()].filter(Boolean).join(' ');
+  const body = name.trim();
+  if (!prefix) return body;
+  return prefix + '：' + body;
+}
+
+// 编辑已有任务时反向拆标题：先试「站点 v版本：名称」，再试「站点：名称」，都不像就整条当名称。
+function parseTodoTitle(title: string): { site: string; version: string; name: string } {
+  const raw = String(title || '').trim();
+  // 站点与版本之间允许空格或连字符（早期标题写过「熊电台-v0.1.0~v0.2.0」这种）。
+  const withVersion = /^(.+?)[\s-]+(v\d+(?:\.\d+){0,2}(?:\s*(?:→|~)\s*v\d+(?:\.\d+){0,2})?)\s*[：:]\s*(.+)$/.exec(raw);
+  if (withVersion) {
+    return { site: withVersion[1].trim(), version: withVersion[2].replace(/\s+/g, ''), name: withVersion[3].trim() };
+  }
+  const withSite = /^([^：:]+?)\s*[：:]\s*(.+)$/.exec(raw);
+  if (withSite) return { site: withSite[1].trim(), version: '', name: withSite[2].trim() };
+  return { site: '', version: '', name: raw };
+}
+
+function siteVersionOf(site: string): string {
+  return window.__SITE_VERSIONS?.[site] || '';
+}
+
+// 站点当前版本 → 下一个里程碑：0.32.0 → v0.33、1.15.1 → v1.16。开工前 patch 还定不下来，先按里程碑记。
+function nextMilestone(version?: string): string {
+  const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(String(version || '').trim());
+  if (!match) return '';
+  return 'v' + match[1] + '.' + (Number(match[2]) + 1);
+}
+
+// 行首的无序列表符号（`- A` / `* A` / `• A` 这种）：保存时剥掉，再统一编号成 ①②③。
+const BULLET_MARKER = /^[-*•·–—+]\s+/;
+
+// 具体需求某一行的「短词」：去掉 ①②③ 编号与列表符号，再取第一个冒号之前的部分。
+function needShortWord(line: string): string {
+  return String(line || '')
+    .replace(BULLET_MARKER, '')
+    .replace(/^([①-⑳]|\d+[.、)）])\s*/, '')
+    .replace(/[：:].*$/, '')
+    .trim();
+}
+
+// 具体需求一行一条，保存时自动编号 ①②③：单行当自由文本不编号，已经带编号的不重复加；
+// 随手写的无序列表（`- A`）会先被剥掉符号，所以「填成列表」也能一键变成编号列表。
+function formatNoteLines(raw: string): string {
+  const lines = String(raw || '').split('\n').map((line) => line.trim().replace(BULLET_MARKER, '')).filter(Boolean);
+  if (lines.length < 2) return lines.join('\n');
+  if (/^([①-⑳]|\d+[.、)）])\s*/.test(lines[0])) return lines.join('\n');
+  const out: string[] = [];
+  let total = 0;
+  lines.forEach((line, index) => {
+    const marker = index < 20 ? String.fromCharCode(0x2460 + index) + ' ' : String(index + 1) + '. ';
+    const next = marker + line;
+    if (total + next.length + 1 > 500) return;
+    out.push(next);
+    total += next.length + 1;
+  });
+  return out.join('\n');
+}
+
+// 需求名称里的需求词：按全角 ｜ / 半角 | 拆开、去空白，最多 20 条（与 formatNoteLines 的编号上限一致）。
+function splitNeedNames(title: string): string[] {
+  return String(title || '')
+    .split(/[｜|]/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .slice(0, 20);
+}
+
+// 需求词 → 具体需求骨架（`① 需求词：`），冒号后面留给用户补细节。
+// offset 是已有条数，追加时编号接着往下排。
+function needSkeleton(needs: string[], offset: number): string[] {
+  return needs.map((need, index) => {
+    const at = offset + index;
+    return (at < 20 ? String.fromCharCode(0x2460 + at) : String(at + 1) + '. ') + need + '：';
+  });
+}
+
+// 站点下拉的候选项：构建时注入的站点清单（来源是 index.astro 的 SITE_REPOS，
+// 与各仓库 package.json 一一对应）；编辑老任务时若它的站点不在清单里，也把它带到最前面。
+function todoSiteOptions(current?: string): string[] {
+  const sites = Array.isArray(window.__TODO_SITES) ? [...window.__TODO_SITES] : [];
+  const value = String(current || '').trim();
+  if (value && !sites.includes(value)) sites.unshift(value);
+  return sites;
+}
+
+// 版本输入框的提示：告诉用户该站点当前已发布的版本，填什么由他自己定。
+function siteVersionHint(site: string): string {
+  const current = siteVersionOf(site);
+  return current ? '当前 ' + current : '如 v0.33';
+}
+
+// 具体需求框的占位示例：一行一条，占位里带 ①②③ 的形态，填的时候照着写就行。
+const NOTE_PLACEHOLDER_DEV = '一行一条具体需求，保存时自动编号\n① …\n② …\n③ …';
+
+function syncNewItemPreview(form: HTMLFormElement): void {
+  const read = (name: string) => (form.elements.namedItem(name) as HTMLInputElement | null)?.value || '';
+  const out = form.querySelector<HTMLElement>('[data-tb-title-preview]');
+  if (!out) return;
+  out.textContent = composeTodoTitle(read('site'), read('version'), read('title')) || '（填写需求名称后生成）';
+}
+
+// 需求名称 → 具体需求 的联动：具体需求为空、或还停在自动生成的骨架上时，
+// 按当前需求名称重铺 ①②③ 骨架；用户一旦自己动过具体需求（删掉 data 标记）就不再自动重写。
+function syncNeedSkeleton(form: HTMLFormElement): void {
+  const titleInput = form.elements.namedItem('title') as HTMLInputElement | null;
+  const noteInput = form.elements.namedItem('note') as HTMLTextAreaElement | null;
+  if (!titleInput || !noteInput) return;
+  // 只有「编程」看板做联动，和生活 / 科研的「任务名称 + 备注」保持区别（与保存时的自动编号一致）。
+  const boardId = (form.elements.namedItem('boardId') as HTMLInputElement | null)?.value || '';
+  if (boardId !== 'coding') return;
+  const untouched = !noteInput.value.trim() || noteInput.dataset.noteFromTitle === '1';
+  if (!untouched) return;
+  const skeleton = needSkeleton(splitNeedNames(titleInput.value), 0).join('\n');
+  if (!skeleton) return;
+  noteInput.value = skeleton;
+  noteInput.dataset.noteFromTitle = '1';
+}
+
+// 「＋ 按名称补全」：名称里有、具体需求里还没提到的需求，补成新的一行（编号接着排）。
+// 只做增量追加，**绝不按名称裁剪具体需求**——标题只放 2–4 个最重的项，具体需求是完整清单，可以是标题的超集。
+function appendMissingNeeds(form: HTMLFormElement): void {
+  const titleInput = form.elements.namedItem('title') as HTMLInputElement | null;
+  const noteInput = form.elements.namedItem('note') as HTMLTextAreaElement | null;
+  if (!noteInput) return;
+  const needs = splitNeedNames(titleInput?.value || '');
+  if (needs.length === 0) {
+    showToast('先在「需求名称」里写需求，用 ｜ 分隔');
+    return;
+  }
+  const lines = noteInput.value.split('\n').map((line) => line.trim()).filter(Boolean);
+  // 已有的需求词 = 行首的短词（去掉编号、取冒号前）。
+  const existing = lines.map(needShortWord);
+  // 覆盖判定放宽到「互相包含」：名称写「知识库分页」、具体需求里已写「知识库：增加分页逻辑」时，不该再补一行。
+  const covered = (need: string) => existing.some((word) => word === need
+    || (word.length >= 2 && need.includes(word))
+    || (need.length >= 2 && word.includes(need)));
+  const missing = needs.filter((need) => !covered(need));
+  if (missing.length === 0) {
+    showToast('具体需求里已经有这些需求了');
+    return;
+  }
+  noteInput.value = [...lines, ...needSkeleton(missing, lines.length)].join('\n');
+  // 追加之后具体需求已经带用户/既有内容，不该再被自动重写。
+  delete noteInput.dataset.noteFromTitle;
+  noteInput.focus();
+  showToast('已补 ' + missing.length + ' 条到具体需求');
+}
+
+// 具体需求 → 需求名称 的反向回写：**位置对应**，第 N 行 ↔ 第 N 个需求词。
+// 只改光标所在的那一个词：标题的词数由用户自己控制（不会被自动加长），
+// 人工挑过的短词也不会被整条覆盖（c24 就是名称 4 项、具体需求 5 行）。
+function syncTitleFromNote(form: HTMLFormElement, noteInput: HTMLTextAreaElement): void {
+  const boardId = (form.elements.namedItem('boardId') as HTMLInputElement | null)?.value || '';
+  if (boardId !== 'coding') return;
+  const titleInput = form.elements.namedItem('title') as HTMLInputElement | null;
+  if (!titleInput) return;
+  const words = splitNeedNames(titleInput.value);
+  // 光标所在行 = 正在改的那一行具体需求（标题词数不够时不动标题，避免自动把它拉长）。
+  const caret = noteInput.selectionStart ?? noteInput.value.length;
+  const lineIndex = noteInput.value.slice(0, caret).split('\n').length - 1;
+  if (lineIndex < 0 || lineIndex >= words.length) return;
+  const word = needShortWord(noteInput.value.split('\n')[lineIndex] || '');
+  if (!word || word === words[lineIndex]) return;
+  words[lineIndex] = word;
+  titleInput.value = words.join('｜');
+  syncNewItemPreview(form);
+}
+
+// 自定义下拉（看板分类 / 站点）共用的收起逻辑：收起所有展开项，keep 那一个除外。
+function closeTodoDropdowns(keep?: HTMLElement): void {
+  document.querySelectorAll<HTMLElement>('.todo-new-dropdown-list:not([hidden])').forEach((list) => {
+    if (keep && list === keep) return;
+    list.hidden = true;
+    list.closest('.todo-new-dropdown')?.querySelector<HTMLButtonElement>('.todo-new-dropdown-toggle')?.setAttribute('aria-expanded', 'false');
+  });
+}
+
+// 切换看板分类时同步表单形态：编程看板才露出站点 / 版本 / 标题预览与「具体需求」，
+// 其余看板回到原来的「任务名称 + 备注」简单表单；站点与版本的值留着不丢，方便再切回来。
+function syncNewItemBoardMode(form: HTMLFormElement, boardId: string): void {
+  const isDev = boardId === 'coding';
+  form.querySelector<HTMLElement>('[data-tb-site-block]')?.toggleAttribute('hidden', !isDev);
+  form.querySelector<HTMLElement>('[data-tb-preview-block]')?.toggleAttribute('hidden', !isDev);
+  // 「＋ 按名称补全」按钮只在编程看板出现（非编程看板没有需求名称 → 具体需求那套）。
+  form.querySelector<HTMLElement>('[data-tb-note-sync]')?.toggleAttribute('hidden', !isDev);
+  const nameLabel = form.querySelector<HTMLElement>('[data-tb-name-label]');
+  if (nameLabel) nameLabel.textContent = isDev ? '需求名称' : '任务名称';
+  const noteLabel = form.querySelector<HTMLElement>('[data-tb-note-label]');
+  if (noteLabel) noteLabel.textContent = isDev ? '具体需求（可选）' : '备注（可选）';
+  const nameInput = form.elements.namedItem('title') as HTMLInputElement | null;
+  if (nameInput) nameInput.placeholder = isDev ? '如：默认甘特图｜横条编辑' : '要做什么？';
+  const noteInput = form.elements.namedItem('note') as HTMLTextAreaElement | null;
+  if (noteInput) {
+    noteInput.placeholder = isDev ? NOTE_PLACEHOLDER_DEV : '补充说明';
+    noteInput.rows = isDev ? 4 : 2;
+  }
+}
+
 function renderNewItemModal(): string {
   if (!newItemOpen) return '';
   const summaryBoards = boards().filter((board) => SUMMARY_BOARD_IDS.includes(board.id));
-  const firstBoard = summaryBoards[0];
+  // 默认落在「编程」：新增任务绝大多数是开发任务，站点 / 版本那套字段也默认就是展开的。
+  const firstBoard = summaryBoards.find((board) => board.id === 'coding') || summaryBoards[0];
   if (!firstBoard) return '';
   const editingItem = editItemId ? itemById(editItemId) : undefined;
   const isEditing = Boolean(editingItem && !editingItem.archived);
@@ -1195,26 +1616,74 @@ function renderNewItemModal(): string {
   ).join('');
   const selectedBoard = summaryBoards.find((board) => board.id === selectedBoardId) || firstBoard;
   const modalTitle = isEditing ? '编辑任务' : '新增任务';
-  const submitLabel = isEditing ? '保存修改' : '添加任务';
+  const submitLabel = isEditing ? '保存修改' : '＋ 添加任务';
+  // 已有标题反向拆成「站点 / 版本 / 需求名称」三段回填；站点改走下拉（选项 = 有版本控制的站点），
+  // 版本框则用占位提示告诉用户该站点当前版本（随站点切换更新），具体填什么由他自己定。
+  const parsedTitle = parseTodoTitle(editingItem?.title || '');
+  // 下拉里只写站点名：右边版本框的占位已经是「当前 x.y.z」，选项里再带一遍是重复信息。
+  const siteOptions = todoSiteOptions(parsedTitle.site).map((site) => {
+    const selected = site === parsedTitle.site;
+    return '<li role="option" class="todo-new-dropdown-option' + (selected ? ' is-selected' : '') + '" data-site-option="' + escape(site) + '" aria-selected="' + (selected ? 'true' : 'false') + '">' + escape(site) + '</li>';
+  }).join('');
+  const siteDropdownLabel = parsedTitle.site || '选择站点';
+  const previewTitle = composeTodoTitle(parsedTitle.site, parsedTitle.version, parsedTitle.name);
+  // 站点 / 版本这套结构化字段只服务「编程」看板的开发任务；生活与科研保持原来的简单表单，
+  // 下拉切到「编程」时再把这些字段显出来（切换走 JS，不重建弹窗，避免丢掉已输入的内容）。
+  const isDevBoard = selectedBoardId === 'coding';
   return '<div class="todo-modal-backdrop" data-tb-modal-close></div>' +
-    '<section class="todo-modal" role="dialog" aria-modal="true" aria-labelledby="todo-new-title">' +
-      '<div class="todo-modal-header"><div><span class="todo-modal-kicker todo-new-title" id="todo-new-title">' + modalTitle + '</span></div><button type="button" class="todo-modal-close" data-tb-modal-close aria-label="关闭">✕</button></div>' +
-      '<form data-tb-new-form' + (isEditing ? ' data-editing-id="' + escape(editingItem?.id) + '"' : '') + '>' +
-        '<div class="todo-new-field"><span class="todo-new-field-label">看板分类</span>' +
-          '<div class="todo-new-dropdown" data-new-board-dropdown>' +
-            '<button type="button" class="todo-new-dropdown-toggle" data-tb-board-toggle aria-haspopup="listbox" aria-expanded="false"><span class="todo-new-dropdown-label">' + escape(selectedBoard.icon + ' ' + selectedBoard.name) + '</span><span class="todo-new-dropdown-caret">▾</span></button>' +
-            '<ul class="todo-new-dropdown-list" role="listbox" hidden>' + boardOptions + '</ul>' +
-            '<input type="hidden" name="boardId" value="' + escape(selectedBoard.id) + '">' +
+    '<section class="todo-modal todo-modal-new" role="dialog" aria-modal="true" aria-labelledby="todo-new-title">' +
+      '<div class="todo-modal-header todo-new-header">' +
+        '<div class="todo-new-heading">' +
+          '<span class="todo-new-badge" aria-hidden="true">＋</span>' +
+          '<div class="todo-new-heading-text">' +
+            '<span class="todo-modal-kicker todo-new-title" id="todo-new-title">' + modalTitle + '</span>' +
+            '<p class="todo-new-subtitle">' + (isEditing ? '改完保存就好，排期与阶段不受影响' : '把想做的事记下来，然后一步一步完成吧 ✨') + '</p>' +
           '</div>' +
         '</div>' +
-        '<label class="todo-new-field">任务名称<input type="text" name="title" maxlength="120" placeholder="要做什么？" value="' + escape(editingItem?.title || '') + '" required aria-label="任务名称"></label>' +
-        '<label class="todo-new-field">链接（可选）<input type="url" name="url" placeholder="https://…" value="' + escape(editingItem?.url || '') + '" aria-label="任务链接"></label>' +
-        '<label class="todo-new-field">备注（可选）<textarea name="note" rows="2" maxlength="500" placeholder="补充说明" aria-label="任务备注">' + escape(editingItem?.note || '') + '</textarea></label>' +
-        '<div class="todo-date-fields">' +
-          '<label>目标日期<input type="date" name="date" value="' + escape(editingItem?.date || todayStr()) + '" required aria-label="目标日期"></label>' +
-          '<span class="todo-new-field-spacer" aria-hidden="true"></span>' +
+        '<div class="todo-new-header-side">' +
+          // 插画自带「小步前进，也是进步 ✨」文案，就不用再写一遍文字了。
+          // 右上角不再放 ✕：底部「取消」已经承担关闭语义，Esc / 点遮罩同样能关。
+          '<img class="todo-new-mascot" src="/assets/todo-board/bear-progress.png" alt="小步前进，也是进步 ✨" width="170" height="86" draggable="false">' +
         '</div>' +
-        '<div class="todo-modal-actions"><button type="button" class="todo-modal-secondary" data-tb-modal-close>取消</button><button type="submit" class="todo-modal-primary">' + submitLabel + '</button></div>' +
+      '</div>' +
+      // autocomplete="off"：这是一次性填写的表单，不要浏览器弹「上次输入过的值」那套历史提示。
+      '<form data-tb-new-form autocomplete="off"' + (isEditing ? ' data-editing-id="' + escape(editingItem?.id) + '"' : '') + '>' +
+        '<div class="todo-new-grid">' +
+          '<div class="todo-new-col">' +
+            '<div class="todo-new-field"><span class="todo-new-field-label">看板分类</span>' +
+              '<div class="todo-new-dropdown" data-new-board-dropdown>' +
+                '<button type="button" class="todo-new-dropdown-toggle" data-tb-board-toggle aria-haspopup="listbox" aria-expanded="false"><span class="todo-new-dropdown-label">' + escape(selectedBoard.icon + ' ' + selectedBoard.name) + '</span><span class="todo-new-dropdown-caret">▾</span></button>' +
+                '<ul class="todo-new-dropdown-list" role="listbox" hidden>' + boardOptions + '</ul>' +
+                '<input type="hidden" name="boardId" value="' + escape(selectedBoard.id) + '">' +
+              '</div>' +
+            '</div>' +
+            '<div class="todo-new-field" data-tb-site-block' + (isDevBoard ? '' : ' hidden') + '><span class="todo-new-field-label">站点与版本</span>' +
+              '<div class="todo-new-site-row">' +
+                '<div class="todo-new-dropdown" data-new-site-dropdown>' +
+                  '<button type="button" class="todo-new-dropdown-toggle" data-tb-site-toggle aria-haspopup="listbox" aria-expanded="false"><span class="todo-new-dropdown-label' + (parsedTitle.site ? '' : ' is-placeholder') + '" data-tb-site-label>' + escape(siteDropdownLabel) + '</span><span class="todo-new-dropdown-caret">▾</span></button>' +
+                  '<ul class="todo-new-dropdown-list" role="listbox" hidden>' + siteOptions + '</ul>' +
+                  '<input type="hidden" name="site" value="' + escape(parsedTitle.site) + '">' +
+                '</div>' +
+                '<input type="text" name="version" maxlength="20" autocomplete="off" placeholder="' + escape(siteVersionHint(parsedTitle.site)) + '" value="' + escape(parsedTitle.version) + '" aria-label="版本号">' +
+              '</div>' +
+            '</div>' +
+            '<label class="todo-new-field"><span class="todo-new-field-label"><span data-tb-name-label>' + (isDevBoard ? '需求名称' : '任务名称') + '</span><i class="todo-new-required" aria-hidden="true">*</i></span><input type="text" name="title" maxlength="120" autocomplete="off" placeholder="' + escape(isDevBoard ? '如：默认甘特图｜横条编辑' : '要做什么？') + '" value="' + escape(parsedTitle.name) + '" required aria-label="任务名称"></label>' +
+          '</div>' +
+          '<div class="todo-new-col">' +
+            '<label class="todo-new-field"><span class="todo-new-field-label"><span data-tb-note-label>' + (isDevBoard ? '具体需求（可选）' : '备注（可选）') + '</span><button type="button" class="todo-new-note-sync" data-tb-note-sync' + (isDevBoard ? '' : ' hidden') + ' title="把「需求名称」里有、具体需求里还没写的需求补成新的一行（已有的行一个字不动）">＋ 按名称补全</button></span><textarea name="note" rows="' + (isDevBoard ? '4' : '2') + '" maxlength="500" placeholder="' + escape(isDevBoard ? NOTE_PLACEHOLDER_DEV : '补充说明') + '" aria-label="备注">' + escape(editingItem?.note || '') + '</textarea></label>' +
+            '<label class="todo-new-field"><span class="todo-new-field-label">链接（可选）</span><span class="todo-new-input-wrap"><span class="todo-new-input-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.1 0l2-2A5 5 0 0 0 12 4l-1 1"></path><path d="M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20l1-1"></path></svg></span><input type="url" name="url" autocomplete="off" placeholder="https://…" value="' + escape(editingItem?.url || '') + '" aria-label="任务链接"></span></label>' +
+            // 目标日期改成可选：它只表示「打算什么时候做」，没有明确日期就留空（卡片上不显示 📅）。
+            '<label class="todo-new-field"><span class="todo-new-field-label">目标日期（可选）</span><input type="date" name="date" value="' + escape(editingItem?.date || '') + '" aria-label="目标日期"></label>' +
+          '</div>' +
+        '</div>' +
+        '<div class="todo-new-footer">' +
+          '<div class="todo-new-preview" data-tb-preview-block' + (isDevBoard ? '' : ' hidden') + '>' +
+            '<span class="todo-new-preview-icon" aria-hidden="true">📝</span>' +
+            '<span class="todo-new-preview-label">标题预览<span class="todo-new-preview-hint">将根据需求名称自动生成</span></span>' +
+            '<span class="todo-new-preview-value" data-tb-title-preview>' + escape(previewTitle || '（填写需求名称后生成）') + '</span>' +
+          '</div>' +
+          '<div class="todo-modal-actions"><button type="button" class="todo-modal-secondary" data-tb-modal-close>取消</button><button type="submit" class="todo-modal-primary">' + submitLabel + '</button></div>' +
+        '</div>' +
       '</form>' +
     '</section>';
 }
@@ -1289,6 +1758,21 @@ function renderStats(): string {
   return '<div class="todo-board-stats"><span class="todo-board-stats-text">总 ' + stats.total + ' · 已完成 ' + stats.done + '</span><div class="todo-board-stats-bar"><div class="todo-board-stats-fill" style="width: ' + stats.rate + '%"></div></div></div>';
 }
 
+// 「进行中」列底部的搁置区：默认只一行计数，点开才铺出卡片。
+// 搁置中的任务不上甘特图、也不占进行中的视线，但记录与阶段都在，随时点「恢复排期」放回去。
+function renderPausedSection(): string {
+  const items = pausedItems().sort((a, b) => (a.pausedAt || '').localeCompare(b.pausedAt || ''));
+  if (items.length === 0) return '';
+  return '<div class="todo-paused' + (pausedOpen ? ' is-open' : '') + '">' +
+    '<button type="button" class="todo-paused-toggle" data-tb-paused-toggle aria-expanded="' + (pausedOpen ? 'true' : 'false') + '">' +
+      '<span class="todo-paused-icon" aria-hidden="true">⏸</span>' +
+      '<span class="todo-paused-text">' + items.length + ' 项搁置中</span>' +
+      '<span class="todo-paused-caret" aria-hidden="true">' + (pausedOpen ? '▴' : '▾') + '</span>' +
+    '</button>' +
+    (pausedOpen ? '<div class="todo-paused-list">' + items.map(renderCard).join('') + '</div>' : '') +
+  '</div>';
+}
+
 function renderColumn(status: 'todo' | 'doing' | 'done', label: string, statusClass: string, items: TodoItem[], suffix: string): string {
   const emptyText = status === 'todo' ? '📥 暂无待办' : status === 'doing' ? '🚀 暂无进行中' : '✅ 等待你完成第一个任务';
   // 「进行中」卡片带排期/阶段进度条，单卡更高，每页少放一条，避免整列被拉高。
@@ -1302,7 +1786,9 @@ function renderColumn(status: 'todo' | 'doing' | 'done', label: string, statusCl
   const pagination = pageCount > 1
     ? '<div class="todo-board-pagination"><button type="button" data-tb-page="prev" data-tb-status="' + status + '"' + (page === 0 ? ' disabled' : '') + '>上一页</button><span>' + (page + 1) + ' / ' + pageCount + '</span><button type="button" data-tb-page="next" data-tb-status="' + status + '"' + (page === pageCount - 1 ? ' disabled' : '') + '>下一页</button></div>'
     : '';
-  return '<div class="todo-board-column"><div class="todo-board-column-header ' + statusClass + '"><span class="todo-board-column-dot"></span>' + label + ' <span class="todo-board-column-count">' + items.length + suffix + '</span></div><div class="todo-board-column-body">' + cards + '</div>' + pagination + '</div>';
+  // 搁置区只挂在「进行中」列下面：它是「本来在推进、暂时下线」的尾巴。
+  const pausedSection = status === 'doing' ? renderPausedSection() : '';
+  return '<div class="todo-board-column"><div class="todo-board-column-header ' + statusClass + '"><span class="todo-board-column-dot"></span>' + label + ' <span class="todo-board-column-count">' + items.length + suffix + '</span></div><div class="todo-board-column-body">' + cards + '</div>' + pagination + pausedSection + '</div>';
 }
 
 function renderColumns(): string {
@@ -1325,9 +1811,14 @@ function renderBoard(): string {
   const addButton = isEditable()
     ? '<button type="button" class="todo-board-add" data-tb-add-new>➕ 新增任务</button>'
     : '';
-  const header = '<header class="todo-board-header"><div class="todo-board-date"><span class="todo-board-date-icon">📅</span><span class="todo-board-date-text">' + escape(todayStr()) + '（今天）</span>' + modeBadge + '</div><div class="todo-board-header-actions">' + addButton + renderViewSwitch() + '<button class="todo-board-history-toggle" type="button" data-tb-history>📜 查看历史 ' + (historyOpen ? '▴' : '▾') + '</button></div></header>';
+  const header = '<header class="todo-board-header"><div class="todo-board-date"><span class="todo-board-date-icon">📅</span><span class="todo-board-date-text">' + escape(todayStr()) + '（今天）</span>' + modeBadge + '</div><div class="todo-board-header-actions">' + addButton + renderViewSwitch() + '</div></header>';
   if (!boardsLoaded) return header + '<div class="todo-board-empty">看板数据未加载。请检查 todo-data.ts 是否正常编译。</div>';
-  return header + renderStats() + (historyOpen ? renderHeatmap() : '') + (currentView === 'gantt' ? renderGantt() : renderColumns()) + renderScheduleModal() + renderCompletionModal() + renderPhaseModal() + renderNewItemModal();
+  const viewContent = currentView === 'board'
+    ? renderColumns()
+    : currentView === 'review'
+      ? renderReview()
+      : renderGantt();
+  return header + renderStats() + viewContent + renderScheduleModal() + renderCompletionModal() + renderPhaseModal() + renderNewItemModal();
 }
 
 function refresh() {
@@ -1985,6 +2476,85 @@ function removeFromGantt(itemId: string): void {
   pushTodoState();
 }
 
+// 搁置了几天：从搁置当天算第 1 天（9/14 搁置、9/23 看就是第 10 天）。
+function pausedDays(pausedAt?: string): number {
+  const start = parseDate(pausedAt);
+  const today = parseDate(todayStr());
+  if (!start || !today) return 1;
+  return Math.max(1, dateDiff(start, today) + 1);
+}
+
+// 恢复时要顺延几天：让第一个未完成的阶段从今天开始（整段一起右移），
+// 没有阶段或全部已完成时按计划开始日算；返回 0 表示原计划还在将来，不用动。
+function resumeShiftDays(item: BoardItem): number {
+  const pending = (item.phases || []).find((phase) => phase.status !== 'done');
+  const anchor = parseDate(pending ? pending.start : item.plannedStart);
+  const today = parseDate(todayStr());
+  if (!anchor || !today) return 0;
+  return Math.max(0, dateDiff(anchor, today));
+}
+
+// 恢复按钮的悬停提示：搁置多久、原计划是什么、点下去会不会顺延。
+function resumeTip(item: BoardItem, shift: number): string {
+  return [
+    '搁置中 · 已 ' + pausedDays(item.pausedAt) + ' 天（自 ' + (item.pausedAt || '') + '）',
+    '原计划：' + shortDate(item.plannedStart) + '—' + shortDate(item.plannedEnd),
+    shift > 0
+      ? '点一下恢复，并把未完成的阶段从今天（' + shortDate(todayStr()) + '）接着排，整条计划右移 ' + shift + ' 天'
+      : '点一下恢复，按原日期回到甘特图',
+  ].join('\n');
+}
+
+// 搁置中的任务（有完整排期但从甘特图下线），甘特图工具栏用它报数。
+// 只看活动任务：归档条目永远视为已完成，不存在「被搁置」这回事。
+function pausedItems(): BoardItem[] {
+  return allItems().filter((item) => Boolean(item.pausedAt));
+}
+
+// 「搁置」= 从甘特图上暂时下线：排期和阶段一个都不删，等待期在时间轴上留白（空窗），
+// 有反馈了点「恢复排期」原样回到轴上，不重排日期、不改历史。
+// 与「移出甘特图」的区别：移出会清掉排期与阶段（等于退回普通待办），搁置只是暂时不上轴。
+function pauseItem(itemId: string): void {
+  if (!isEditable()) {
+    showToast('🔒 线上只读：请在本地 dev（npm run dev）中修改任务状态');
+    return;
+  }
+  const item = itemById(itemId);
+  if (!item || item.archived || item.pausedAt) return;
+  todoState.items[itemId] = { ...(todoState.items[itemId] || {}), pausedAt: todayStr() };
+  pushTodoState();
+  showToast('⏸ 已搁置「' + item.title + '」：从甘特图下线，排期与阶段记录保留，等待期不计入时间轴');
+}
+
+function resumeItem(itemId: string): void {
+  if (!isEditable()) {
+    showToast('🔒 线上只读：请在本地 dev（npm run dev）中修改任务状态');
+    return;
+  }
+  const item = itemById(itemId);
+  if (!item || !item.pausedAt) return;
+  const days = pausedDays(item.pausedAt);
+  const shift = resumeShiftDays(item);
+  const start = parseDate(item.plannedStart);
+  const end = parseDate(item.plannedEnd);
+  const patch = { ...(todoState.items[itemId] || {}) };
+  delete patch.pausedAt;
+  // 一键恢复 + 顺延：整条计划（含阶段）右移，让没做完的那段从今天接着排。
+  // 整段平移而不是只挪尾巴，是为了不产生校验不允许的「阶段空档」，也保住各阶段的相对关系。
+  const shifted = shift > 0 && Boolean(start && end);
+  if (shifted && start && end) {
+    patch.plannedStart = fmtDate(addDays(start, shift));
+    patch.plannedEnd = fmtDate(addDays(end, shift));
+    const phases = item.phases || [];
+    if (phases.length > 0) patch.phases = shiftPhases(phases, shift);
+  }
+  todoState.items[itemId] = patch;
+  pushTodoState();
+  showToast(shifted
+    ? '▶️ 已恢复「' + item.title + '」（搁置 ' + days + ' 天）：计划顺延 ' + shift + ' 天到 ' + shortDate(patch.plannedStart) + '—' + shortDate(patch.plannedEnd)
+    : '▶️ 已恢复「' + item.title + '」（搁置 ' + days + ' 天）：按原计划 ' + shortDate(item.plannedStart) + '—' + shortDate(item.plannedEnd) + ' 回到甘特图');
+}
+
 // 「退回待办」只撤销完成状态：保留排期和阶段，方便用户继续按原计划返工。
 function returnToTodo(itemId: string): void {
   if (!isEditable()) {
@@ -2023,35 +2593,27 @@ document.addEventListener('click', (event) => {
   const target = event.target as HTMLElement;
   const viewButton = target.closest<HTMLButtonElement>('[data-tb-view]');
   if (viewButton) {
-    currentView = viewButton.dataset.tbView === 'gantt' ? 'gantt' : 'board';
+    const nextView = viewButton.dataset.tbView;
+    currentView = nextView === 'gantt' ? 'gantt' : nextView === 'review' ? 'review' : 'board';
     scheduleItemId = null;
     completionItemId = null;
     refresh();
     return;
   }
 
-  const ganttScaleButton = target.closest<HTMLButtonElement>('[data-tb-gantt-scale]');
-  if (ganttScaleButton) {
-    ganttGranularity = ganttScaleButton.dataset.tbGanttScale === 'hour' ? 'hour' : 'day';
-    refresh();
-    return;
-  }
-
-  // 自定义下拉：点击下拉外部时收起展开的选项列表。
-  if (!target.closest('[data-new-board-dropdown]')) {
-    document.querySelectorAll<HTMLElement>('[data-new-board-dropdown] .todo-new-dropdown-list:not([hidden])').forEach((list) => {
-      list.hidden = true;
-      const toggle = list.closest('.todo-new-dropdown')?.querySelector<HTMLButtonElement>('[data-tb-board-toggle]');
-      toggle?.setAttribute('aria-expanded', 'false');
-    });
+  // 自定义下拉（看板分类 / 站点）：点击下拉外部时收起展开的选项列表。
+  if (!target.closest('[data-new-board-dropdown]') && !target.closest('[data-new-site-dropdown]')) {
+    closeTodoDropdowns();
   }
 
   const boardToggle = target.closest<HTMLButtonElement>('[data-tb-board-toggle]');
   if (boardToggle) {
     const list = boardToggle.closest('.todo-new-dropdown')?.querySelector<HTMLElement>('.todo-new-dropdown-list');
     if (list) {
-      list.hidden = !list.hidden;
-      boardToggle.setAttribute('aria-expanded', list.hidden ? 'false' : 'true');
+      const willOpen = list.hidden;
+      closeTodoDropdowns(list);
+      list.hidden = !willOpen;
+      boardToggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
     }
     return;
   }
@@ -2064,14 +2626,56 @@ document.addEventListener('click', (event) => {
       if (hiddenInput) hiddenInput.value = boardOption.dataset.boardOption || '';
       const label = dropdown.querySelector<HTMLElement>('.todo-new-dropdown-label');
       if (label) label.textContent = boardOption.textContent?.trim() || hiddenInput?.value || '';
+      // 切到「编程」才露出站点 / 版本那套结构化字段（只切显隐，不重建弹窗，免得丢掉已输入内容）。
+      const newForm = dropdown.closest<HTMLFormElement>('[data-tb-new-form]');
+      if (newForm) syncNewItemBoardMode(newForm, boardOption.dataset.boardOption || '');
       dropdown.querySelectorAll<HTMLElement>('[data-board-option]').forEach((option) => {
         const selected = option === boardOption;
         option.classList.toggle('is-selected', selected);
         option.setAttribute('aria-selected', selected ? 'true' : 'false');
       });
-      const list = dropdown.querySelector<HTMLElement>('.todo-new-dropdown-list');
-      if (list) list.hidden = true;
-      dropdown.querySelector<HTMLButtonElement>('[data-tb-board-toggle]')?.setAttribute('aria-expanded', 'false');
+      closeTodoDropdowns();
+    }
+    return;
+  }
+
+  // 站点下拉：展开 / 收起候选站点。
+  const siteToggle = target.closest<HTMLButtonElement>('[data-tb-site-toggle]');
+  if (siteToggle) {
+    const list = siteToggle.closest('[data-new-site-dropdown]')?.querySelector<HTMLElement>('.todo-new-dropdown-list');
+    if (list) {
+      const willOpen = list.hidden;
+      closeTodoDropdowns(list);
+      list.hidden = !willOpen;
+      siteToggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    }
+    return;
+  }
+
+  const siteOption = target.closest<HTMLElement>('[data-site-option]');
+  if (siteOption) {
+    const dropdown = siteOption.closest<HTMLElement>('[data-new-site-dropdown]');
+    const form = dropdown?.closest<HTMLFormElement>('[data-tb-new-form]');
+    const site = siteOption.dataset.siteOption || '';
+    const siteInput = form?.elements.namedItem('site') as HTMLInputElement | null;
+    const versionInput = form?.elements.namedItem('version') as HTMLInputElement | null;
+    if (dropdown && form && siteInput && versionInput) {
+      siteInput.value = site;
+      // 版本只把「该站点当前版本」放进占位提示，不替用户填，自己定要写哪一版。
+      versionInput.placeholder = siteVersionHint(site);
+      const label = dropdown.querySelector<HTMLElement>('[data-tb-site-label]');
+      if (label) {
+        label.textContent = site;
+        label.classList.remove('is-placeholder');
+      }
+      dropdown.querySelectorAll<HTMLElement>('[data-site-option]').forEach((option) => {
+        const selected = option === siteOption;
+        option.classList.toggle('is-selected', selected);
+        option.setAttribute('aria-selected', selected ? 'true' : 'false');
+      });
+      closeTodoDropdowns();
+      syncNewItemPreview(form);
+      (form.elements.namedItem('title') as HTMLInputElement | null)?.focus();
     }
     return;
   }
@@ -2164,10 +2768,41 @@ document.addEventListener('click', (event) => {
     return;
   }
 
+
+
+  const pauseButton = target.closest<HTMLButtonElement>('[data-tb-pause]');
+  if (pauseButton) {
+    const itemId = pauseButton.dataset.tbPause;
+    if (itemId) {
+      pauseItem(itemId);
+      Object.keys(boardPages).forEach((key) => delete boardPages[key]);
+      refresh();
+    }
+    return;
+  }
+
+  const resumeButton = target.closest<HTMLButtonElement>('[data-tb-resume]');
+  if (resumeButton) {
+    const itemId = resumeButton.dataset.tbResume;
+    if (itemId) {
+      resumeItem(itemId);
+      Object.keys(boardPages).forEach((key) => delete boardPages[key]);
+      refresh();
+    }
+    return;
+  }
+
   const convertToDayButton = target.closest<HTMLButtonElement>('[data-tb-hour-to-day]');
   if (convertToDayButton) {
     const itemId = convertToDayButton.dataset.tbHourToDay;
     if (itemId) convertHourlyItemToDay(itemId);
+    return;
+  }
+
+  const ganttScaleButton = target.closest<HTMLButtonElement>('[data-tb-gantt-scale]');
+  if (ganttScaleButton) {
+    ganttGranularity = ganttScaleButton.dataset.tbGanttScale === 'hour' ? 'hour' : 'day';
+    refresh();
     return;
   }
 
@@ -2177,10 +2812,16 @@ document.addEventListener('click', (event) => {
     if (itemId) {
       removeFromGantt(itemId);
       currentView = 'board';
-      ganttShowCompleted = false;
       Object.keys(boardPages).forEach((key) => delete boardPages[key]);
       refresh();
     }
+    return;
+  }
+
+  const reviewPageButton = target.closest<HTMLButtonElement>('[data-tb-review-page]');
+  if (reviewPageButton && !reviewPageButton.disabled) {
+    doneReviewPage = Math.max(0, doneReviewPage + (reviewPageButton.dataset.tbReviewPage === 'next' ? 1 : -1));
+    refresh();
     return;
   }
 
@@ -2307,11 +2948,16 @@ document.addEventListener('click', (event) => {
     return;
   }
 
-  const historyButton = target.closest<HTMLButtonElement>('[data-tb-history]');
-  if (historyButton) {
-    selectedHeatmapDate = null;
-    heatmapPage = 0;
-    historyOpen = !historyOpen;
+  const noteSyncButton = target.closest<HTMLButtonElement>('[data-tb-note-sync]');
+  if (noteSyncButton) {
+    const form = noteSyncButton.closest<HTMLFormElement>('[data-tb-new-form]');
+    if (form) appendMissingNeeds(form);
+    return;
+  }
+
+  const pausedToggleButton = target.closest<HTMLButtonElement>('[data-tb-paused-toggle]');
+  if (pausedToggleButton) {
+    pausedOpen = !pausedOpen;
     refresh();
     return;
   }
@@ -2342,13 +2988,6 @@ document.addEventListener('click', (event) => {
   }
 });
 
-document.addEventListener('change', (event) => {
-  const target = event.target as HTMLInputElement;
-  if (!target.matches('[data-tb-gantt-completed]')) return;
-  ganttShowCompleted = target.checked;
-  refresh();
-});
-
 document.addEventListener('submit', (event) => {
   const form = event.target as HTMLFormElement;
   const newForm = form.closest<HTMLFormElement>('[data-tb-new-form]');
@@ -2360,11 +2999,17 @@ document.addEventListener('submit', (event) => {
     }
     const boardId = (newForm.elements.namedItem('boardId') as HTMLInputElement | null)?.value || '';
     const titleInput = newForm.elements.namedItem('title') as HTMLInputElement | null;
+    const siteInput = newForm.elements.namedItem('site') as HTMLInputElement | null;
+    const versionInput = newForm.elements.namedItem('version') as HTMLInputElement | null;
     const urlInput = newForm.elements.namedItem('url') as HTMLInputElement | null;
     const noteInput = newForm.elements.namedItem('note') as HTMLTextAreaElement | null;
     const dateInput = newForm.elements.namedItem('date') as HTMLInputElement | null;
-    const title = titleInput?.value.trim() || '';
-    if (!boardId || !title || !dateInput?.value) return;
+    // 标题按规范拼「站点 v版本：需求名称」（非编程看板不填站点 / 版本，等价于纯任务名称）；
+    // 只有编程看板的「具体需求」按一行一条自动编号，生活 / 科研的备注保持原样。
+    const title = composeTodoTitle(siteInput?.value || '', versionInput?.value || '', titleInput?.value || '').slice(0, 120);
+    const note = boardId === 'coding' ? formatNoteLines(noteInput?.value || '') : (noteInput?.value.trim() || '');
+    // 目标日期可选：留空也能保存（dev 端会写成不带 date 字段的行）。
+    if (!boardId || !title) return;
     const editingId = newForm.dataset.editingId || '';
     const action = editingId ? 'update' : 'add';
     fetch('/__todo_file', {
@@ -2376,8 +3021,8 @@ document.addEventListener('submit', (event) => {
         boardId,
         title,
         url: urlInput?.value.trim() || '',
-        note: noteInput?.value.trim() || '',
-        date: dateInput.value,
+        note,
+        date: dateInput?.value || '',
         createdAt: todayStr(),
       }),
     })
@@ -2486,6 +3131,27 @@ document.addEventListener('submit', (event) => {
 document.addEventListener('input', (event) => {
   const field = (event.target as HTMLElement).closest<HTMLTextAreaElement>('textarea[name="phaseTitle"]');
   if (field) autosizePhaseTitleField(field);
+});
+
+// 「新增任务」弹窗：站点 / 版本 / 需求名称 一改就重拼标题预览，格式对不对当场可见。
+document.addEventListener('input', (event) => {
+  const target = event.target as HTMLInputElement;
+  if (!['site', 'version', 'title'].includes(target.name || '')) return;
+  const form = target.closest<HTMLFormElement>('[data-tb-new-form]');
+  if (!form) return;
+  syncNewItemPreview(form);
+  // 需求名称一改，具体需求的骨架跟着重铺（只在具体需求为空 / 还停在自动骨架上时才动它）。
+  if (target.name === 'title') syncNeedSkeleton(form);
+});
+
+// 具体需求这边是反向的：用户一动它就不再按需求名称自动重写（「＋ 按名称补全」仍可手动增量追加），
+// 同时把光标所在那一行的短词，回写到需求名称里对应的那一个词上。
+document.addEventListener('input', (event) => {
+  const note = (event.target as HTMLElement).closest<HTMLTextAreaElement>('textarea[name="note"]');
+  if (!note) return;
+  delete note.dataset.noteFromTitle;
+  const form = note.closest<HTMLFormElement>('[data-tb-new-form]');
+  if (form) syncTitleFromNote(form, note);
 });
 
 // 窗口宽度一变，折行数就变了，得重新量一次高度，否则多出来的行会被 overflow: hidden 裁掉。

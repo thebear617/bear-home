@@ -240,17 +240,6 @@
   font-size: 11px;
 }
 
-.todo-board-history-toggle {
-  background: #ffffff;
-  border: 1px solid #e7dfd3;
-  border-radius: 20px;
-  padding: 6px 16px;
-  font-size: 13px;
-  color: #5a4f44;
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
 .todo-board-add {
   border: 1px solid #c2410c;
   border-radius: 20px;
@@ -269,53 +258,303 @@
 
 .todo-new-field {
   display: grid;
-  gap: 6px;
-  margin-bottom: 12px;
-  color: #5a4f44;
-  font-size: 12px;
+  gap: 7px;
+  margin-bottom: 0;
+  color: #3a322c;
+  font-size: 13px;
 }
 
 .todo-new-field input,
 .todo-new-field select,
 .todo-new-field textarea {
   width: 100%;
-  padding: 8px 9px;
-  border: 1px solid #e7dfd3;
-  border-radius: 7px;
-  background: #fbf8f3;
+  padding: 10px 12px;
+  border: 1px solid #ece3d8;
+  border-radius: 10px;
+  background: #fffdfb;
   color: #2f2924;
   font: inherit;
+  font-size: 13px;
   box-sizing: border-box;
 }
 
 .todo-new-field textarea {
   resize: vertical;
+  line-height: 1.6;
 }
 
 .todo-new-field input:focus,
 .todo-new-field select:focus,
 .todo-new-field textarea:focus {
-  outline: 2px solid rgba(194, 65, 12, .22);
+  outline: 2px solid rgba(194, 65, 12, .18);
   border-color: #c2410c;
 }
 
-.todo-new-field-spacer {
+/* 「新增任务」弹窗：奶油底 + 两块白卡（左「定名字」/ 右「填细节」）+ 底部结果条，窄屏退回单列。
+   用两级选择器，压过后文基础 .todo-modal 的宽度 / 内边距 / 底色。 */
+.todo-modal.todo-modal-new {
+  width: min(920px, calc(100vw - 32px));
+  padding: 0;
+  border-color: #f0e8de;
+  border-radius: 20px;
+  background: #faf7f2;
+}
+
+.todo-new-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+  /* 两栏等高：网格行高由较高的那张卡决定，矮的一张跟着拉平。 */
+  align-items: stretch;
+  padding: 0 22px;
+}
+
+.todo-new-col {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  padding: 18px;
+  border: 1px solid #f1e9df;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(47, 41, 36, .04);
+}
+
+.todo-new-col > * {
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .todo-new-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+/* 站点 / 版本与标题预览只在「编程」看板出现；hidden 属性要显式兜住 .todo-new-field 的 display: grid。 */
+.todo-new-field[hidden],
+.todo-new-preview[hidden] {
   display: none;
 }
 
-/* 「新增任务」弹窗：橙色 kicker 兼作标题（语义与「新增任务」重复，不再另设 h2）。
-   用两级选择器压过后文的 .todo-modal-kicker（11px），字号与右侧 28px 关闭按钮视觉等高。 */
+/* 站点（下拉）+ 版本（输入）一行两列：站点列宽一些，版本列够放下「当前 0.32.0」这种提示。 */
+.todo-new-site-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+/* 「链接」输入框的行内图标：原生 input 放不了前缀，套一层做定位。 */
+.todo-new-input-wrap {
+  position: relative;
+  display: block;
+}
+
+.todo-new-input-wrap input {
+  padding-left: 34px;
+}
+
+.todo-new-input-icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  display: grid;
+  place-items: center;
+  transform: translateY(-50%);
+  color: #b9a894;
+  pointer-events: none;
+}
+
+/* 底部结果条：左边「标题预览 + 拼好的标题」，右边操作按钮，底边跟弹窗同圆角。 */
+.todo-new-footer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 14px 22px 16px;
+  border-top: 1px solid #f0e8de;
+  border-radius: 0 0 20px 20px;
+  background: #fffbf6;
+}
+
+.todo-new-preview {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.todo-new-preview-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #fff1e5;
+  font-size: 15px;
+}
+
+.todo-new-preview-label {
+  display: grid;
+  flex: 0 0 auto;
+  color: #3a322c;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.todo-new-preview-hint {
+  color: #b9a894;
+  font-size: 10.5px;
+  font-weight: 400;
+}
+
+.todo-new-preview-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-left: 4px;
+  padding: 9px 14px;
+  border: 1px solid #f2e2d3;
+  border-radius: 10px;
+  background: #fff8f2;
+  color: #b45309;
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+}
+
+.todo-new-footer .todo-modal-actions {
+  flex: 0 0 auto;
+  margin: 0 0 0 auto;
+}
+
+/* 窄屏：两栏并一栏，底栏改成上下两段（预览一行、按钮一行）。 */
+@media (max-width: 760px) {
+  .todo-new-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .todo-modal-new .todo-new-grid {
+    padding: 0 16px;
+  }
+
+  .todo-new-mascot {
+    display: none;
+  }
+
+  .todo-new-footer {
+    flex-wrap: wrap;
+    padding: 14px 16px 16px;
+  }
+
+  .todo-new-preview {
+    width: 100%;
+  }
+
+  .todo-new-footer .todo-modal-actions {
+    margin: 0;
+  }
+}
+
+/* 「新增任务」弹窗表头：左边「圆形加号徽标 + 标题 + 副标题」，右边熊插画 + 关闭按钮。
+   align-items: stretch 让左右两块同高（高度由较高的插画决定），左右内容各自垂直居中，
+   这样左边不会“起飞”、左右上下底边齐平。同样两级选择器压过后文 .todo-modal-header。 */
+.todo-modal-header.todo-new-header {
+  align-items: stretch;
+  gap: 16px;
+  margin-bottom: 0;
+  padding: 18px 22px;
+}
+
+.todo-new-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.todo-new-badge {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(150deg, #ffd9bd, #f7a273);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .7), 0 3px 8px rgba(194, 65, 12, .16);
+  color: #fffdfa;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.todo-new-heading-text {
+  min-width: 0;
+}
+
+/* 用两级选择器压过后文的 .todo-modal-kicker（11px 橙色）。 */
 .todo-modal-header .todo-new-title {
   margin-bottom: 0;
-  color: #c2410c;
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 28px;
-  letter-spacing: .02em;
+  color: #2f2924;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: .01em;
+}
+
+.todo-new-subtitle {
+  margin: 4px 0 0;
+  color: #a99a8c;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.todo-new-header-side {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 表头右侧的熊插画：图片自带「小步前进，也是进步 ✨」文案，不再另写文字。 */
+.todo-new-mascot {
+  align-self: center;
+  flex: 0 0 auto;
+  width: 170px;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
 }
 
 .todo-new-field-label {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.todo-new-required {
+  color: #d4541f;
+  font-style: normal;
+}
+
+/* 「＋ 按名称补全」：具体需求标签行右侧的小幽灵按钮，只在编程看板出现。 */
+.todo-new-note-sync {
+  margin-left: auto;
+  padding: 2px 9px;
+  border: 1px dashed #e0d3c2;
+  border-radius: 999px;
+  background: transparent;
+  color: #9a8e80;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.todo-new-note-sync:hover {
+  border-color: #c2410c;
+  color: #c2410c;
 }
 
 /* 看板分类自定义下拉：替代原生 select 的系统弹出样式。 */
@@ -329,12 +568,13 @@
   justify-content: space-between;
   gap: 8px;
   width: 100%;
-  padding: 8px 9px;
-  border: 1px solid #e7dfd3;
-  border-radius: 7px;
-  background: #fbf8f3;
+  padding: 10px 12px;
+  border: 1px solid #ece3d8;
+  border-radius: 10px;
+  background: #fffdfb;
   color: #2f2924;
   font: inherit;
+  font-size: 13px;
   cursor: pointer;
   transition: border-color 0.15s ease;
 }
@@ -348,6 +588,16 @@
   font-size: 11px;
 }
 
+/* 站点下拉未选时标签走占位灰；候选有 9 个，列表给个高度上限，别撑出弹窗。 */
+.todo-new-dropdown-label.is-placeholder {
+  color: #b1a495;
+}
+
+.todo-new-site-row .todo-new-dropdown-list {
+  max-height: 236px;
+  overflow-y: auto;
+}
+
 .todo-new-dropdown-list {
   position: absolute;
   top: calc(100% + 4px);
@@ -358,8 +608,8 @@
   padding: 4px;
   list-style: none;
   background: #ffffff;
-  border: 1px solid #e7dfd3;
-  border-radius: 9px;
+  border: 1px solid #f0e8de;
+  border-radius: 12px;
   box-shadow: 0 10px 28px rgba(47, 41, 36, .14);
 }
 
@@ -383,12 +633,6 @@
 .todo-new-dropdown-option.is-selected::after {
   content: '✓';
   float: right;
-}
-
-.todo-board-history-toggle:hover {
-  background: #fbf6ee;
-  border-color: #c2410c;
-  color: #c2410c;
 }
 
 .todo-board-stats {
@@ -531,6 +775,50 @@
   opacity: 0.45;
 }
 
+/* 搁置区：「进行中」列底部的一行尾巴，默认收起，点开才铺卡片。 */
+.todo-paused {
+  margin: 0 12px 10px;
+  padding-top: 8px;
+  border-top: 1px dashed #e7dfd3;
+}
+
+.todo-paused-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 5px 9px;
+  border: 1px solid #f0dcb4;
+  border-radius: 8px;
+  background: #fdf9f0;
+  color: #9a6d1f;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.todo-paused-toggle:hover {
+  border-color: #e0c58c;
+  background: #fdf6e8;
+}
+
+.todo-paused-text {
+  flex: 1;
+  text-align: left;
+}
+
+.todo-paused-icon {
+  font-size: 11px;
+}
+
+.todo-paused-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .todo-card {
   background: #ffffff;
   border-radius: 10px;
@@ -547,13 +835,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   min-width: 0;
-  gap: 8px;
+  gap: 6px 8px;
 }
 
 .todo-card-actions {
   display: inline-flex;
   align-items: center;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 4px;
   margin-left: auto;
 }
@@ -576,6 +868,18 @@
 
 .todo-card-action-danger {
   color: #b91c1c;
+}
+
+/* 搁置中的「恢复排期」：绿色系，和旁边的编辑 / 完成 / 删除区分开。 */
+.todo-card-action-resume {
+  border-color: #cfdcc4;
+  background: #f7fbf3;
+  color: #4f7a37;
+}
+
+.todo-card-action-resume:hover {
+  border-color: #4f7a37;
+  color: #4f7a37;
 }
 
 .todo-card-action-danger:hover {
@@ -660,6 +964,7 @@
 
 .todo-card-badge {
   align-self: flex-start;
+  flex: 0 0 auto;
   display: inline-block;
   padding: 2px 8px;
   background: #f7f3ee;
@@ -670,6 +975,8 @@
   font-weight: 600;
   letter-spacing: 0;
   line-height: 1.5;
+  /* 顶部一行是「徽章 + 一排动作按钮」，徽章被压窄会折成「生 / 活」两行；这里不让它缩。 */
+  white-space: nowrap;
 }
 
 .todo-card-meta-icon {
@@ -708,6 +1015,15 @@
   margin: 4px 0 0;
   color: #9a8e80;
   font-size: 12px;
+}
+
+/* 搁置提示：只报数不上轴，长标题允许换行。 */
+.todo-gantt-paused {
+  margin: 6px 0 0;
+  color: #9a6d1f;
+  font-size: 11.5px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 .todo-gantt-controls {
@@ -910,9 +1226,12 @@
 
 .todo-gantt-task-title {
   min-width: 0;
+  /* 标题允许两行：220px 的标签列单行只够十几个字，两行基本能读全，超出才省略。 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .todo-gantt-remove {
@@ -1130,6 +1449,37 @@
   font-weight: 600;
   line-height: 1.3;
   text-align: center;
+  /* 按自身宽度决定显不显示阶段名（容器查询，见下方 @container）；序号始终在。 */
+  container-type: inline-size;
+  gap: 4px;
+}
+
+/* 阶段名默认不显示（窄段只留序号），宽度够时由容器查询放出来。
+   放不下时由 CSS 省略，不再由 JS 硬截成 4 个字。 */
+.todo-gantt-phase-copy {
+  display: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 序号与阶段名之间的短破折：两者并排时不加分隔会粘成「2骨架搭建」，看着奇怪。 */
+.todo-gantt-phase-copy::before {
+  content: '-';
+  margin-right: 3px;
+  opacity: 0.45;
+}
+
+/* 窄到放不下字的段（典型是 1 天的段）：只留序号，跟左侧进度点、阶段弹窗的编号对得上。 */
+.todo-gantt-phase-index {
+  display: block;
+  opacity: 0.55;
+}
+
+@container (min-width: 48px) {
+  .todo-gantt-phase-copy {
+    display: block;
+  }
 }
 
 .todo-gantt-phase:last-child {
@@ -1149,12 +1499,6 @@
 .todo-gantt-phase.is-done {
   background: #dcf5e9;
   color: #216a4a;
-}
-
-.todo-gantt-phase-copy {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .todo-gantt-phases-open {
@@ -1358,6 +1702,9 @@
   top: 50%;
   left: 50%;
   width: min(520px, calc(100vw - 32px));
+  /* 「新增任务」弹窗字段变多，窗口矮时让弹窗自己滚动，别把按钮顶出屏幕。 */
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
   transform: translate(-50%, -50%);
   padding: 20px;
   border: 1px solid #e7dfd3;
@@ -1654,6 +2001,174 @@
   white-space: nowrap;
   color: #9a8e80;
   font-size: 11px;
+}
+
+/* 已完成 · 复盘清单：甘特图只画在办任务，已完成的按周铺在这里（阶段按时长成比例）。
+   与甘特图共用同一套色板，但不参与时间轴，所以不会被轴窗口挤压，行数再多也不撑长甘特图。 */
+.todo-review {
+  margin-top: 22px;
+  padding: 16px 20px 20px;
+  border: 1px solid #e7dfd3;
+  border-radius: 14px;
+  background: #fffdfa;
+}
+
+.todo-review-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.todo-review-title {
+  margin: 0;
+  color: #5a4f44;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.todo-review-summary {
+  color: #9a8e80;
+  font-size: 12px;
+}
+
+.todo-review-group {
+  margin-top: 14px;
+}
+
+.todo-review-group-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #efe7dc;
+  color: #8a7d70;
+  font-size: 12px;
+}
+
+.todo-review-group-head strong {
+  color: #5a4f44;
+}
+
+.todo-review-badge {
+  padding: 1px 7px;
+  border: 1px solid #f0dcb4;
+  border-radius: 999px;
+  background: #fdf6e8;
+  color: #9a6d1f;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.todo-review-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.todo-review-row {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px dashed #f2ece3;
+}
+
+.todo-review-row:last-child {
+  border-bottom: 0;
+}
+
+.todo-review-date {
+  padding-top: 1px;
+  color: #a99c8d;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.todo-review-main {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.todo-review-topline {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 3px 8px;
+  min-width: 0;
+}
+
+.todo-review-board {
+  flex: 0 0 auto;
+  font-size: 12px;
+}
+
+.todo-review-task {
+  min-width: 0;
+  color: #4f4438;
+  font-size: 12.5px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* 起止与天数靠右，扫一眼就是「什么时候做的、花了多久」。 */
+.todo-review-period {
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: #9a8e80;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.todo-review-phases {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.todo-review-phase-track {
+  display: flex;
+  flex: 0 0 clamp(120px, 30%, 240px);
+  gap: 2px;
+}
+
+.todo-review-phase {
+  flex: var(--phase-weight, 1);
+  min-width: 4px;
+  height: 7px;
+  border-radius: 4px;
+}
+
+/* 已完成任务整条都是绿的，靠明暗交替把相邻两段分开。 */
+.todo-review-phase:nth-child(even) {
+  filter: brightness(0.92);
+}
+
+.todo-review-phase.is-todo { background: #dfe4ea; }
+.todo-review-phase.is-doing { background: #f3a06a; }
+.todo-review-phase.is-done { background: #6cc79b; }
+
+/* 阶段名一行排开，放不下就省略；每段的起止与耗时在悬停提示里。 */
+.todo-review-phase-names {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: #9a8e80;
+  font-size: 11.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 复盘清单的分页：沿用看板分页的按钮样式，改成居中一行。 */
+.todo-review-pagination {
+  justify-content: center;
+  min-height: 0;
+  margin-top: 14px;
+  padding: 0;
 }
 
 .todo-modal-secondary:hover {
@@ -2193,10 +2708,6 @@
 
   .todo-board-view-button {
     flex: 1;
-  }
-
-  .todo-board-history-toggle {
-    padding-inline: 10px;
   }
 
   .todo-card-actions {

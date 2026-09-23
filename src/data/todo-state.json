@@ -1,11 +1,41 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-19T08:21:23.304Z",
+  "updatedAt": "2026-09-23T09:37:52.751Z",
   "items": {
     "l1": {
       "status": "doing",
       "plannedStart": "2026-09-19",
-      "plannedEnd": "2026-09-23"
+      "plannedEnd": "2026-09-25",
+      "phases": [
+        {
+          "id": "p1",
+          "title": "骨架搭建｜工作流设计",
+          "start": "2026-09-19",
+          "end": "2026-09-20",
+          "status": "done"
+        },
+        {
+          "id": "p1789975536934",
+          "title": "分类学设计",
+          "start": "2026-09-21",
+          "end": "2026-09-21",
+          "status": "done"
+        },
+        {
+          "id": "p1789975551896",
+          "title": "照片分拣：整理好当前 icloud 相簿",
+          "start": "2026-09-22",
+          "end": "2026-09-23",
+          "status": "done"
+        },
+        {
+          "id": "p1790140215284",
+          "title": "录入数据：规定字段",
+          "start": "2026-09-24",
+          "end": "2026-09-25",
+          "status": "doing"
+        }
+      ]
     },
     "c21": {
       "status": "doing",
@@ -151,7 +181,8 @@
     "l32": {
       "status": "doing",
       "plannedStart": "2026-09-07",
-      "plannedEnd": "2026-09-18",
+      "plannedEnd": "2026-09-20",
+      "pausedAt": "2026-09-14",
       "phases": [
         {
           "id": "p1",
@@ -178,7 +209,7 @@
           "id": "p1789365625421",
           "title": "等待反馈和下一轮讨论",
           "start": "2026-09-14",
-          "end": "2026-09-18",
+          "end": "2026-09-20",
           "status": "doing"
         }
       ]
@@ -268,10 +299,11 @@
       "status": "done",
       "completedAt": "2026-09-10"
     },
-    "c24": {
-      "status": "doing",
+    "c30": {
+      "status": "done",
       "plannedStart": "2026-09-10",
-      "plannedEnd": "2026-09-21",
+      "plannedEnd": "2026-09-11",
+      "completedAt": "2026-09-12",
       "phases": [
         {
           "id": "p1",
@@ -286,7 +318,15 @@
           "start": "2026-09-11",
           "end": "2026-09-11",
           "status": "done"
-        },
+        }
+      ]
+    },
+    "c31": {
+      "status": "done",
+      "plannedStart": "2026-09-12",
+      "plannedEnd": "2026-09-15",
+      "completedAt": "2026-09-15",
+      "phases": [
         {
           "id": "p1789113754712",
           "title": "板块重构：猫猫详情面板调整",
@@ -295,13 +335,16 @@
           "status": "done"
         },
         {
-          "id": "p1789366406786",
-          "title": "开发暂停：受 CRM 需求及组会影响",
+          "id": "p1790121600000",
+          "title": "财务公示：账目公示 + 价格参考",
           "start": "2026-09-13",
-          "end": "2026-09-21",
-          "status": "todo"
+          "end": "2026-09-15",
+          "status": "done"
         }
       ]
+    },
+    "c24": {
+      "status": "todo"
     },
     "l41": {
       "status": "done",
@@ -373,12 +416,14 @@
       "completedAt": "2026-09-19"
     },
     "l49": {
-      "status": "todo"
+      "status": "done",
+      "completedAt": "2026-09-19"
     },
     "l50": {
-      "status": "doing",
+      "status": "done",
       "plannedStart": "2026-09-17",
       "plannedEnd": "2026-09-20",
+      "completedAt": "2026-09-21",
       "phases": [
         {
           "id": "p1",
@@ -392,14 +437,79 @@
           "title": "商定：商定具体安排",
           "start": "2026-09-19",
           "end": "2026-09-19",
-          "status": "doing"
+          "status": "done"
         },
         {
           "id": "p1789805361038",
-          "title": "出发：出发去玩",
+          "title": "出发：去吃铁锅炖｜玩桌游｜吃老友粉",
           "start": "2026-09-20",
           "end": "2026-09-20",
+          "status": "done"
+        }
+      ]
+    },
+    "c26": {
+      "status": "done",
+      "plannedStart": "2026-09-19",
+      "plannedEnd": "2026-09-23",
+      "completedAt": "2026-09-23",
+      "phases": [
+        {
+          "id": "p1",
+          "title": "寻找Base：确定为 cloudcodeui，看他如何适配型改造",
+          "start": "2026-09-19",
+          "end": "2026-09-21",
+          "status": "done"
+        },
+        {
+          "id": "p1790005500747",
+          "title": "v0.1.0: APP化｜codebuddy接入｜实时消息｜除 codex 适配",
+          "start": "2026-09-22",
+          "end": "2026-09-22",
+          "status": "done"
+        },
+        {
+          "id": "p1790147193910",
+          "title": "v0.2.0: APP热更新｜UI 美化｜codex 适配",
+          "start": "2026-09-23",
+          "end": "2026-09-23",
+          "status": "done"
+        }
+      ]
+    },
+    "c29": {
+      "status": "doing",
+      "plannedStart": "2026-09-23",
+      "plannedEnd": "2026-09-24",
+      "phases": [
+        {
+          "id": "p1",
+          "title": "模型显示｜标签交互｜APP名字图标",
+          "start": "2026-09-23",
+          "end": "2026-09-23",
+          "status": "done"
+        },
+        {
+          "id": "p1790186400000",
+          "title": "UI / UX 优化",
+          "start": "2026-09-24",
+          "end": "2026-09-24",
           "status": "todo"
+        }
+      ]
+    },
+    "c32": {
+      "status": "done",
+      "plannedStart": "2026-09-23",
+      "plannedEnd": "2026-09-23",
+      "completedAt": "2026-09-23",
+      "phases": [
+        {
+          "id": "p1",
+          "title": "搁置｜命名规范｜复盘视图｜甘特图长文本｜细节修复",
+          "start": "2026-09-23",
+          "end": "2026-09-23",
+          "status": "done"
         }
       ]
     }

@@ -160,7 +160,8 @@ function normalizeTodoPatch(raw) {
     if (!TODO_STATUSES.includes(raw.status)) throw new Error('invalid todo status');
     patch.status = raw.status;
   }
-  for (const key of ['plannedStart', 'plannedEnd', 'completedAt']) {
+  // pausedAt = 搁置（等待中）起始日：任务从甘特图下线，但排期 / 阶段原样保留。
+  for (const key of ['plannedStart', 'plannedEnd', 'completedAt', 'pausedAt']) {
     if (raw[key] !== undefined) {
       if (!isValidDateKey(raw[key])) throw new Error(`invalid todo ${key}`);
       patch[key] = raw[key];
@@ -218,7 +219,9 @@ function addTodoItemToFile(payload) {
   if (typeof boardId !== 'string' || !TODO_FILE_BOARD_PREFIXES[boardId]) throw new Error('invalid board');
   const title = typeof payload.title === 'string' ? payload.title.trim() : '';
   if (!title) throw new Error('invalid title');
-  if (!isValidDateKey(payload.date)) throw new Error('invalid date');
+  // 目标日期可选：填了必须合法，留空就整行不写 date 字段（卡片上也就不显示 📅）。
+  const dateKey = isValidDateKey(payload.date) ? payload.date : '';
+  if (payload.date && !dateKey) throw new Error('invalid date');
   const url = typeof payload.url === 'string' ? payload.url.trim() : '';
   const note = typeof payload.note === 'string' ? payload.note.trim() : '';
   const createdAt = isValidDateKey(payload.createdAt) ? payload.createdAt : formatDateKey(new Date());
@@ -241,7 +244,8 @@ function addTodoItemToFile(payload) {
   }
   if (itemsIndex === -1) throw new Error(`items array not found for board: ${boardId}`);
   const id = nextTodoItemId([source, archivedSource], boardId);
-  const itemLine = `      { id: '${id}', title: ${JSON.stringify(title)}, status: 'todo', date: '${payload.date}', createdAt: '${createdAt}', url: ${JSON.stringify(url)}, note: ${JSON.stringify(note)} },`;
+  const dateFragment = dateKey ? `date: '${dateKey}', ` : '';
+  const itemLine = `      { id: '${id}', title: ${JSON.stringify(title)}, status: 'todo', ${dateFragment}createdAt: '${createdAt}', url: ${JSON.stringify(url)}, note: ${JSON.stringify(note)} },`;
   if (inlineEmpty) {
     lines.splice(itemsIndex, 1, '    items: [', itemLine, '    ]');
   } else {
@@ -274,7 +278,9 @@ function updateTodoItemInFile(payload) {
   if (typeof boardId !== 'string' || !TODO_FILE_BOARD_PREFIXES[boardId]) throw new Error('invalid board');
   const title = typeof payload.title === 'string' ? payload.title.trim() : '';
   if (!title) throw new Error('invalid title');
-  if (!isValidDateKey(payload.date)) throw new Error('invalid date');
+  // 同上：目标日期可选，留空时把原行里的 date 字段去掉。
+  const dateKey = isValidDateKey(payload.date) ? payload.date : '';
+  if (payload.date && !dateKey) throw new Error('invalid date');
   const url = typeof payload.url === 'string' ? payload.url.trim() : '';
   const note = typeof payload.note === 'string' ? payload.note.trim() : '';
 
@@ -286,8 +292,9 @@ function updateTodoItemInFile(payload) {
 
   const originalLine = lines[itemIndex];
   const status = originalLine.match(/status:\s*'(todo|doing|done)'/)?.[1] || 'todo';
-  const createdAt = originalLine.match(/createdAt:\s*'(\d{4}-\d{2}-\d{2})'/)?.[1] || payload.date;
-  const itemLine = `      { id: '${id}', title: ${JSON.stringify(title)}, status: '${status}', date: '${payload.date}', createdAt: '${createdAt}', url: ${JSON.stringify(url)}, note: ${JSON.stringify(note)} },`;
+  const createdAt = originalLine.match(/createdAt:\s*'(\d{4}-\d{2}-\d{2})'/)?.[1] || dateKey || formatDateKey(new Date());
+  const dateFragment = dateKey ? `date: '${dateKey}', ` : '';
+  const itemLine = `      { id: '${id}', title: ${JSON.stringify(title)}, status: '${status}', ${dateFragment}createdAt: '${createdAt}', url: ${JSON.stringify(url)}, note: ${JSON.stringify(note)} },`;
 
   // 先删掉原行，再重新定位目标看板，避免源看板和目标看板位置变化时使用过期索引。
   lines.splice(itemIndex, 1);

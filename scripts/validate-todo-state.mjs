@@ -47,7 +47,7 @@ if (state.version !== 1 || !state.items || typeof state.items !== 'object' || Ar
       errors.push(`${id} 的补丁不是对象`);
       continue;
     }
-    for (const key of ['plannedStart', 'plannedEnd', 'completedAt']) {
+    for (const key of ['plannedStart', 'plannedEnd', 'completedAt', 'pausedAt']) {
       const value = patch[key];
       if (value !== undefined && (typeof value !== 'string' || !dateKeyPattern.test(value))) {
         errors.push(`${id} 的 ${key} 不是 YYYY-MM-DD 日期`);

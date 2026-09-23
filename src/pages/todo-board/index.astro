@@ -3,9 +3,36 @@ import SiteLayout from '../../layouts/SiteLayout.astro';
 import { TODO_BOARDS } from '../../data/todo-data';
 import { ARCHIVED_TODO_BOARDS } from '../../data/archived-todo-data';
 import todoState from '../../data/todo-state.json';
+import { readFileSync } from 'node:fs';
 
 const dateKey = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai' }).format(new Date());
 const boardsLoaded = Array.isArray(TODO_BOARDS) && TODO_BOARDS.length > 0;
+
+// 「新增任务」弹窗按「站点 v版本：需求」拼标题，需要各站点当前版本作为建议值。
+// dev / build 时直接读兄弟仓库的 package.json，读到什么就是什么，不用手工维护；
+// 线上 Actions 只检出本仓库，读不到就退化成空表，弹窗里手填即可。
+const SITE_REPOS = {
+  熊窝: 'personal',
+  猪窝: 'home',
+  猫猫: 'cats',
+  熊电台: 'bear-radio',
+  开发笔记: 'devnotes',
+  常识笔记: 'lifenotes',
+  科研笔记: 'reanotes',
+  聊天站: 'chatnotes',
+  游戏笔记: 'gamenotes',
+};
+const siteVersions = {};
+for (const [site, repo] of Object.entries(SITE_REPOS)) {
+  try {
+    const version = JSON.parse(readFileSync(new URL(`../../../../${repo}/package.json`, import.meta.url), 'utf8')).version;
+    if (typeof version === 'string') siteVersions[site] = version;
+  } catch {
+    // 仓库不存在或没有 package.json：跳过，不影响页面渲染。
+  }
+}
+// 站点下拉的候选清单：和 SITE_REPOS 同源，加一个站点只改上面那张表。
+const siteNames = Object.keys(SITE_REPOS);
 ---
 
 <SiteLayout title="任务看板 · 熊窝" active="todo-board">
@@ -33,10 +60,12 @@ const boardsLoaded = Array.isArray(TODO_BOARDS) && TODO_BOARDS.length > 0;
       <div class="todo-board-empty">看板数据未加载。请检查 todo-data.ts 是否正常编译。</div>
     )}
   </div>
-  <script define:vars={{ boards: TODO_BOARDS, archived: ARCHIVED_TODO_BOARDS, state: todoState }}>
+  <script define:vars={{ boards: TODO_BOARDS, archived: ARCHIVED_TODO_BOARDS, state: todoState, siteVersions, siteNames }}>
     window.__TODO_BOARDS = boards;
     window.__ARCHIVED_TODO_BOARDS = archived;
     window.__TODO_STATE = state;
+    window.__SITE_VERSIONS = siteVersions;
+    window.__TODO_SITES = siteNames;
   </script>
   <script>
     import '../../scripts/todo-board';
